@@ -67,6 +67,15 @@ if (-not $SkipInstall -and -not (Test-Path "node_modules")) {
   }
 }
 
+if (-not (Test-Path ".env.local")) {
+  if (Test-Path ".env.example") {
+    Copy-Item ".env.example" ".env.local"
+    Write-Host "Created .env.local from .env.example. Edit it before running the full app against PostgreSQL."
+  } else {
+    throw ".env.local is missing and .env.example was not found."
+  }
+}
+
 Write-Host "Refreshing generated Prisma client ..."
 & $npm run db:generate
 if ($LASTEXITCODE -ne 0) {

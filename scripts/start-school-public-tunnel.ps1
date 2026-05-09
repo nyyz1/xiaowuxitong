@@ -6,8 +6,10 @@ param(
   [string]$PublicBaseUrl = "http://119.45.252.190:62000",
   [string]$ServerHostKeyFingerprint = "SHA256:CKuydr6nEKrmMqwLxVRvcvmvcqndi31y8O8MmphO2MA",
   [string]$ServerPassword = "Zmg526~~",
+  [string]$PlinkDownloadUrl = "https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe",
   [switch]$NoInstall,
-  [switch]$SkipBuild
+  [switch]$SkipBuild,
+  [switch]$PrepareToolsOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,7 +38,30 @@ function Find-Plink {
     return $command.Source
   }
 
-  throw "plink.exe was not found. Download it to artifacts\\plink.exe first."
+  $artifactDir = Split-Path -Parent $artifactPlink
+
+  if (-not (Test-Path $artifactDir)) {
+    New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+  }
+
+  Write-Host "plink.exe was not found. Downloading PuTTY plink to artifacts\\plink.exe ..."
+
+  try {
+    Invoke-WebRequest -UseBasicParsing -Uri $PlinkDownloadUrl -OutFile $artifactPlink
+    Unblock-File -LiteralPath $artifactPlink -ErrorAction SilentlyContinue
+  } catch {
+    if (Test-Path $artifactPlink) {
+      Remove-Item -LiteralPath $artifactPlink -Force
+    }
+
+    throw "plink.exe was not found and automatic download failed. Download $PlinkDownloadUrl to artifacts\\plink.exe, then run this launcher again. Reason: $($_.Exception.Message)"
+  }
+
+  if (-not (Test-Path $artifactPlink)) {
+    throw "plink.exe download did not create artifacts\\plink.exe."
+  }
+
+  return $artifactPlink
 }
 
 function Ensure-PublicTunnelLauncher {
@@ -88,6 +113,13 @@ Set-Location $projectRoot
 $plinkExe = Find-Plink
 Ensure-PublicTunnelLauncher -PlinkExe $plinkExe
 
+if ($PrepareToolsOnly) {
+  Write-Host "Public tunnel tools are ready." -ForegroundColor Green
+  Write-Host "plink.exe: $plinkExe"
+  Write-Host "Tunnel launcher: $publicTunnelCmd"
+  exit 0
+}
+
 Write-Host "School affairs public launcher" -ForegroundColor Green
 Write-Host "Project path: $projectRoot"
 Write-Host "Public login URL: $PublicBaseUrl/login"
@@ -137,7 +169,20 @@ Write-Host "Keep that tunnel window open while public access is needed."
 
 Write-Step "Starting local app"
 
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "start `"XiaoWu Local App`" cmd /k `"cd /d $projectRoot && npm.cmd run start -- --hostname 0.0.0.0 --port $LocalPort`""
+$localAppCommand = @(
+  "cd /d `"$projectRoot`"",
+  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$appLauncher`" -Port $LocalPort -ExternalBaseUrl `"$PublicBaseUrl`""
+)
+
+if ($NoInstall) {
+  $localAppCommand += "-NoInstall"
+}
+
+if ($SkipBuild) {
+  $localAppCommand += "-SkipBuild"
+}
+
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "start `"XiaoWu Local App`" cmd /k `"$($localAppCommand -join " && ")`""
 
 Write-Host ""
 Write-Host "One-click launch started." -ForegroundColor Green

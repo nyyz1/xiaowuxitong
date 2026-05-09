@@ -2,6 +2,44 @@
 
 ## 2026-05-09
 
+- User reported two fresh-clone launcher failures after replacing the old local project with the GitHub repository:
+  - `start-work.cmd` failed during Prisma Client generation because `DATABASE_URL` was unavailable
+  - `start-school-public-pilot.cmd` failed because ignored local runtime tool `artifacts\plink.exe` was missing
+- Re-read the required memory-bank files and treated the work as a Step 7 multi-workstation development and public-pilot launcher reliability refinement.
+- Root causes:
+  - `scripts/start-work.ps1` did not create `.env.local` when a freshly cloned workstation skipped `setup-dev-workstation.cmd`
+  - `prisma.config.ts` loaded default `.env` through `dotenv/config`, while this Next.js project keeps local runtime values in `.env.local`
+  - `scripts/start-school-public-tunnel.ps1` expected a locally downloaded `plink.exe`, but `artifacts/` is intentionally ignored by Git
+- Changes made:
+  - updated `prisma.config.ts` to load `.env.local` before falling back to `.env`
+  - updated `scripts/start-work.ps1` so it creates `.env.local` from `.env.example` before running `npm run db:generate`
+  - updated `scripts/start-school-public-tunnel.ps1` so it automatically downloads PuTTY `plink.exe` to `artifacts\plink.exe` when neither the artifact copy nor a PATH copy exists
+  - added a `-PrepareToolsOnly` check mode to the public tunnel script so tool preparation can be verified without starting the public tunnel or local app windows
+- Verification:
+  - created `.env.local` from `.env.example` on the current fresh clone
+  - `npm.cmd run db:generate` succeeded and Prisma reported loading environment values from `.env.local`
+  - PowerShell parser checks passed for `scripts/start-work.ps1` and `scripts/start-school-public-tunnel.ps1`
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\start-school-public-tunnel.ps1 -PrepareToolsOnly` downloaded `artifacts\plink.exe` and generated `start-public-tunnel.cmd`
+  - refreshed Git index state after Prisma generation so only the three intended source files remain as real code changes
+- Verification note:
+  - the full public pilot was not launched in this pass because the tool-preparation verification intentionally avoided opening persistent tunnel and app windows
+
+- User then reported that `start-work.cmd` correctly stopped on the uncommitted launcher fixes, and that `start-school-public-pilot.cmd` opened normally but both local `127.0.0.1:3000/login` and public `119.45.252.190:62000/login` were unreachable.
+- Follow-up root cause:
+  - the public launcher prepared the environment and tunnel, but started the local app with a raw `npm.cmd run start` command
+  - on a fresh GitHub clone there is no `.next` production build yet, so the local app window could exit before anything listened on port `3000`
+- Follow-up changes made:
+  - updated `scripts/start-school-public-tunnel.ps1` so the visible local-app window runs `scripts/start-school-pilot.ps1` with the public external base URL instead of calling `npm.cmd run start` directly
+  - this lets the normal school-pilot launcher handle dependency checks, build creation, duplicate-start protection, and production startup for public-pilot use too
+- Follow-up verification:
+  - ran the public launcher end to end
+  - confirmed the local Next.js service listens on `0.0.0.0:3000`
+  - `http://127.0.0.1:3000/login` returned `200 OK`
+  - confirmed the SSH reverse tunnel process is established to `119.45.252.190:22`
+  - verified on the Tencent Cloud server that `0.0.0.0:62000` and `[::]:62000` are listening through `sshd`
+  - verified from the server that both `http://127.0.0.1:62000/login` and `http://119.45.252.190:62000/login` return `200 OK`
+  - verified from the current workstation outside the Codex sandbox that `http://119.45.252.190:62000/login` returns `200 OK`
+
 - User asked to pause the Step 7 full-site elegant UI deep-refinement and delivery wrap-up because they were leaving work, and requested a clear handoff record for continuing later.
 - Re-read the required memory-bank files before starting the implementation slice and mapped the request to Step 7 stabilization, deployment, and handover prep.
 - Work completed before pause:
