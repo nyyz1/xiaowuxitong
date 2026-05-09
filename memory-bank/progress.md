@@ -2,6 +2,53 @@
 
 ## 2026-05-09
 
+- User then asked to continue the remaining Step 7 UI acceptance work and fully close the paused UI-delivery slice.
+- Re-read `tasks/todo.md` together with the required memory-bank files, treated the work as the remaining Step 7 acceptance sub-step, and distinguished stale checklist items from true unfinished verification.
+- Findings before rerunning smoke:
+  - the local workstation could still open `/login`, but business pages such as `/dashboard/people` failed because `.env.local` was still using the old PostgreSQL application password `school_password`
+  - the current live database accepted `school_admin` with `PilotDb2026!Q7mX9rL2`, matching the operator handoff guide rather than the stale `.env.local`
+  - the Grade 11 manager accounts had lost their `managedGradeId` bindings, so grade-scoped page verification could not be trusted until the test accounts were rebound
+- Changes made:
+  - updated local `.env.local` so `DATABASE_URL` now uses the current real workstation application password for `school_admin`
+  - rebound `grade11.manager1`, `grade11.manager2`, and `grade11.manager3` to the active `2024级` cohort so the current Grade 11 role smoke matches the documented trial scope again
+  - reran scripted authenticated page-shape and role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector` across dashboard, six business modules, data management, and the two quick-task routes
+  - synced `tasks/todo.md` so the static verification, README checklist link, architecture update, browser/page smoke, and role-boundary smoke items are no longer left stale
+- Verification:
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - confirmed the local PostgreSQL database accepts `school_admin` with the current workstation password from the operator guide
+  - scripted route smoke returned `200` for every expected-allowed route for `admin`, `leader1`, `data.manager`, and `inspector`
+  - after rebinding `managedGradeId`, scripted route smoke returned `200` for the expected-allowed `grade11.manager1` routes: `/dashboard`, `/dashboard/people`, `/dashboard/inspection`, `/dashboard/exports`, `/dashboard/quick/students`, and `/dashboard/quick/inspection`
+  - scripted content checks confirmed:
+    - `admin` can still see teacher-management entry points such as `教师档案`, `新增教师`, and `教师统计类目配置`
+    - `grade11.manager1` still stays student-scoped on people/inspection/export pages, with `教师统计类目配置` absent and `教师量化` absent from inspection/export page content
+    - `inspector` can still open `量化快录`
+    - `data.manager` can still open `学生快查`
+- Risks or blockers:
+  - this pass completed browser-equivalent page-shape smoke through authenticated HTTP and rendered-content checks, but not screenshot-level visual comparison because no Playwright/browser automation runtime was available in the current session
+  - the UI/delivery slice is still uncommitted; git review and commit/push remain separate follow-up work if we want to close the engineering handoff loop too
+- Next step:
+  - if we want a final polish beyond the current acceptance bar, do one screenshot-level visual pass in the in-app browser when browser automation is available, then review git status and decide whether to commit the Step 7 UI/delivery slice separately
+
+- User asked to continue the paused Step 7 UI delivery task.
+- Re-read the required memory-bank files and treated the work as the current Step 7 UI-delivery verification and handoff-doc completion sub-step rather than a new feature step.
+- Changes made:
+  - confirmed the current login shell, dashboard shell, overview page, submit-button styling, and final-delivery checklist files are still the relevant Step 7 UI delivery surface
+  - verified the Chinese UI/document text by reopening the affected files with explicit UTF-8 decoding; the source files are readable and the earlier apparent mojibake on this workstation was again a PowerShell display-path issue rather than fresh content corruption
+  - added `docs/final-delivery-checklist.md` to the README handoff-doc list so the final operator acceptance checklist is now discoverable from the main project entry point
+- Verification:
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - `Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000/login`
+  - confirmed the local production process is still listening on TCP `3000`
+- Risks or blockers:
+  - this continuation pass did not complete a fresh screenshot-based browser visual smoke because the current repository/runtime does not include Playwright and the in-app browser automation path was not available in this session
+  - role-by-role visual click-through after the refined UI remains limited to earlier smoke evidence already recorded in this file; this pass focused on the current delivery sub-step's static verification and doc completion
+- Next step:
+  - if we want to fully close the UI delivery slice beyond static verification, run one fresh browser-based smoke on login, dashboard overview, and the two quick-task pages from the live build when browser automation is available
+
 - User reported two fresh-clone launcher failures after replacing the old local project with the GitHub repository:
   - `start-work.cmd` failed during Prisma Client generation because `DATABASE_URL` was unavailable
   - `start-school-public-pilot.cmd` failed because ignored local runtime tool `artifacts\plink.exe` was missing

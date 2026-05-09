@@ -32,9 +32,10 @@ The repository now contains a runnable Next.js application scaffold with:
 - visible grade/class selectors now load directly from `Grade` and `Class` instead of front-end academic-year groupings
 - the visible app shell now exposes only six business modules: school structure, user permissions, people records, alumni archive, routine inspection, and statistics export
 - the shared dashboard shell and global design tokens now use a `校务档案馆` backend visual system: warm paper surfaces, ink-green navigation, coral signal accents, fine dividers, a sticky top status bar, role label, neutral working canvas, and tighter controls
+- the Step 7 UI-delivery surface currently centers on `src/components/auth/login-form.tsx`, `src/components/shell/dashboard-shell.tsx`, `src/app/dashboard/page.tsx`, `src/components/form/submit-button.tsx`, and `docs/final-delivery-checklist.md`; this slice has current static verification coverage through `typecheck`, `lint`, `build`, and a local `/login` reachability check
 - local PGlite simulation script for demo data and report smoke verification when PostgreSQL is not available
 - PostgreSQL demo seed script and deployment smoke-test guide for handoff preparation
-- updated README and trial handoff documents that match the approved school PostgreSQL pilot and account model
+- updated README and trial handoff documents that match the approved school PostgreSQL pilot and account model, with the final delivery checklist now linked directly from the main README handoff-doc section
 - GitHub remote collaboration is now prepared around the public repository `https://github.com/nyyz1/xiaowuxitong.git`; source, docs, scripts, schema, and generated Prisma client are versioned, while local environment files, installed dependencies, build output, logs, artifacts, tunnel material, and workstation runtime data stay outside Git.
 
 Migration acceptance note for the current workstation as of 2026-05-09:
@@ -344,6 +345,7 @@ Current implementation note:
 - The earlier pilot workstation database used native PostgreSQL 17 under `D:\PostgreSQL\17`, with data under `D:\PostgreSQL\data` and service `postgresql-xiaowuxitong`.
 - The current migrated workstation verified on 2026-05-09 uses native PostgreSQL 17 under `C:\Program Files\PostgreSQL\17`, with data under `C:\Program Files\PostgreSQL\17\data` and service `postgresql-x64-17`.
 - The current verified application database is `school_affairs` owned by `school_admin`.
+- The current real workstation application password in operator docs is `PilotDb2026!Q7mX9rL2`; if `.env.local` is reverted to the older `school_password`, login can still work through the Bootstrap fallback while data-backed pages such as people, structure, inspection, and exports fail at runtime.
 - After a real reboot check, `postgresql-xiaowuxitong` is verified to auto-start cleanly as an Automatic Windows service and still listens only on `127.0.0.1:5432` and `[::1]:5432`.
 - The production pilot launcher has been verified on the workstation LAN path: `.env.local` currently points `NEXTAUTH_URL` at the chosen school-network address, the app listens on `0.0.0.0:3000`, and office PCs should access only the web application URL while PostgreSQL remains local-only.
 - A separate office PC on the same school network has now confirmed it can open the pilot site, so the current workstation-to-LAN access model is verified beyond localhost.
@@ -357,6 +359,7 @@ Current implementation note:
 - A concrete failure mode of that caveat is now verified too: `/login` can still return HTML `200` while the browser shows `This page couldn’t load` because a referenced `/_next/static/chunks/*.js` file returns `404` and triggers `ChunkLoadError`; the recovery is to restart the live site process so it matches the current `.next` output.
 - The lifecycle-extension browser smoke is now verified on the live workstation deployment: the system administrator can reach rollover and archive pages, school leaders can reach the archive center but not structure controls, and Grade 11 managers remain limited to their scoped active-data pages.
 - The later browser-use visual smoke is now verified too: on loopback the admin can open the live teacher multi-department form, category-create UI, import picker UI, and click the student/teacher quantification switchers, while `leader1` and `grade11.manager1` still respect the expected structure and scope boundaries.
+- The current Grade 11 pilot smoke also depends on `grade11.manager1~3` remaining bound to the active `2024级` cohort through `User.managedGradeId`; if those bindings are lost, grade-scoped routes redirect away even though the account role still says `GRADE_MANAGER`.
 - Browser-close login persistence is now hardened for the live pilot: besides the normal `Auth.js` session token, the app now requires a dedicated browser-session cookie that has no explicit expiry and therefore disappears when the browser session ends.
 - Another operational caveat is now explicit: PostgreSQL is a real Windows service and survives reboot automatically, but the web application currently does not; it is started by `scripts/start-school-pilot.ps1`, so a machine reboot requires either rerunning that launcher or adding a future Windows auto-start registration.
 - The pilot launcher now validates private IPv4 candidates and falls back to parsing `ipconfig`, which prevents accidental `NEXTAUTH_URL=http://1:3000` corruption when only one LAN IP is present.

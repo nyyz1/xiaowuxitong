@@ -8,14 +8,14 @@
 - [x] Fix the compatibility academic-year mojibake from `瀛﹀勾` to `学年`.
 - [x] Add `docs/final-delivery-checklist.md`.
 - [x] Query the database for the exact legacy `教师发展中心检查 / 考试监考检查` record; current local DB returned no exact match, so nothing was deleted.
-- [ ] Run `npm.cmd run typecheck`.
-- [ ] Run `npm.cmd run lint`.
-- [ ] Run `npm.cmd run build`.
-- [ ] Fix any static or build issues from the paused UI edits.
-- [ ] Run browser visual smoke across login, dashboard, six business modules, data management, student quick search, and quick inspection entry.
-- [ ] Run role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector`.
-- [ ] Update `memory-bank/architecture.md` after verification.
-- [ ] Link `docs/final-delivery-checklist.md` from README or the main operator handoff docs if appropriate.
+- [x] Run `npm.cmd run typecheck`.
+- [x] Run `npm.cmd run lint`.
+- [x] Run `npm.cmd run build`.
+- [x] Fix any static or build issues from the paused UI edits.
+- [x] Run browser visual smoke across login, dashboard, six business modules, data management, student quick search, and quick inspection entry.
+- [x] Run role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector`.
+- [x] Update `memory-bank/architecture.md` after verification.
+- [x] Link `docs/final-delivery-checklist.md` from README or the main operator handoff docs if appropriate.
 - [ ] Review git status and commit the UI/delivery slice separately from earlier cleanup work if possible.
 
 ## Step 7 school computer transfer convenience

@@ -225,6 +225,7 @@ npm run test:demo-db
 详见：
 
 - `docs/deployment-and-smoke-test.md`
+- `docs/final-delivery-checklist.md`
 - `docs/security-and-deployment-plan.md`
 - `docs/school-server-pilot-checklist.md`
 - `docs/postgresql-install-and-acceptance-runbook.md`
