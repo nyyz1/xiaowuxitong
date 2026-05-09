@@ -2,6 +2,20 @@
 
 ## 2026-05-09
 
+- User asked for a more convenient default or one-click way to continue Codex development across different work locations and different logged-in GitHub accounts.
+- Re-read the required memory-bank files and treated the work as a Step 7 collaboration and handoff convenience refinement.
+- Changes made:
+  - added `setup-dev-workstation.cmd` plus `scripts/setup-dev-workstation.ps1` for first-time setup on another development computer, including Git/Node checks, optional winget installation, Git safe-directory setup, `.env.local` preparation, dependency installation, and Prisma client generation
+  - added `start-work.cmd` plus `scripts/start-work.ps1` for pre-Codex work sync from GitHub, with a guard that stops when local unsaved changes exist
+  - added `save-work.cmd` plus `scripts/save-work.ps1` for end-of-session typecheck, lint, commit, rebase, and push
+  - added `docs/codex-multi-workstation.md` and linked it from `README.md`
+- Verification completed so far:
+  - PowerShell parser checks passed for the three new `.ps1` scripts
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+- Next step:
+  - commit and push the new convenience workflow
+
 - User provided the new GitHub repository `https://github.com/nyyz1/xiaowuxitong.git` and asked how to push the local project for remote collaboration.
 - Re-read the required memory-bank files and treated the work as a Step 7 collaboration and handoff preparation task.
 - Findings:

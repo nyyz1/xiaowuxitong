@@ -63,6 +63,22 @@ setup-school-workstation.cmd
 
 详细说明见 `docs/school-transfer-one-click.md`。
 
+## 多电脑 Codex 开发
+
+如果你本人要在不同工作地点继续开发，推荐用 GitHub 加三个一键脚本：
+
+```text
+setup-dev-workstation.cmd
+start-work.cmd
+save-work.cmd
+```
+
+- 新电脑第一次克隆仓库后，双击 `setup-dev-workstation.cmd`。
+- 每次准备让 Codex 开发前，双击 `start-work.cmd` 拉取 GitHub 最新代码。
+- 每次离开电脑前，双击 `save-work.cmd`，它会检查、提交并推送当前改动。
+
+详细说明见 `docs/codex-multi-workstation.md`。
+
 ## 本地启动
 
 1. 复制环境变量模板
