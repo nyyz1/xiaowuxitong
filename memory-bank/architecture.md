@@ -40,9 +40,9 @@ The repository now contains a runnable Next.js application scaffold with:
 
 Migration acceptance note for the current workstation as of 2026-05-09:
 
-- The migrated workstation's PostgreSQL service is `postgresql-x64-17`, installed under `C:\Program Files\PostgreSQL\17`, with the data directory at `C:\Program Files\PostgreSQL\17\data`.
-- The application database is `school_affairs`, owned by `school_admin`, and `.env.local` currently points to `postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public`.
-- PostgreSQL command-line tools are available at `C:\Program Files\PostgreSQL\17\bin`; they are not guaranteed to be on PATH in the current PowerShell session.
+- The current verified workstation PostgreSQL service is `postgresql-xiaowuxitong`, installed under `D:\PostgreSQL\17`, with the data directory at `D:\PostgreSQL\data`.
+- The application database is `school_affairs`, owned by `school_admin`, and `.env.local` must match the current `school_admin` password recorded in `docs/pilot-accounts-and-usage-guide.md`.
+- PostgreSQL command-line tools are available at `D:\PostgreSQL\17\bin`; they are not guaranteed to be on PATH in the current PowerShell session.
 - Direct `npm` invocation in PowerShell can be blocked by execution policy on this workstation, while `npm.cmd` works and is the safer command form for manual verification.
 - The local production app has been verified listening on `0.0.0.0:3000`, and the current same-network login URL is tracked in `logs/current-school-pilot-url.txt`.
 - The Chinese handoff markdown docs in `README.md`, `docs/`, and `tasks/` are stored as UTF-8 text; earlier mojibake reports were mostly caused by Windows PowerShell default decoding rather than widespread content corruption.

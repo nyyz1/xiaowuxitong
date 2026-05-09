@@ -245,13 +245,13 @@ npm run test:demo-db
 
 This migrated workstation has been verified as runnable with the following local state:
 
-- PostgreSQL service: `postgresql-x64-17`
-- PostgreSQL install path: `C:\Program Files\PostgreSQL\17`
-- PostgreSQL data path: `C:\Program Files\PostgreSQL\17\data`
-- PostgreSQL tools path: `C:\Program Files\PostgreSQL\17\bin`
+- PostgreSQL service: `postgresql-xiaowuxitong`
+- PostgreSQL install path: `D:\PostgreSQL\17`
+- PostgreSQL data path: `D:\PostgreSQL\data`
+- PostgreSQL tools path: `D:\PostgreSQL\17\bin`
 - Application database: `school_affairs`
 - Application database user: `school_admin`
-- Current `DATABASE_URL`: `postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public`
+- Current `DATABASE_URL`: use the current `school_admin` password recorded in `docs/pilot-accounts-and-usage-guide.md`
 - Current same-network login URL source: `logs/current-school-pilot-url.txt`
 
 On this workstation, PowerShell may block direct `npm` because of execution policy. Use `npm.cmd run ...` when that happens:
@@ -266,5 +266,5 @@ npm.cmd run db:push
 If PostgreSQL tools are not on `PATH`, use the full path:
 
 ```powershell
-& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U school_admin -d school_affairs
+& "D:\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U school_admin -d school_affairs
 ```

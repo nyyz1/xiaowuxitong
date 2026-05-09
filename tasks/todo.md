@@ -16,7 +16,7 @@
 - [x] Run role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector`.
 - [x] Update `memory-bank/architecture.md` after verification.
 - [x] Link `docs/final-delivery-checklist.md` from README or the main operator handoff docs if appropriate.
-- [ ] Review git status and commit the UI/delivery slice separately from earlier cleanup work if possible.
+- [x] Review git status and commit the UI/delivery slice separately from earlier cleanup work if possible.
 
 ## Step 7 school computer transfer convenience
 

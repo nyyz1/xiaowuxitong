@@ -2,6 +2,25 @@
 
 ## 2026-05-09
 
+- User then asked to use the `neat-freak` cleanup pass to reconcile the project's current docs and task state.
+- Re-read the named skill plus the current README, `tasks/todo.md`, `tasks/lessons.md`, and the top of `memory-bank/architecture.md`, then compared them against the live workstation state instead of just appending new notes.
+- Findings:
+  - the Step 7 UI-delivery commit had already been created locally, but `tasks/todo.md` still showed the final git-review/commit line as unfinished
+  - the README migration acceptance note and the matching architecture note still described the older `C:\Program Files\PostgreSQL\17` / `postgresql-x64-17` workstation shape and the stale `school_password` example, even though the current verified workstation is back on `D:\PostgreSQL\17` with service `postgresql-xiaowuxitong`
+  - `docs/pilot-accounts-and-usage-guide.md` already held the current application password and D-drive PostgreSQL paths, so the main project entry points had become the stale layer
+- Changes made:
+  - updated `README.md` so its migration acceptance note now matches the current D-drive PostgreSQL service and points readers to `docs/pilot-accounts-and-usage-guide.md` for the current application password instead of repeating the stale password inline
+  - updated `memory-bank/architecture.md` so the current-workstation note matches the same D-drive PostgreSQL reality and no longer claims `.env.local` should use the old placeholder password
+  - updated `tasks/todo.md` to mark the Step 7 UI-delivery git-review/commit item complete, matching the already-created local commit
+- Verification:
+  - `sc.exe qc postgresql-xiaowuxitong`
+  - re-read `docs/pilot-accounts-and-usage-guide.md` to confirm the current workstation password and D-drive PostgreSQL paths before editing the higher-level docs
+  - re-read the edited `README.md`, `memory-bank/architecture.md`, and `tasks/todo.md` content after patching
+- Risks or blockers:
+  - this pass intentionally did not rewrite every older historical note in `progress.md`; it cleaned the current reader-facing source-of-truth layers first
+- Next step:
+  - if we want the project tree fully pristine after this knowledge cleanup, create one small follow-up docs commit for the README / architecture / todo reconciliation
+
 - User then asked to continue the remaining Step 7 UI acceptance work and fully close the paused UI-delivery slice.
 - Re-read `tasks/todo.md` together with the required memory-bank files, treated the work as the remaining Step 7 acceptance sub-step, and distinguished stale checklist items from true unfinished verification.
 - Findings before rerunning smoke:
