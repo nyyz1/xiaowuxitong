@@ -1,0 +1,61 @@
+import "server-only";
+
+import { UserRole } from "@/generated/prisma/enums";
+import { prisma } from "@/lib/prisma";
+
+export async function getUserManagementData() {
+  const [users, totalUsers, activeUsers, activeAdmins, gradeOptions] =
+    await Promise.all([
+      prisma.user.findMany({
+        orderBy: [
+          { isActive: "desc" },
+          { role: "asc" },
+          { displayName: "asc" },
+          { username: "asc" },
+        ],
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          role: true,
+          managedGradeId: true,
+          managedGrade: {
+            select: {
+              id: true,
+              name: true,
+              enrollmentYear: true,
+            },
+          },
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.user.count(),
+      prisma.user.count({
+        where: {
+          isActive: true,
+        },
+      }),
+      prisma.user.count({
+        where: {
+          role: UserRole.SYSTEM_ADMIN,
+          isActive: true,
+        },
+      }),
+      prisma.grade.findMany({
+        where: {
+          isVisibleInMain: true,
+        },
+        orderBy: [{ enrollmentYear: "asc" }, { name: "asc" }],
+      }),
+    ]);
+
+  return {
+    users,
+    totalUsers,
+    activeUsers,
+    activeAdmins,
+    gradeOptions,
+  };
+}

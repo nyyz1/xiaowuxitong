@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SYSTEM_ADMIN
+  SCHOOL_LEADER
+  GRADE_MANAGER
+  DATA_MANAGER
+  INSPECTION_STAFF
+}
+
+enum InspectionValueType {
+  SCORE
+  COUNT
+  DEDUCTION
+}
+
+enum InspectionTargetType {
+  STUDENT
+  TEACHER
+}
+
+enum GradeStage {
+  HIGH_ONE
+  HIGH_TWO
+  HIGH_THREE
+  ALUMNI
+}
+
+enum ProfileFieldTargetType {
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique
+  displayName  String
+  passwordHash String?
+  role         UserRole   @default(DATA_MANAGER)
+  managedGradeId String?
+  managedGrade Grade?     @relation("ManagedGradeUsers", fields: [managedGradeId], references: [id], onDelete: SetNull)
+  isActive     Boolean    @default(true)
+  auditLogs    AuditLog[]
+  inspections  InspectionRecord[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([managedGradeId])
+}
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  startDate DateTime?
+  endDate   DateTime?
+  isCurrent Boolean  @default(false)
+  grades    Grade[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Grade {
+  id             String       @id @default(cuid())
+  name           String
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  stage          GradeStage?
+  enrollmentYear Int?
+  isVisibleInMain Boolean     @default(true)
+  graduationYear Int?
+  classes        Class[]
+  managedUsers   User[]       @relation("ManagedGradeUsers")
+  students       Student[]
+  inspections    InspectionRecord[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([academicYearId, name])
+  @@unique([academicYearId, enrollmentYear])
+  @@index([academicYearId, isVisibleInMain])
+  @@index([enrollmentYear, isVisibleInMain])
+  @@index([stage, isVisibleInMain])
+  @@index([graduationYear])
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  gradeId   String
+  grade     Grade    @relation(fields: [gradeId], references: [id], onDelete: Restrict)
+  students  Student[]
+  inspections InspectionRecord[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([gradeId, name])
+}
+
+model Department {
+  id                 String                     @id @default(cuid())
+  name               String                     @unique
+  teachers           Teacher[]
+  teacherAssignments TeacherDepartmentAssignment[]
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+}
+
+model Subject {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  teachers  Teacher[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Teacher {
+  id                  String                     @id @default(cuid())
+  idCardNumber        String?                    @unique
+  employeeNumber      String
+  name                String
+  gender              String?
+  departmentId        String?
+  department          Department?                @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  departmentAssignments TeacherDepartmentAssignment[]
+  subjectId           String?
+  subject             Subject?                   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  duties              String[]                   @default([])
+  profileData         Json                       @default("{}")
+  phone               String?
+  employmentStatus    String                     @default("ACTIVE")
+  remarks             String?
+  inspections         InspectionRecord[]
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+
+  @@index([idCardNumber])
+  @@index([departmentId])
+  @@index([subjectId])
+}
+
+model Student {
+  id               String   @id @default(cuid())
+  idCardNumber     String?  @unique
+  studentNumber    String
+  name             String
+  gender           String?
+  gradeId          String
+  grade            Grade    @relation(fields: [gradeId], references: [id], onDelete: Restrict)
+  classId          String?
+  class            Class?   @relation(fields: [classId], references: [id], onDelete: SetNull)
+  enrollmentStatus String   @default("ACTIVE")
+  isArchived       Boolean  @default(false)
+  archivedAt       DateTime?
+  profileData      Json     @default("{}")
+  phone            String?
+  guardianContact  String?
+  remarks          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([idCardNumber])
+  @@index([gradeId])
+  @@index([classId])
+  @@index([isArchived])
+}
+
+model TeacherDepartmentAssignment {
+  teacherId    String
+  departmentId String
+  teacher      Teacher    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  createdAt    DateTime   @default(now())
+
+  @@id([teacherId, departmentId])
+  @@index([departmentId])
+}
+
+model ProfileFieldDefinition {
+  id         String                 @id @default(cuid())
+  targetType ProfileFieldTargetType
+  fieldKey   String?
+  name       String
+  sortOrder  Int                    @default(0)
+  isActive   Boolean                @default(true)
+  isDeleted  Boolean                @default(false)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@unique([targetType, name])
+  @@unique([targetType, fieldKey])
+  @@index([targetType, isActive, sortOrder])
+  @@index([targetType, isDeleted, sortOrder])
+}
+
+model InspectionCategory {
+  id        String           @id @default(cuid())
+  name      String
+  targetType InspectionTargetType @default(STUDENT)
+  items     InspectionItem[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([targetType, name])
+  @@index([targetType])
+}
+
+model InspectionItem {
+  id          String              @id @default(cuid())
+  name        String
+  categoryId  String
+  category    InspectionCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  valueType   InspectionValueType @default(SCORE)
+  description String?
+  isActive    Boolean             @default(true)
+  records     InspectionRecord[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([categoryId, name])
+}
+
+model InspectionRecord {
+  id               String         @id @default(cuid())
+  inspectionDate   DateTime
+  inspectionItemId String
+  inspectionItem   InspectionItem @relation(fields: [inspectionItemId], references: [id], onDelete: Restrict)
+  gradeId          String?
+  grade            Grade?         @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  classId          String?
+  class            Class?         @relation(fields: [classId], references: [id], onDelete: SetNull)
+  teacherId        String?
+  teacher          Teacher?       @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  recordedById     String?
+  recordedBy       User?          @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  value            Float
+  remarks          String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([inspectionDate])
+  @@index([inspectionItemId])
+  @@index([gradeId])
+  @@index([classId])
+  @@index([teacherId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String
+  targetId   String?
+  summary    String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
