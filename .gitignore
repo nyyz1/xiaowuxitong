@@ -16,6 +16,7 @@
 /outputs
 /artifacts
 /logs
+/start-public-tunnel.cmd
 
 # next.js
 /.next/

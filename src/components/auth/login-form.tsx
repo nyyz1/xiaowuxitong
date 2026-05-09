@@ -76,22 +76,25 @@ export function LoginForm({
 
   return (
     <div className="page-shell flex items-center justify-center px-5 py-10">
-      <div className="grid w-full max-w-6xl overflow-hidden rounded-xl border border-[var(--panel-border)] bg-[var(--paper)] shadow-[0_24px_70px_rgba(18,45,42,0.14)] lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative min-h-[620px] border-b border-[var(--panel-border)] bg-[linear-gradient(180deg,#fbf7ee_0%,#edf4f1_100%)] p-8 lg:border-b-0 lg:border-r">
+      <div className="grid w-full max-w-6xl overflow-hidden rounded-[28px] border border-[var(--panel-border)] bg-white/88 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl lg:grid-cols-[1.04fr_0.96fr]">
+        <section className="relative min-h-[620px] border-b border-[var(--panel-border)] bg-[linear-gradient(145deg,#ffffff_0%,#f4f7fb_58%,#edf2f9_100%)] p-8 lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-4 border-b border-[var(--panel-border)] pb-5 text-xs text-[var(--text-muted)]">
-            <span>校务档案馆</span>
+            <span>校务数据工作台</span>
             <span>内部系统 / 试点版</span>
           </div>
 
           <div className="flex min-h-[390px] flex-col justify-center py-10">
             <span className="soft-kicker w-fit">校务系统登录</span>
-            <h1 className="mt-6 max-w-xl text-5xl font-semibold leading-tight text-[var(--text-primary)] md:text-6xl">
+            <h1 className="mt-6 max-w-xl text-5xl font-semibold leading-tight tracking-normal text-[var(--text-primary)] md:text-6xl">
               {appConfig.name}
-              <span className="text-[var(--coral)]">.</span>
+              <span className="text-[var(--accent)]">.</span>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
               {appConfig.subtitle}
             </p>
+            <div className="mt-8 max-w-xl rounded-2xl border border-[var(--panel-border)] bg-white/78 p-4 text-sm leading-7 text-[var(--text-secondary)]">
+              围绕师生档案、常规检查、统计导出和数据运维组织，让试点数据有统一入口、清晰权限和可追溯记录。
+            </div>
           </div>
 
           <div className="grid gap-3 border-t border-[var(--panel-border)] pt-5 sm:grid-cols-3">
@@ -100,8 +103,8 @@ export function LoginForm({
               <div className="mt-1 text-xs text-[var(--text-muted)]">活跃届别</div>
             </div>
             <div>
-              <div className="text-2xl font-semibold text-[var(--slate-blue)]">7</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">后台入口</div>
+              <div className="text-2xl font-semibold text-[var(--slate-blue)]">6+1</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)]">模块与运维</div>
             </div>
             <div>
               <div className="text-2xl font-semibold text-[var(--coral)]">1</div>
@@ -111,7 +114,7 @@ export function LoginForm({
         </section>
 
         <Card
-          className="!rounded-none !border-0 !bg-[#fffdf8]"
+          className="!rounded-none !border-0 !bg-white"
           styles={{ body: { padding: 40 } }}
         >
           <Space direction="vertical" size={22} className="w-full">
@@ -121,7 +124,7 @@ export function LoginForm({
                 账号登录
               </Typography.Title>
               <Typography.Paragraph className="!mb-0 !leading-7 !text-[var(--text-secondary)]">
-                请输入系统管理员分配的账号和密码。首次部署或数据库暂不可用时，可使用兜底管理员账号进入系统。
+                请输入系统管理员分配的账号和密码。真实数据录入前，请先替换默认试点密码和兜底管理员配置。
               </Typography.Paragraph>
             </div>
 
@@ -155,8 +158,8 @@ export function LoginForm({
               </Button>
             </Form>
 
-            <div className="rounded-lg border border-[var(--panel-border)] bg-[var(--panel-soft)] px-4 py-3 text-sm leading-6 text-[var(--text-primary)]">
-              兜底管理员建议先在 <code>.env.local</code> 中设置：
+            <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel-soft)] px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
+              兜底管理员仅用于试点部署和应急进入。交付真实数据前请在 <code>.env.local</code> 中重新设置：
               <br />
               <code>BOOTSTRAP_ADMIN_USERNAME</code>
               <br />

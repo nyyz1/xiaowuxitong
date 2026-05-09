@@ -24,7 +24,7 @@ export function buildGradeDepartmentName(enrollmentYear: number) {
 }
 
 export function buildCompatibilityAcademicYearName(enrollmentYear: number) {
-  return `${enrollmentYear}-${enrollmentYear + 1}瀛﹀勾`;
+  return `${enrollmentYear}-${enrollmentYear + 1}学年`;
 }
 
 export function buildCompatibilityAcademicYearDateRange(enrollmentYear: number) {

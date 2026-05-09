@@ -12,6 +12,7 @@ The repository now contains a runnable Next.js application scaffold with:
 - one-click Windows school-pilot launcher for LAN workstation deployment
 - one-click project-only transfer helpers for moving the codebase to a school office computer without carrying the current local database data, including school-workstation prerequisite checks and app database bootstrap
 - one-click multi-workstation Codex development helpers for first-time developer setup, pre-work GitHub sync, and end-of-session verify/commit/push
+- the public-tunnel runtime launcher `start-public-tunnel.cmd` is generated on demand by `scripts/start-school-public-tunnel.ps1` and is intentionally ignored by Git because it can contain workstation-specific paths and tunnel credentials
 - duplicate-start protection and existing-port detection in the Windows school-pilot launcher
 - user and permission management module for system administrators
 - approved school trial role model with school leaders, grade-scoped managers, and an optional managed-grade relation on database users

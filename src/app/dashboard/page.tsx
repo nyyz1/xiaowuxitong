@@ -16,12 +16,17 @@ const nextMilestones = [
 const moduleLinks = [
   { href: "/dashboard/structure", label: "学校结构", meta: "年级、班级、部门、学科" },
   { href: "/dashboard/users", label: "用户权限", meta: "账号、角色、年级范围" },
-  { href: "/dashboard/data-management", label: "数据管理", meta: "备份保护、数据清理" },
   { href: "/dashboard/people", label: "师生档案", meta: "维护、筛选、导入导出" },
   { href: "/dashboard/archive/students", label: "往届存档", meta: "归档学生查询与修正" },
   { href: "/dashboard/inspection", label: "常规检查", meta: "学生/教师量化记录" },
   { href: "/dashboard/exports", label: "统计导出", meta: "汇总、Excel、CSV" },
 ];
+
+const operationsLink = {
+  href: "/dashboard/data-management",
+  label: "数据管理",
+  meta: "备份保护、审计查看、数据清理",
+};
 
 function canUseStudentQuickSearch(userRole: UserRole) {
   return (
@@ -62,30 +67,30 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-5">
-      <section className="paper-panel rounded-[28px] p-6">
+      <section className="elegant-page-hero rounded-[28px] p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="soft-kicker">校务后台</span>
-            <h1 className="mt-4 text-3xl font-semibold text-[var(--text-primary)]">
+            <h1 className="mt-4 text-4xl font-semibold tracking-normal text-[var(--text-primary)]">
               校务总台
-              <span className="text-[var(--coral)]">.</span>
+              <span className="text-[var(--accent)]">.</span>
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
-              当前版本围绕学校结构、用户权限、师生档案、往届存档、常规检查、统计导出和数据运维组织，优先保障筛选、录入、导入导出和权限边界。
+              当前版本围绕六个业务模块和一个运维入口组织，优先保障筛选、录入、导入导出、数据备份和权限边界。
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center lg:min-w-[360px]">
             <div className="dashboard-metric">
-              <div className="text-2xl font-semibold text-[var(--accent-strong)]">7</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">后台入口</div>
+              <div className="text-2xl font-semibold text-[var(--accent-strong)]">6</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)]">业务模块</div>
             </div>
             <div className="dashboard-metric">
-              <div className="text-2xl font-semibold text-emerald-700">3</div>
+              <div className="text-2xl font-semibold text-[var(--slate-blue)]">1</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)]">运维入口</div>
+            </div>
+            <div className="dashboard-metric">
+              <div className="text-2xl font-semibold text-[var(--coral)]">3</div>
               <div className="mt-1 text-xs text-[var(--text-muted)]">活跃届别</div>
-            </div>
-            <div className="dashboard-metric">
-              <div className="text-2xl font-semibold text-amber-700">1</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">试点学校</div>
             </div>
           </div>
         </div>
@@ -97,7 +102,7 @@ export default async function DashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group rounded-[24px] border border-[var(--panel-border)] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-[0_12px_30px_rgba(18,45,42,0.08)]"
+              className="elegant-action-card group rounded-[24px] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
             >
               <span className="soft-kicker">常用任务</span>
               <div className="mt-4 flex items-end justify-between gap-4">
@@ -123,7 +128,7 @@ export default async function DashboardPage() {
           <Link
             key={item.href}
             href={item.href}
-            className="group rounded-[28px] border border-[var(--panel-border)] bg-[#fffdf8] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-white hover:shadow-[0_12px_30px_rgba(18,45,42,0.08)]"
+            className="elegant-action-card group rounded-[28px] p-4 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-white"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)]">
@@ -144,6 +149,28 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </section>
+
+      {session.user.role === UserRole.SYSTEM_ADMIN ? (
+        <section className="elegant-action-card rounded-[28px] p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <span className="soft-kicker">运维入口</span>
+              <h2 className="mt-3 text-xl font-semibold text-[var(--text-primary)]">
+                {operationsLink.label}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                {operationsLink.meta}。该入口仅系统管理员可见，所有删除操作仍要求先完成数据库备份。
+              </p>
+            </div>
+            <Link
+              href={operationsLink.href}
+              className="elegant-primary-link inline-flex h-11 items-center justify-center rounded-md bg-[var(--accent-strong)] px-5 text-sm font-semibold text-white"
+            >
+              打开数据管理
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <article className="rounded-[28px] border border-[var(--panel-border)] bg-[#fffdf8] p-5">

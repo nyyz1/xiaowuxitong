@@ -1,5 +1,23 @@
 ﻿# Current Task Plan
 
+## Paused Step 7 full-site elegant UI and final delivery wrap-up
+
+- [x] Re-read required memory-bank files and map the task to Step 7 stabilization and handover.
+- [x] Start the modern light visual-system pass in `src/app/globals.css`.
+- [x] Refine the shared dashboard shell, login page, dashboard overview, and shared submit button styling.
+- [x] Fix the compatibility academic-year mojibake from `瀛﹀勾` to `学年`.
+- [x] Add `docs/final-delivery-checklist.md`.
+- [x] Query the database for the exact legacy `教师发展中心检查 / 考试监考检查` record; current local DB returned no exact match, so nothing was deleted.
+- [ ] Run `npm.cmd run typecheck`.
+- [ ] Run `npm.cmd run lint`.
+- [ ] Run `npm.cmd run build`.
+- [ ] Fix any static or build issues from the paused UI edits.
+- [ ] Run browser visual smoke across login, dashboard, six business modules, data management, student quick search, and quick inspection entry.
+- [ ] Run role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector`.
+- [ ] Update `memory-bank/architecture.md` after verification.
+- [ ] Link `docs/final-delivery-checklist.md` from README or the main operator handoff docs if appropriate.
+- [ ] Review git status and commit the UI/delivery slice separately from earlier cleanup work if possible.
+
 ## Step 7 school computer transfer convenience
 
 - [x] Restate the request as a Step 7 deployment and handoff convenience task: move only the project code to the school office computer, without carrying the current home database data.

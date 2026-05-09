@@ -196,27 +196,31 @@ export function DashboardShell({
         theme="light"
         className="dashboard-sidebar"
         style={{
-          background:
-            "linear-gradient(180deg, #153f3a 0%, #102f32 58%, #182331 100%)",
-          borderRight: "1px solid rgba(251,247,238,0.12)",
+          background: "rgba(255,255,255,0.86)",
+          borderRight: "1px solid var(--panel-border)",
+          boxShadow: "12px 0 34px rgba(15,23,42,0.045)",
+          backdropFilter: "blur(22px)",
         }}
       >
-        <div className="flex h-full flex-col px-4 py-5 text-white">
-          <div className="mb-6 border-b border-white/10 pb-5">
+        <div className="flex h-full flex-col px-4 py-5 text-[var(--text-primary)]">
+          <div className="mb-6 border-b border-[var(--panel-border)] pb-5">
             <div className="flex items-center gap-3">
               <div className="archive-mark">校</div>
               <div>
-                <Typography.Text className="!text-xs !font-semibold !text-white/62">
+                <Typography.Text className="!text-xs !font-semibold !text-[var(--text-muted)]">
                   SCHOOL AFFAIRS
                 </Typography.Text>
-                <Typography.Title level={4} className="!mb-0 !mt-0 !text-white">
+                <Typography.Title
+                  level={4}
+                  className="!mb-0 !mt-0 !text-[var(--text-primary)]"
+                >
                   {appConfig.name}
                 </Typography.Title>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-white/62">
+            <div className="mt-4 flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <span className="coral-dot" />
-              <span>校内私有部署 · 档案与检查数据台</span>
+              <span>私有部署 · 档案与检查工作台</span>
             </div>
           </div>
 
@@ -226,17 +230,17 @@ export function DashboardShell({
             items={buildMenuItems(userRole)}
             style={{
               background: "transparent",
-              color: "rgba(255,255,255,0.88)",
+              color: "var(--text-secondary)",
               border: "none",
               flex: 1,
             }}
-            theme="dark"
+            theme="light"
           />
 
-          <div className="rounded-lg border border-white/10 bg-[#fbf7ee12] p-3 text-xs leading-6 text-white/72">
-            <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2">
+          <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel-soft)] p-3 text-xs leading-6 text-[var(--text-secondary)]">
+            <div className="mb-2 flex items-center justify-between border-b border-[var(--panel-border)] pb-2">
               <span>权限边界</span>
-              <span className="text-[#f0b19e]">RBAC</span>
+              <span className="text-[var(--accent-strong)]">RBAC</span>
             </div>
             导入、导出和删除等敏感操作继续由服务器端权限校验。
           </div>
@@ -258,7 +262,7 @@ export function DashboardShell({
             {canSeeStudentQuickSearch(userRole) ? (
               <Link
                 href="/dashboard/quick/students"
-                className="inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
+                className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
               >
                 学生快查
               </Link>
@@ -266,7 +270,7 @@ export function DashboardShell({
             {canSeeInspectionQuickEntry(userRole) ? (
               <Link
                 href="/dashboard/quick/inspection"
-                className="inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
+                className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
               >
                 量化快录
               </Link>

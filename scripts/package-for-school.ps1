@@ -156,10 +156,12 @@ $notePath = Join-Path $stagingRoot "SCHOOL_TRANSFER_README.txt"
 在学校办公室电脑上使用：
 
 1. 解压到 D:\xiaowuxitong
-2. 确认学校电脑已经安装 Node.js LTS 和 PostgreSQL
-3. 确认 PostgreSQL 里已经创建 school_admin 用户和 school_affairs 数据库
-4. 双击 setup-school-workstation.cmd
-5. 等脚本完成后，打开 logs\current-school-pilot-url.txt 里的登录地址
+2. 双击 setup-school-workstation.cmd
+3. 按提示输入 PostgreSQL 的 postgres 超级用户密码
+4. 等脚本完成后，打开 logs\current-school-pilot-url.txt 里的登录地址
+
+setup-school-workstation.cmd 会检查 Node.js LTS 和 PostgreSQL；如果缺失，会尝试通过 winget 安装。
+它也会创建或更新默认的 school_admin 用户和 school_affairs 数据库。
 
 如果不想写入演示数据，请用 PowerShell 执行：
 
