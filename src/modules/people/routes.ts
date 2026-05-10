@@ -15,6 +15,10 @@ import {
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
 import {
+  getStudentStatusLabel,
+  getTeacherStatusLabel,
+} from "@/modules/people/status-options";
+import {
   buildTemplateHeaders,
   buildWorkbookBuffer,
   spreadsheetResponse,
@@ -43,7 +47,7 @@ export async function handleTeacherExportRequest(request: Request) {
     teacher.name,
     getTeacherDepartmentNames(teacher).join("、"),
     teacher.subject?.name ?? "",
-    teacher.employmentStatus === "ACTIVE" ? "正常" : "停用",
+    getTeacherStatusLabel(teacher.employmentStatus),
     ...teacherProfileFields.map((field) =>
       getProfileFieldValue(
         mergeSystemProfileData(teacherProfileFields, teacher.profileData, {
@@ -79,7 +83,7 @@ export async function handleStudentExportRequest(request: Request) {
     student.name,
     student.grade.name,
     student.class?.name ?? "",
-    student.enrollmentStatus === "ACTIVE" ? "正常" : "停用",
+    getStudentStatusLabel(student.enrollmentStatus),
     ...studentProfileFields.map((field) =>
       getProfileFieldValue(
         mergeSystemProfileData(studentProfileFields, student.profileData, {

@@ -1,14 +1,16 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
+import { useState, type PropsWithChildren } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Layout, Menu, Space, Tag, Typography } from "antd";
+import { Button, Drawer, Grid, Layout, Menu, Space, Typography } from "antd";
+import type { MenuProps } from "antd";
 import { UserRole } from "@/generated/prisma/enums";
 import { LogoutButton } from "@/components/shell/logout-button";
 import { appConfig } from "@/lib/app-config";
 
 const { Header, Content, Sider } = Layout;
+const { useBreakpoint } = Grid;
 
 type DashboardShellProps = PropsWithChildren<{
   userName: string;
@@ -52,49 +54,84 @@ function canSeeInspectionQuickEntry(userRole: UserRole) {
   );
 }
 
-function buildMenuItems(userRole: UserRole) {
-  const items = [
+function buildMenuItems(
+  userRole: UserRole,
+  onNavigate?: () => void,
+): NonNullable<MenuProps["items"]> {
+  const items: NonNullable<MenuProps["items"]> = [
     {
       key: "overview",
-      label: <Link href="/dashboard">系统总览</Link>,
+      label: (
+        <Link href="/dashboard" onClick={onNavigate}>
+          系统总览
+        </Link>
+      ),
     },
     {
       key: "structure",
-      label: <Link href="/dashboard/structure">学校结构</Link>,
+      label: (
+        <Link href="/dashboard/structure" onClick={onNavigate}>
+          学校结构
+        </Link>
+      ),
     },
     {
       key: "users",
-      label: <Link href="/dashboard/users">用户权限</Link>,
+      label: (
+        <Link href="/dashboard/users" onClick={onNavigate}>
+          用户权限
+        </Link>
+      ),
     },
   ];
 
   if (canSeeDataManagementMenu(userRole)) {
     items.push({
       key: "data-management",
-      label: <Link href="/dashboard/data-management">数据管理</Link>,
+      label: (
+        <Link href="/dashboard/data-management" onClick={onNavigate}>
+          数据管理
+        </Link>
+      ),
     });
   }
 
   items.push({
     key: "people",
-    label: <Link href="/dashboard/people">师生档案</Link>,
+    label: (
+      <Link href="/dashboard/people" onClick={onNavigate}>
+        师生档案
+      </Link>
+    ),
   });
 
   if (canSeeArchiveMenu(userRole)) {
     items.push({
       key: "archive",
-      label: <Link href="/dashboard/archive/students">往届存档</Link>,
+      label: (
+        <Link href="/dashboard/archive/students" onClick={onNavigate}>
+          往届存档
+        </Link>
+      ),
     });
   }
 
   items.push(
     {
       key: "inspection",
-      label: <Link href="/dashboard/inspection">常规检查</Link>,
+      label: (
+        <Link href="/dashboard/inspection" onClick={onNavigate}>
+          常规检查
+        </Link>
+      ),
     },
     {
       key: "exports",
-      label: <Link href="/dashboard/exports">统计导出</Link>,
+      label: (
+        <Link href="/dashboard/exports" onClick={onNavigate}>
+          统计导出
+        </Link>
+      ),
     },
   );
 
@@ -186,79 +223,132 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const screens = useBreakpoint();
+  const isDesktop = screens.lg ?? false;
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const menuItems = buildMenuItems(userRole, () => setIsMobileNavOpen(false));
+  const roleLabel = roleLabels[userRole];
+  const userSummary =
+    userName.trim() && userName.trim() !== roleLabel
+      ? `当前用户：${userName} · ${roleLabel}`
+      : `当前用户：${roleLabel}`;
 
   return (
     <Layout className="dashboard-shell">
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        width={248}
-        theme="light"
-        className="dashboard-sidebar"
-        style={{
-          background: "rgba(255,255,255,0.86)",
-          borderRight: "1px solid var(--panel-border)",
-          boxShadow: "12px 0 34px rgba(15,23,42,0.045)",
-          backdropFilter: "blur(22px)",
-        }}
-      >
-        <div className="flex h-full flex-col px-4 py-5 text-[var(--text-primary)]">
-          <div className="mb-6 border-b border-[var(--panel-border)] pb-5">
+      {isDesktop ? (
+        <Sider
+          width={248}
+          theme="light"
+          className="dashboard-sidebar"
+          style={{
+            background: "rgba(255,255,255,0.86)",
+            borderRight: "1px solid var(--panel-border)",
+            boxShadow: "12px 0 34px rgba(15,23,42,0.045)",
+            backdropFilter: "blur(22px)",
+          }}
+        >
+          <div className="flex h-full flex-col px-4 py-5 text-[var(--text-primary)]">
+            <div className="mb-6 border-b border-[var(--panel-border)] pb-5">
+              <div className="flex items-center gap-3">
+                <div className="archive-mark">校</div>
+                <div>
+                  <Typography.Text className="!text-xs !font-semibold !text-[var(--text-muted)]">
+                    SCHOOL AFFAIRS
+                  </Typography.Text>
+                  <Typography.Title
+                    level={4}
+                    className="!mb-0 !mt-0 !text-[var(--text-primary)]"
+                  >
+                    {appConfig.name}
+                  </Typography.Title>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <span className="coral-dot" />
+                <span>档案与检查工作台</span>
+              </div>
+            </div>
+
+            <Menu
+              mode="inline"
+              selectedKeys={[getSelectedKey(pathname)]}
+              items={menuItems}
+              style={{
+                background: "transparent",
+                color: "var(--text-secondary)",
+                border: "none",
+                flex: 1,
+              }}
+              theme="light"
+            />
+          </div>
+        </Sider>
+      ) : (
+        <Drawer
+          open={isMobileNavOpen}
+          placement="left"
+          width={264}
+          onClose={() => setIsMobileNavOpen(false)}
+          title={
             <div className="flex items-center gap-3">
               <div className="archive-mark">校</div>
               <div>
-                <Typography.Text className="!text-xs !font-semibold !text-[var(--text-muted)]">
+                <div className="text-xs font-semibold text-[var(--text-muted)]">
                   SCHOOL AFFAIRS
-                </Typography.Text>
-                <Typography.Title
-                  level={4}
-                  className="!mb-0 !mt-0 !text-[var(--text-primary)]"
-                >
+                </div>
+                <div className="text-base font-semibold text-[var(--text-primary)]">
                   {appConfig.name}
-                </Typography.Title>
+                </div>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <span className="coral-dot" />
-              <span>私有部署 · 档案与检查工作台</span>
-            </div>
-          </div>
-
+          }
+          className="dashboard-mobile-drawer"
+          styles={{
+            body: {
+              padding: 12,
+            },
+          }}
+        >
           <Menu
             mode="inline"
             selectedKeys={[getSelectedKey(pathname)]}
-            items={buildMenuItems(userRole)}
+            items={menuItems}
             style={{
               background: "transparent",
               color: "var(--text-secondary)",
               border: "none",
-              flex: 1,
             }}
             theme="light"
           />
-
-          <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel-soft)] p-3 text-xs leading-6 text-[var(--text-secondary)]">
-            <div className="mb-2 flex items-center justify-between border-b border-[var(--panel-border)] pb-2">
-              <span>权限边界</span>
-              <span className="text-[var(--accent-strong)]">RBAC</span>
-            </div>
-            导入、导出和删除等敏感操作继续由服务器端权限校验。
-          </div>
-        </div>
-      </Sider>
+        </Drawer>
+      )}
 
       <Layout className="!bg-transparent">
-        <Header className="dashboard-topbar !sticky !top-0 !z-10 !flex !h-auto !flex-wrap !items-center !justify-between !gap-3 !px-4 !py-3 md:!px-6 md:!py-4">
-          <div>
-            <Typography.Title level={4} className="!mb-1 !text-[var(--text-primary)]">
-              {getModuleLabel(pathname, searchParams)}
-            </Typography.Title>
-            <Typography.Text className="!text-sm !text-[var(--text-secondary)]">
-              当前用户：{userName} · {roleLabels[userRole]}
-            </Typography.Text>
+        <Header
+          className={`dashboard-topbar !z-10 !flex !h-auto !flex-wrap !items-center !justify-between !gap-3 !px-4 !py-3 md:!px-6 md:!py-4 ${
+            isDesktop ? "!sticky !top-0" : "!relative"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            {!isDesktop ? (
+              <Button
+                className="dashboard-mobile-nav-trigger"
+                onClick={() => setIsMobileNavOpen(true)}
+              >
+                菜单
+              </Button>
+            ) : null}
+            <div>
+              <Typography.Title level={4} className="!mb-1 !text-[var(--text-primary)]">
+                {getModuleLabel(pathname, searchParams)}
+              </Typography.Title>
+              <Typography.Text className="!text-sm !text-[var(--text-secondary)]">
+                {userSummary}
+              </Typography.Text>
+            </div>
           </div>
 
-          <Space size="small" wrap>
+          <Space size="small" wrap className="dashboard-topbar-actions !justify-end">
             {canSeeStudentQuickSearch(userRole) ? (
               <Link
                 href="/dashboard/quick/students"
@@ -275,12 +365,6 @@ export function DashboardShell({
                 量化快录
               </Link>
             ) : null}
-            <Tag
-              color="processing"
-              className="!rounded-md !border-[var(--panel-border)] !bg-[var(--accent-soft)] !px-3 !py-1 !text-[var(--accent-strong)]"
-            >
-              私有部署
-            </Tag>
             <LogoutButton />
           </Space>
         </Header>

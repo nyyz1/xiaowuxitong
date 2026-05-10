@@ -178,13 +178,14 @@ function redirectAfterRecordMutation(
     redirect(`${path}&${params.toString()}`);
   }
 
-  redirectWithNotice(message, tone, targetType);
+  redirectWithNotice(message, tone, targetType, "#record-entry");
 }
 
 function redirectWithNotice(
   message: string,
   tone: NoticeTone = "success",
   targetType: InspectionTargetTypeValue = "STUDENT",
+  hash = "",
 ): never {
   const params = new URLSearchParams({
     message,
@@ -192,7 +193,7 @@ function redirectWithNotice(
     targetType,
   });
 
-  redirect(`/dashboard/inspection?${params.toString()}`);
+  redirect(`/dashboard/inspection?${params.toString()}${hash}`);
 }
 
 function getMutationErrorMessage(error: unknown) {

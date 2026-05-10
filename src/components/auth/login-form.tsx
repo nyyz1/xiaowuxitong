@@ -92,24 +92,6 @@ export function LoginForm({
             <p className="mt-5 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
               {appConfig.subtitle}
             </p>
-            <div className="mt-8 max-w-xl rounded-2xl border border-[var(--panel-border)] bg-white/78 p-4 text-sm leading-7 text-[var(--text-secondary)]">
-              围绕师生档案、常规检查、统计导出和数据运维组织，让试点数据有统一入口、清晰权限和可追溯记录。
-            </div>
-          </div>
-
-          <div className="grid gap-3 border-t border-[var(--panel-border)] pt-5 sm:grid-cols-3">
-            <div>
-              <div className="text-2xl font-semibold text-[var(--accent-strong)]">3</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">活跃届别</div>
-            </div>
-            <div>
-              <div className="text-2xl font-semibold text-[var(--slate-blue)]">6+1</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">模块与运维</div>
-            </div>
-            <div>
-              <div className="text-2xl font-semibold text-[var(--coral)]">1</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">试点学校</div>
-            </div>
           </div>
         </section>
 
@@ -123,9 +105,6 @@ export function LoginForm({
               <Typography.Title level={2} className="!mb-2 !mt-4 !text-[var(--text-primary)]">
                 账号登录
               </Typography.Title>
-              <Typography.Paragraph className="!mb-0 !leading-7 !text-[var(--text-secondary)]">
-                请输入系统管理员分配的账号和密码。真实数据录入前，请先替换默认试点密码和兜底管理员配置。
-              </Typography.Paragraph>
             </div>
 
             {clearStaleSession ? (
@@ -157,14 +136,6 @@ export function LoginForm({
                 进入后台
               </Button>
             </Form>
-
-            <div className="rounded-xl border border-[var(--panel-border)] bg-[var(--panel-soft)] px-4 py-3 text-sm leading-6 text-[var(--text-secondary)]">
-              兜底管理员仅用于试点部署和应急进入。交付真实数据前请在 <code>.env.local</code> 中重新设置：
-              <br />
-              <code>BOOTSTRAP_ADMIN_USERNAME</code>
-              <br />
-              <code>BOOTSTRAP_ADMIN_PASSWORD</code>
-            </div>
           </Space>
         </Card>
       </div>

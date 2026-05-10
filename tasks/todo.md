@@ -1,5 +1,17 @@
 ﻿# Current Task Plan
 
+## Step 7 knowledge cleanup and handoff consistency
+
+- [x] Reconcile the public-pilot launcher docs with the current `start-school-public-tunnel.ps1` behavior so reader-facing docs no longer claim the launcher runs raw `npm.cmd run start`.
+- [x] Tighten the dashboard-shell architecture wording so the topbar behavior matches the current desktop-sticky and mobile-non-sticky implementation.
+- [x] Record the cleanup result in `memory-bank/progress.md` and `tasks/lessons.md`.
+
+## Step 7 deeper documentation pruning
+
+- [x] Add a single `docs/README.md` entry point so handoff documents are grouped by daily use, deployment, and migration workflows.
+- [x] Remove stale live-workstation wording that treated the historical C-drive migrated machine as the current default.
+- [x] Compress `memory-bank/progress.md` into an active log and move older milestone history into `memory-bank/progress-archive.md`.
+
 ## Paused Step 7 full-site elegant UI and final delivery wrap-up
 
 - [x] Re-read required memory-bank files and map the task to Step 7 stabilization and handover.

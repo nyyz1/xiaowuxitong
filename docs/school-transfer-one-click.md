@@ -59,6 +59,8 @@ PostgreSQL 安装器如果弹出界面，需要手动选择安装路径和 `post
 postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public
 ```
 
+这里的 `school_password` 是初始化脚本默认值，不代表当前 live 试点电脑正在使用的真实密码。
+
 如果学校电脑使用了不同的应用数据库密码，可以用 PowerShell 指定：
 
 ```powershell
@@ -194,54 +196,8 @@ http://127.0.0.1:3000/login
 ```
 
 如果本机能打开、其他电脑打不开，通常是 Windows 防火墙没有放行 TCP `3000`，或者其他电脑不在同一个局域网。
-## 2026-05-09 Migration Acceptance Addendum
+## 当前工作站与迁移说明补充
 
-One migrated workstation has now been verified with this actual local shape:
-
-- PostgreSQL service name: `postgresql-x64-17`
-- PostgreSQL install path: `C:\Program Files\PostgreSQL\17`
-- PostgreSQL data path: `C:\Program Files\PostgreSQL\17\data`
-- PostgreSQL tool path: `C:\Program Files\PostgreSQL\17\bin`
-- `psql.exe` and `pg_dump.exe` may not be on `PATH`
-- direct `npm` in PowerShell may be blocked by execution policy; use `npm.cmd run ...`
-
-If `.env.local` uses the default connection below but `school_admin` cannot log in:
-
-```text
-postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public
-```
-
-log in with the PostgreSQL superuser `postgres`, then create or reset the application role and database:
-
-```sql
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'school_admin') THEN
-    CREATE ROLE school_admin LOGIN PASSWORD 'school_password';
-  ELSE
-    ALTER ROLE school_admin WITH LOGIN PASSWORD 'school_password';
-  END IF;
-END $$;
-```
-
-If `school_affairs` does not exist:
-
-```sql
-CREATE DATABASE school_affairs OWNER school_admin;
-```
-
-If `school_affairs` already exists:
-
-```sql
-ALTER DATABASE school_affairs OWNER TO school_admin;
-GRANT ALL ON SCHEMA public TO school_admin;
-ALTER SCHEMA public OWNER TO school_admin;
-```
-
-Then sync and seed from the project directory:
-
-```powershell
-$env:DATABASE_URL="postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public"
-npm.cmd run db:push
-npm.cmd run db:seed:demo
-```
+- 当前 live 试点环境的账号、密码、数据库运维口径，以 `docs/pilot-accounts-and-usage-guide.md` 为准。
+- 新迁移电脑无论最终使用 `D:\PostgreSQL\17` 还是 `C:\Program Files\PostgreSQL\17`，都属于可接受结果；关键是核对真实服务名、工具路径、数据目录和 `.env.local` 里的连接串是否一致。
+- 如果 `school_admin` 无法登录，不要先假设密码还是 `school_password`；应先核对这台机器实际的 `.env.local` 或当前运维记录，再决定是重置应用库账号，还是只修正本地配置。

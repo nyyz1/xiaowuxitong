@@ -27,7 +27,11 @@ export function LogoutButton() {
   };
 
   return (
-    <Button ghost loading={isPending} onClick={handleLogout}>
+    <Button
+      loading={isPending}
+      onClick={handleLogout}
+      className="dashboard-secondary-button !inline-flex !h-9 !items-center !rounded-md !border-[var(--panel-border)] !bg-white !px-3 !text-sm !font-semibold !text-[var(--text-primary)] hover:!border-[var(--accent)] hover:!text-[var(--accent-strong)]"
+    >
       退出登录
     </Button>
   );

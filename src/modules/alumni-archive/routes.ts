@@ -8,6 +8,7 @@ import {
   getProfileFieldValue,
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
+import { getStudentStatusLabel } from "@/modules/people/status-options";
 import {
   buildTemplateHeaders,
   buildWorkbookBuffer,
@@ -36,7 +37,7 @@ export async function handleArchiveStudentExportRequest(request: Request) {
     student.name,
     student.grade.name,
     student.class?.name ?? "",
-    student.enrollmentStatus === "ACTIVE" ? "正常" : "停用",
+    getStudentStatusLabel(student.enrollmentStatus),
     ...studentProfileFields.map((field) =>
       getProfileFieldValue(
         mergeSystemProfileData(studentProfileFields, student.profileData, {

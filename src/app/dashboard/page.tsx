@@ -6,13 +6,6 @@ import {
   requireAuthenticatedSession,
 } from "@/lib/authorization";
 
-const nextMilestones = [
-  "用真实 PostgreSQL 环境持续复核登录、录入、导入、导出和数据清理流程",
-  "后续功能继续按独立业务模块落地，避免跨模块耦合",
-  "保持备份、恢复和试点机运维文档与现场配置一致",
-  "根据试点反馈决定下一阶段功能增减和流程调整",
-];
-
 const moduleLinks = [
   { href: "/dashboard/structure", label: "学校结构", meta: "年级、班级、部门、学科" },
   { href: "/dashboard/users", label: "用户权限", meta: "账号、角色、年级范围" },
@@ -38,13 +31,16 @@ function canUseStudentQuickSearch(userRole: UserRole) {
 }
 
 function getTaskLinks(userRole: UserRole) {
-  const taskLinks = [];
+  const taskLinks: Array<{
+    href: string;
+    label: string;
+    action: string;
+  }> = [];
 
   if (canUseStudentQuickSearch(userRole)) {
     taskLinks.push({
       href: "/dashboard/quick/students",
       label: "学生快查",
-      meta: "手机上先搜学生，不进入完整维护页",
       action: "立即查询",
     });
   }
@@ -53,7 +49,6 @@ function getTaskLinks(userRole: UserRole) {
     taskLinks.push({
       href: "/dashboard/quick/inspection",
       label: "量化快录",
-      meta: "只保留日期、项目、对象、数值和备注",
       action: "开始录入",
     });
   }
@@ -110,11 +105,8 @@ export default async function DashboardPage() {
                   <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
                     {item.label}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                    {item.meta}
-                  </p>
                 </div>
-                <span className="shrink-0 rounded-md bg-[var(--accent-soft)] px-3 py-2 text-sm font-semibold text-[var(--accent-strong)] transition group-hover:bg-[var(--accent-strong)] group-hover:text-white">
+                <span className="shrink-0 text-sm font-semibold text-[var(--coral)] transition group-hover:translate-x-0.5">
                   {item.action}
                 </span>
               </div>
@@ -172,7 +164,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+      <section>
         <article className="rounded-[28px] border border-[var(--panel-border)] bg-[#fffdf8] p-5">
           <div className="flex items-center justify-between gap-3 border-b border-[var(--panel-border)] pb-4">
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">
@@ -180,7 +172,7 @@ export default async function DashboardPage() {
             </h2>
             <span className="text-xs text-[var(--text-muted)]">按业务边界维护</span>
           </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {moduleHighlights.map((item) => (
               <div key={item.title} className="border-l-2 border-[var(--coral)] pl-3">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">
@@ -192,27 +184,6 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
-        </article>
-
-        <article className="rounded-[28px] border border-[var(--panel-border)] bg-[#fffdf8] p-5">
-          <div className="border-b border-[var(--panel-border)] pb-4">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-              下一阶段任务
-            </h2>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              继续围绕真实试点反馈做稳定化。
-            </p>
-          </div>
-          <ol className="mt-4 space-y-3 text-sm leading-7 text-[var(--text-secondary)]">
-            {nextMilestones.map((item, index) => (
-              <li key={item} className="grid grid-cols-[28px_1fr] gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--coral-soft)] text-xs font-semibold text-[var(--coral)]">
-                  {index + 1}
-                </span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ol>
         </article>
       </section>
     </div>

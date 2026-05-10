@@ -40,6 +40,55 @@ function getStudentGradeWhere(studentViewMode: StudentViewMode): Prisma.GradeWhe
   };
 }
 
+function normalizeQuickSearchKeyword(value: string) {
+  return value.trim().toUpperCase();
+}
+
+function matchesQuickSearchValue(value: string | null | undefined, keyword: string) {
+  if (!value) {
+    return false;
+  }
+
+  return value.toUpperCase().includes(keyword);
+}
+
+function matchesStudentQuickSearchKeyword(
+  student: {
+    idCardNumber?: string | null;
+    studentNumber?: string | null;
+    name: string;
+    phone?: string | null;
+    guardianContact?: string | null;
+    profileData: unknown;
+  },
+  keyword: string,
+  dormitoryFieldIds: string[],
+) {
+  if (!keyword) {
+    return true;
+  }
+
+  if (
+    matchesQuickSearchValue(student.idCardNumber, keyword) ||
+    matchesQuickSearchValue(student.studentNumber, keyword) ||
+    matchesQuickSearchValue(student.name, keyword) ||
+    matchesQuickSearchValue(student.phone, keyword) ||
+    matchesQuickSearchValue(student.guardianContact, keyword)
+  ) {
+    return true;
+  }
+
+  const profileData =
+    student.profileData && typeof student.profileData === "object" && !Array.isArray(student.profileData)
+      ? (student.profileData as Record<string, unknown>)
+      : {};
+
+  return dormitoryFieldIds.some((fieldId) => {
+    const rawValue = profileData[fieldId];
+    return typeof rawValue === "string" && matchesQuickSearchValue(rawValue, keyword);
+  });
+}
+
 export function normalizePeopleFilters(params: RawSearchParams) {
   return peopleFilterSchema.parse({
     teacherKeyword: readParam(params, "teacherKeyword"),
@@ -321,11 +370,25 @@ export async function getStudentQuickSearchData(
 ) {
   const gradeScopeId = options.gradeScopeId ?? null;
   const shouldSearch = options.shouldSearch ?? false;
-  const studentWhere = buildStudentWhere(filters, gradeScopeId, "active");
-  const [studentGrades, studentProfileFields, students, studentCount] =
+  const normalizedKeyword = normalizeQuickSearchKeyword(filters.studentKeyword);
+  const [studentGrades, studentProfileFields] =
     await Promise.all([
       getStudentGrades("active", gradeScopeId),
       getProfileFieldDefinitions("STUDENT", { activeOnly: true }),
+    ]);
+  const dormitoryFieldIds = studentProfileFields
+    .filter((field) => field.name.includes("宿舍"))
+    .map((field) => field.id);
+  const studentWhere = buildStudentWhere(
+    {
+      ...filters,
+      studentKeyword: "",
+    },
+    gradeScopeId,
+    "active",
+  );
+  const [candidateStudents] =
+    await Promise.all([
       shouldSearch
         ? prisma.student.findMany({
             where: studentWhere,
@@ -341,12 +404,15 @@ export async function getStudentQuickSearchData(
             },
           })
         : Promise.resolve([]),
-      shouldSearch
-        ? prisma.student.count({
-            where: studentWhere,
-          })
-        : Promise.resolve(0),
     ]);
+
+  const matchedStudents = shouldSearch
+    ? candidateStudents.filter((student) =>
+        matchesStudentQuickSearchKeyword(student, normalizedKeyword, dormitoryFieldIds),
+      )
+    : [];
+  const students = matchedStudents.slice(0, 40);
+  const studentCount = matchedStudents.length;
 
   return {
     students,

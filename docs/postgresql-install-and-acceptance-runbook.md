@@ -64,6 +64,7 @@ DATABASE_URL=postgresql://school_admin:数据库密码@localhost:5432/school_aff
 - `NEXTAUTH_SECRET` 不要继续使用演示值
 - 兜底管理员密码要与演示环境分开
 - 如果只是当前试点电脑本机运行数据库，不需要把 `DATABASE_URL` 改成局域网 IP
+- 当前 live 试点电脑的真实数据库密码口径，以 `docs/pilot-accounts-and-usage-guide.md` 或当前 `.env.local` 为准，不要把其他文档里的默认示例值当作现场真值
 
 ## 五、初始化项目
 
@@ -246,23 +247,8 @@ ORDER BY action_count DESC;
 ### 4. 导出没问题，但还不敢切真实数据
 
 这是正常的。建议先做脱敏样例数据，再做单年级、单部门试点，不要直接全校切换。
-## 2026-05-09 Migrated Workstation Addendum
+## 当前工作站补充说明
 
-The workstation accepted on 2026-05-09 uses the PostgreSQL installer default location instead of the earlier D-drive pilot layout:
-
-- PostgreSQL service: `postgresql-x64-17`
-- PostgreSQL install path: `C:\Program Files\PostgreSQL\17`
-- PostgreSQL data path: `C:\Program Files\PostgreSQL\17\data`
-- PostgreSQL tools path: `C:\Program Files\PostgreSQL\17\bin`
-- PostgreSQL superuser password confirmed during recovery: `postgres`
-- Application DB role restored to match `.env.local`: `school_admin / school_password`
-
-For this workstation, the following app-side acceptance has already passed:
-
-```powershell
-$env:DATABASE_URL="postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public"
-npm.cmd run db:push
-npm.cmd run db:seed:demo
-```
-
-The main authenticated pages were smoke-checked as `admin / ChangeMe123!` and returned `200 OK`.
+- 当前 live 试点环境的数据库账号、密码与访问口径，以 `docs/pilot-accounts-and-usage-guide.md` 为准。
+- 当前现场默认工作站使用 `D:\PostgreSQL\17` / `D:\PostgreSQL\data` 与服务 `postgresql-xiaowuxitong`；历史上验收过的 `C:\Program Files\PostgreSQL\17` 迁移机器只代表另一种可接受落地形态。
+- 如果你在另一台新电脑上复现这套环境，真正需要验收的是 PostgreSQL 服务是否启动、`school_affairs` 是否存在、`school_admin` 是否能用当前 `.env.local` 里的密码连接，以及 `npm.cmd run db:push` 后业务页是否能正常打开。

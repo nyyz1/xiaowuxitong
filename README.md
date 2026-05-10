@@ -45,6 +45,11 @@
 - `scripts/`：数据库种子、PGlite 模拟、试点启动脚本
 - `docs/`：部署、验收、试点交付文档
 
+文档入口建议先看：
+
+- `docs/README.md`：按“日常试点使用 / 部署验收 / 迁移协作”分类的文档导航
+- `docs/pilot-accounts-and-usage-guide.md`：当前 live 试点环境的账号、密码、地址、启动与日常使用说明
+
 ## 只搬项目到学校电脑的一键方式
 
 如果不需要带走当前电脑里的数据库数据，可以在家里电脑双击：
@@ -142,7 +147,7 @@ start-school-public-pilot.cmd
 它会做三件事：
 
 - 把 `NEXTAUTH_URL` 准备成 `http://119.45.252.190:62000`
-- 打开一个本地应用窗口，运行 `npm.cmd run start -- --hostname 0.0.0.0 --port 3000`
+- 打开一个本地应用窗口，复用 `scripts/start-school-pilot.ps1` 完成本地依赖检查、构建和生产启动
 - 打开一个公网隧道窗口，通过 `plink` 把腾讯云 `62000` 反向映射到本机 `3000`
 
 这条路径当前验证通过的公网登录地址是：

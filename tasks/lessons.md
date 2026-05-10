@@ -1,5 +1,17 @@
 ﻿# Lessons
 
+## 2026-05-10 - Keep launcher docs anchored to the real entry script, not yesterday's inner command
+
+- Trigger: the public-pilot launcher had already been refactored to reuse `scripts/start-school-pilot.ps1`, but `README.md` and the deployment guide still told readers it directly ran `npm.cmd run start -- --hostname 0.0.0.0 --port 3000`.
+- Pattern: launcher internals can change for good reasons like dependency checks, build creation, or duplicate-start protection, while high-level docs keep repeating an older subordinate command and silently drift out of date.
+- Rule: when a double-click entry point delegates to another script, document the real entry script as the source of truth and describe the responsibilities it centralizes, instead of hard-coding the older inner command in multiple docs.
+
+## 2026-05-10 - Keep active progress logs short and push old churn into milestone archives
+
+- Trigger: `memory-bank/progress.md` had grown into a multi-thousand-line mix of current state, old migration failures, launcher experiments, and resolved UI feedback, making the file hard to use as a same-day handoff tool.
+- Pattern: once a project leaves bootstrap and enters repeated stabilization cycles, the daily active log and the long-term historical record stop being the same document shape.
+- Rule: keep `progress.md` optimized for current verified state plus recent changes, and move older resolved churn into a separate milestone archive instead of forcing every future maintainer to reread obsolete debugging detail first.
+
 ## 2026-05-09 - Treat each migrated PostgreSQL install as its own verified shape
 
 - Trigger: after moving the project to a new workstation, the docs still described the earlier D-drive PostgreSQL pilot, but the setup path had installed PostgreSQL as `postgresql-x64-17` under `C:\Program Files\PostgreSQL\17\data`.

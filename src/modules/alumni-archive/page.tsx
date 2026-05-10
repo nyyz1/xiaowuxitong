@@ -12,6 +12,11 @@ import {
   getProfileFieldInputName,
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
+import {
+  getStudentStatusLabel,
+  isStudentActiveStatus,
+  studentStatusOptions,
+} from "@/modules/people/status-options";
 import type {
   PeopleFilters,
   getPeopleManagementData,
@@ -53,12 +58,8 @@ function getStudentProfileData(
   });
 }
 
-function statusLabel(status: string) {
-  return status === "ACTIVE" ? "正常" : "停用";
-}
-
-function statusBadgeClass(status: string) {
-  return status === "ACTIVE"
+function statusBadgeClass(isActive: boolean) {
+  return isActive
     ? "bg-emerald-100 text-emerald-700"
     : "bg-slate-200 text-slate-600";
 }
@@ -301,8 +302,11 @@ function StudentForm({
         name="enrollmentStatus"
         defaultValue={student?.enrollmentStatus ?? "ACTIVE"}
       >
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {studentStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <div className="lg:col-span-1">
         <SubmitButton
@@ -357,8 +361,11 @@ function StudentFilterForm({
       </SelectBox>
       <SelectBox name="studentStatus" defaultValue={filters.studentStatus}>
         <option value="ALL">全部状态</option>
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {studentStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <button className="h-11 rounded-2xl bg-[var(--accent-strong)] px-5 text-sm font-semibold text-white">
         查询存档学生
@@ -534,10 +541,10 @@ export function AlumniArchivePage({
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
-                        student.enrollmentStatus,
+                        isStudentActiveStatus(student.enrollmentStatus),
                       )}`}
                     >
-                      {statusLabel(student.enrollmentStatus)}
+                      {getStudentStatusLabel(student.enrollmentStatus)}
                     </span>
                   </div>
                 </summary>
@@ -559,15 +566,15 @@ export function AlumniArchivePage({
                         name="status"
                         value={
                           student.enrollmentStatus === "ACTIVE"
-                            ? "INACTIVE"
+                            ? "LONG_TERM_LEAVE"
                             : "ACTIVE"
                         }
                       />
                       <SubmitButton
                         idleLabel={
                           student.enrollmentStatus === "ACTIVE"
-                            ? "停用存档学生"
-                            : "恢复存档学生"
+                            ? "设为长期请假"
+                            : "恢复正常"
                         }
                         pendingLabel="处理中..."
                         tone={

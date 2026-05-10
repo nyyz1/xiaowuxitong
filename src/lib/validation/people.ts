@@ -1,7 +1,9 @@
 import { z } from "zod";
+import {
+  studentStatuses,
+  teacherStatuses,
+} from "@/modules/people/status-options";
 
-export const teacherStatuses = ["ACTIVE", "INACTIVE"] as const;
-export const studentStatuses = ["ACTIVE", "INACTIVE"] as const;
 export const profileFieldTargetTypes = ["TEACHER", "STUDENT"] as const;
 
 const idSchema = z.string().trim().min(1).max(64);
@@ -61,9 +63,14 @@ export const studentMutationSchema = z.object({
   remarks: remarksSchema,
 });
 
-export const archivePeopleRecordSchema = z.object({
+export const teacherRecordStatusSchema = z.object({
   id: idSchema,
-  status: z.enum(["ACTIVE", "INACTIVE"]),
+  status: z.enum(teacherStatuses),
+});
+
+export const studentRecordStatusSchema = z.object({
+  id: idSchema,
+  status: z.enum(studentStatuses),
 });
 
 export const peopleRecordDeleteSchema = z.object({

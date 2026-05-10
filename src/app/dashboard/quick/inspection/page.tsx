@@ -253,7 +253,7 @@ export default async function QuickInspectionPage({
             <textarea
               name="remarks"
               rows={3}
-              placeholder="可填写检查人、问题说明或整改要求"
+              placeholder="备注，如有实际需要可以填写，如具体情况、整改要求等"
               className="rounded-md border border-[var(--panel-border)] bg-white px-4 py-3 text-sm font-normal text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
             />
           </label>

@@ -23,6 +23,15 @@ import {
   getTeacherDepartmentNames,
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
+import {
+  getStudentStatusLabel,
+  getTeacherStatusLabel,
+  isStudentActiveStatus,
+  isTeacherActiveStatus,
+  studentStatusOptions,
+  teacherStatusOptions,
+} from "@/modules/people/status-options";
+import { StudentScopeFields } from "@/modules/people/student-scope-fields";
 import type {
   PeopleFilters,
   getPeopleManagementData,
@@ -88,12 +97,8 @@ function getStudentProfileData(
   });
 }
 
-function statusLabel(status: string) {
-  return status === "ACTIVE" ? "正常" : "停用";
-}
-
-function statusBadgeClass(status: string) {
-  return status === "ACTIVE"
+function statusBadgeClass(isActive: boolean) {
+  return isActive
     ? "bg-emerald-100 text-emerald-700"
     : "bg-slate-200 text-slate-600";
 }
@@ -581,8 +586,11 @@ function TeacherForm({
         name="employmentStatus"
         defaultValue={teacher?.employmentStatus ?? "ACTIVE"}
       >
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {teacherStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <div className="lg:col-span-2">
         <SubmitButton
@@ -628,28 +636,29 @@ function StudentForm({
         required
       />
       <TextInput name="name" defaultValue={student?.name} placeholder="姓名" required />
-      <SelectBox name="gradeId" defaultValue={student?.gradeId} required>
-        <option value="">请选择年级</option>
-        {grades.map((grade) => (
-          <option key={grade.id} value={grade.id}>
-            {grade.name}
-          </option>
-        ))}
-      </SelectBox>
-      <SelectBox name="classId" defaultValue={student?.classId}>
-        <option value="">未选择班级</option>
-        {classes.map((classItem) => (
-          <option key={classItem.id} value={classItem.id}>
-            {classItem.gradeName} / {classItem.name}
-          </option>
-        ))}
-      </SelectBox>
+      <StudentScopeFields
+        grades={grades}
+        classes={classes}
+        gradeName="gradeId"
+        className="classId"
+        defaultGradeId={student?.gradeId}
+        defaultClassId={student?.classId}
+        gradePlaceholder="请选择年级"
+        classPlaceholder="未选择班级"
+        classPrompt="请选择班级"
+        emptyClassLabel="当前年级暂无班级"
+        disabledClassLabel="请先选择年级"
+        requiredGrade
+      />
       <SelectBox
         name="enrollmentStatus"
         defaultValue={student?.enrollmentStatus ?? "ACTIVE"}
       >
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {studentStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <div className="lg:col-span-1">
         <SubmitButton
@@ -705,8 +714,11 @@ function TeacherFilterForm({
       </SelectBox>
       <SelectBox name="teacherStatus" defaultValue={filters.teacherStatus}>
         <option value="ALL">全部状态</option>
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {teacherStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <button className="h-11 rounded-2xl bg-[var(--accent-strong)] px-5 text-sm font-semibold text-white">
         查询教师
@@ -735,26 +747,26 @@ function StudentFilterForm({
         defaultValue={filters.studentKeyword}
         placeholder="搜索身份证号、学籍号、姓名、电话、监护人"
       />
-      <SelectBox name="studentGradeId" defaultValue={filters.studentGradeId}>
-        <option value="">全部年级</option>
-        {grades.map((grade) => (
-          <option key={grade.id} value={grade.id}>
-            {grade.name}
-          </option>
-        ))}
-      </SelectBox>
-      <SelectBox name="studentClassId" defaultValue={filters.studentClassId}>
-        <option value="">全部班级</option>
-        {classes.map((classItem) => (
-          <option key={classItem.id} value={classItem.id}>
-            {classItem.gradeName} / {classItem.name}
-          </option>
-        ))}
-      </SelectBox>
+      <StudentScopeFields
+        grades={grades}
+        classes={classes}
+        gradeName="studentGradeId"
+        className="studentClassId"
+        defaultGradeId={filters.studentGradeId}
+        defaultClassId={filters.studentClassId}
+        gradePlaceholder="全部年级"
+        classPlaceholder="全部班级"
+        classPrompt="请选择班级"
+        emptyClassLabel="当前年级暂无班级"
+        disabledClassLabel="请先选择年级"
+      />
       <SelectBox name="studentStatus" defaultValue={filters.studentStatus}>
         <option value="ALL">全部状态</option>
-        <option value="ACTIVE">正常</option>
-        <option value="INACTIVE">停用</option>
+        {studentStatusOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </SelectBox>
       <button className="h-11 rounded-2xl bg-[var(--accent-strong)] px-5 text-sm font-semibold text-white">
         查询学生
@@ -997,10 +1009,10 @@ export function PeoplePage({
                         </div>
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
-                            teacher.employmentStatus,
+                            isTeacherActiveStatus(teacher.employmentStatus),
                           )}`}
                         >
-                          {statusLabel(teacher.employmentStatus)}
+                          {getTeacherStatusLabel(teacher.employmentStatus)}
                         </span>
                       </div>
                     </summary>
@@ -1021,15 +1033,15 @@ export function PeoplePage({
                             name="status"
                             value={
                               teacher.employmentStatus === "ACTIVE"
-                                ? "INACTIVE"
+                                ? "LONG_SICK_LEAVE"
                                 : "ACTIVE"
                             }
                           />
                           <SubmitButton
                             idleLabel={
                               teacher.employmentStatus === "ACTIVE"
-                                ? "停用教师"
-                                : "恢复教师"
+                                ? "设为长病假"
+                                : "恢复正常"
                             }
                             pendingLabel="处理中..."
                             tone={
@@ -1143,10 +1155,10 @@ export function PeoplePage({
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
-                        student.enrollmentStatus,
+                        isStudentActiveStatus(student.enrollmentStatus),
                       )}`}
                     >
-                      {statusLabel(student.enrollmentStatus)}
+                      {getStudentStatusLabel(student.enrollmentStatus)}
                     </span>
                   </div>
                 </summary>
@@ -1168,15 +1180,15 @@ export function PeoplePage({
                         name="status"
                         value={
                           student.enrollmentStatus === "ACTIVE"
-                            ? "INACTIVE"
+                            ? "LONG_TERM_LEAVE"
                             : "ACTIVE"
                         }
                       />
                       <SubmitButton
                         idleLabel={
                           student.enrollmentStatus === "ACTIVE"
-                            ? "停用学生"
-                            : "恢复学生"
+                            ? "设为长期请假"
+                            : "恢复正常"
                         }
                         pendingLabel="处理中..."
                         tone={

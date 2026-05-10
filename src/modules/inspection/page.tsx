@@ -814,7 +814,7 @@ function RecordForm({
         <TextArea
           name="remarks"
           defaultValue={record?.remarks}
-          placeholder="备注，如检查人、问题说明、整改要求"
+          placeholder="?????????????"
         />
       </div>
       <div className="lg:col-span-4">
@@ -1043,18 +1043,6 @@ export function InspectionPage({
         </div>
       </section>
 
-      {notice ? (
-        <div
-          className={`rounded-3xl border px-5 py-4 text-sm ${
-            notice.tone === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-rose-200 bg-rose-50 text-rose-700"
-          }`}
-        >
-          {notice.message}
-        </div>
-      ) : null}
-
       {access.canConfigureInspection ? (
         <SectionCard
           title={`${targetTypeLabel}分类与项目`}
@@ -1078,10 +1066,21 @@ export function InspectionPage({
         />
 
         {access.canRecordInspection ? (
-          <div className="mt-5 rounded-[24px] border border-dashed border-[var(--panel-border)] bg-[var(--panel-soft)] p-4">
+          <div id="record-entry" className="mt-5 scroll-mt-24 rounded-[24px] border border-dashed border-[var(--panel-border)] bg-[var(--panel-soft)] p-4">
             <h3 className="mb-3 text-base font-semibold text-[var(--text-primary)]">
               新增{targetTypeLabel}记录
             </h3>
+            {notice ? (
+              <div
+                className={`mb-4 rounded-2xl border px-4 py-3 text-sm ${
+                  notice.tone === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-rose-200 bg-rose-50 text-rose-700"
+                }`}
+              >
+                {notice.message}
+              </div>
+            ) : null}
             {data.activeItems.length === 0 || missingTargetDependency ? (
               <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 {isTeacherTarget

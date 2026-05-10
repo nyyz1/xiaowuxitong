@@ -35,6 +35,7 @@ DATABASE_URL=postgresql://school_admin:school_password@localhost:5432/school_aff
 ```
 
 真实部署时，务必替换 `NEXTAUTH_SECRET` 和兜底管理员密码。
+上面的 `school_password` 只是初始化示例；当前 live 试点密码以 `docs/pilot-accounts-and-usage-guide.md` 或这台机器当前 `.env.local` 为准。
 
 ## 2. 启动 PostgreSQL
 
@@ -160,10 +161,7 @@ start-school-public-pilot.cmd
 它会：
 
 1. 准备 `.env.local` 里的 `NEXTAUTH_URL=http://119.45.252.190:62000`
-2. 打开本地应用窗口并运行：
-```text
-npm.cmd run start -- --hostname 0.0.0.0 --port 3000
-```
+2. 打开本地应用窗口并复用 `scripts/start-school-pilot.ps1`，统一完成依赖检查、构建和生产启动
 3. 打开公网隧道窗口并运行 `plink` 反向 SSH，把腾讯云 `62000` 转回本机 `3000`
 
 当前已验证可用的公网地址是：
@@ -317,18 +315,8 @@ npm run db:validate
 - 试点电脑如果在新构建后没有重启正在运行的 `next start`，浏览器可能出现 `This page couldn’t load` 或 `ChunkLoadError`；这时应先重启站点再继续排查
 - 如果登录页正常但数据业务页出现 server error，应优先检查 Prisma schema 是否已经同步到 live PostgreSQL，再排查业务代码
 - 当前已验证的是“当前 Windows 登录账号登录后自动拉起站点”；如果学校后续要做“无人登录也能机开即起”的机器级自启动，仍需要管理员权限和真正的 Windows 任务或服务
-## 2026-05-09 Migrated Workstation Notes
+## 当前工作站说明
 
-The migrated workstation verified on 2026-05-09 does not match the earlier D-drive PostgreSQL pilot exactly. Its verified state is:
-
-- PostgreSQL service: `postgresql-x64-17`
-- PostgreSQL install path: `C:\Program Files\PostgreSQL\17`
-- PostgreSQL data path: `C:\Program Files\PostgreSQL\17\data`
-- PostgreSQL tools: `C:\Program Files\PostgreSQL\17\bin`
-- Application DB: `school_affairs`
-- Application DB role: `school_admin`
-- Current DB URL: `postgresql://school_admin:school_password@localhost:5432/school_affairs?schema=public`
-
-This C-drive PostgreSQL install is acceptable for the migrated workstation smoke test. A future move to `D:\PostgreSQL\data` should be treated as a separate PostgreSQL administration task, not a requirement for normal app smoke.
-
-On this workstation, prefer `npm.cmd run ...` in PowerShell if direct `npm run ...` is blocked by execution policy.
+- 当前 live 试点环境的账号、密码、数据库运维口径、登录地址，以 `docs/pilot-accounts-and-usage-guide.md` 为准。
+- 历史上验证过装在 `C:\Program Files\PostgreSQL\17` 的迁移工作站，但那不是当前现场默认值；当前 live 试点电脑使用 `D:\PostgreSQL\17` / `D:\PostgreSQL\data` 与服务 `postgresql-xiaowuxitong`。
+- 在这台 Windows 工作站上，如果 PowerShell 因执行策略拦住直接 `npm run ...`，优先改用 `npm.cmd run ...`。

@@ -5,6 +5,7 @@
 The repository now contains a runnable Next.js application scaffold with:
 
 - Bootstrap admin login page
+- the login surface is now intentionally minimal: hero title plus subtitle on the left, and only the login badge, title, fields, and submit action on the right, with the former trial stats and bootstrap-warning copy removed from the page chrome
 - database-backed user login with Bootstrap fallback
 - protected dashboard shell
 - NextAuth credentials flow
@@ -23,19 +24,23 @@ The repository now contains a runnable Next.js application scaffold with:
 - school structure management module for visible grade, class, department, and subject maintenance, with `AcademicYear` retained only as an internal compatibility layer
 - grade lifecycle helper for enrollment-year cohort naming, academic-year rollover, alumni cohort rules, and grade-department name synchronization
 - people management module for active teacher and student manual maintenance, mistaken-entry deletion with audit logging, configurable information statistics category add/disable/delete flows, identity-card-number-based import updates, Excel import templates, Excel import, filtered export, teacher multi-duty support, and teacher multi-department support
+- people status configuration is now role-aware inside the people module: teachers use `正常 / 备孕 / 产假 / 长病假`, while students use `正常 / 休学 / 长期请假`, and the same shared definitions drive forms, filters, import normalization, and export labels
 - the active people module is exposed as a single `师生档案` sidebar entry, while the people page can still internally focus student or teacher records through query state
 - alumni archive module for archived student query, edit, import, and export flows
 - inspection management module for student quantification and teacher quantification categories, items, record entry, filtered review, record edits, and mistaken-entry deletion
 - reporting module for student quantification and teacher quantification summaries, xlsx/csv exports, and export audit logging
 - system-admin-only data management module for grouped record counts, search, pagination, selected-row deletion, fixed one-click cleanup, backup-before-delete protection, and read-only audit-log viewing
-- mobile-first quick task routes for active-student lookup and routine-inspection entry, keeping full maintenance workflows on the existing people and inspection pages
+- mobile-first quick task routes for active-student lookup and routine-inspection entry, keeping full maintenance workflows on the existing people and inspection pages; the student quick-search path now also treats dormitory-code keywords as case-insensitive, normalizes dormitory-related student profile values to uppercase on save/import so `C123` and `c123` resolve to the same dormitory, and requires grade-first class selection so quick-search class options stay limited to the chosen grade
 - visible grade/class selectors now load directly from `Grade` and `Class` instead of front-end academic-year groupings
 - the visible app shell now exposes only six business modules: school structure, user permissions, people records, alumni archive, routine inspection, and statistics export
-- the shared dashboard shell and global design tokens now use a `校务档案馆` backend visual system: warm paper surfaces, ink-green navigation, coral signal accents, fine dividers, a sticky top status bar, role label, neutral working canvas, and tighter controls
-- the Step 7 UI-delivery surface currently centers on `src/components/auth/login-form.tsx`, `src/components/shell/dashboard-shell.tsx`, `src/app/dashboard/page.tsx`, `src/components/form/submit-button.tsx`, and `docs/final-delivery-checklist.md`; this slice has current static verification coverage through `typecheck`, `lint`, `build`, and a local `/login` reachability check
+- the shared dashboard shell and global design tokens now use a lighter operator-facing visual system with a desktop sidebar, a mobile drawer navigation trigger, a desktop-sticky but mobile-non-sticky topbar, and consistent secondary-action styling for topbar controls
+- the Step 7 UI-delivery surface currently centers on `src/components/auth/login-form.tsx`, `src/components/shell/dashboard-shell.tsx`, `src/app/dashboard/page.tsx`, `src/components/form/submit-button.tsx`, and `docs/final-delivery-checklist.md`; the current shape removes the global RBAC explainer, the top `私有部署` badge, and the homepage `下一阶段任务` card so the dashboard reads as an operator work surface instead of a delivery checklist, and this slice has current static verification coverage through `typecheck`, `lint`, and `build`
+- the latest Step 7 feedback refinement also moves inspection save notices down into the record-entry section, anchors full-page inspection saves back to `#record-entry` for continuous data entry, links student grade/class selectors on the people page through a dedicated client component, removes duplicate topbar user-role wording, simplifies the homepage quick-task cards, and makes the mobile topbar non-sticky so it does not dominate narrow screens during scroll
+- the mobile quick inspection route now also carries an explicit Chinese remarks placeholder instead of fallback/question-mark text, so the compact entry form stays usable on narrow screens
 - local PGlite simulation script for demo data and report smoke verification when PostgreSQL is not available
 - PostgreSQL demo seed script and deployment smoke-test guide for handoff preparation
 - updated README and trial handoff documents that match the approved school PostgreSQL pilot and account model, with the final delivery checklist now linked directly from the main README handoff-doc section
+- V1.5 planning materials now live under `docs/product-roadmap-v1-5-v2.md` and `docs/v1-5-executable-plan.md`, with a leadership decision deck at `docs/roadmap-leadership-brief-v1-5-v2.pptx`; these are recommendation and reporting artifacts only, not approved V1 scope changes
 - GitHub remote collaboration is now prepared around the public repository `https://github.com/nyyz1/xiaowuxitong.git`; source, docs, scripts, schema, and generated Prisma client are versioned, while local environment files, installed dependencies, build output, logs, artifacts, tunnel material, and workstation runtime data stay outside Git.
 
 Migration acceptance note for the current workstation as of 2026-05-09:
@@ -62,7 +67,10 @@ The planned version 1 architecture is:
 - `prd.md` defines product scope and acceptance
 - `tech-stack.md` defines tool and platform choices
 - `implementation-plan.md` defines execution order
-- `progress.md` records what was actually done
+- `progress.md` keeps the short active change log, while `progress-archive.md` keeps compressed older milestone history
+- `docs/README.md` is the operator-facing document index
+- `docs/pilot-accounts-and-usage-guide.md` is the live pilot source of truth for current workstation passwords, URLs, daily operator guidance, and the current quick-task usage rules
+- `docs/product-roadmap-v1-5-v2.md`, `docs/v1-5-executable-plan.md`, and `docs/roadmap-leadership-brief-v1-5-v2.pptx` are post-V1 planning and leadership-reporting artifacts; they should guide scope discussion but do not change the implemented architecture until explicitly approved
 - this file defines module boundaries, data flow, and architectural constraints
 
 ## Architecture Goals
@@ -80,8 +88,8 @@ The planned version 1 architecture is:
 | --- | --- | --- | --- | --- |
 | `src/app/login/page.tsx` | login route entry | session state | login page or redirect to dashboard | implemented |
 | `src/app/dashboard/layout.tsx` | route protection for dashboard area | session cookies | guarded app shell | implemented |
-| `src/app/dashboard/page.tsx` | scaffolded admin overview page | authenticated request | roadmap-oriented dashboard screen | implemented |
-| `src/app/dashboard/quick/students/page.tsx` | mobile-first active student quick search route | authenticated people session, student keyword or grade/class filters | compact student result cards with full authorized active-student details | implemented for Step 7 task-entry optimization |
+| `src/app/dashboard/page.tsx` | operator overview page | authenticated request | quick-task-first dashboard with module entry cards, admin data-management entry, and lighter module responsibility summary | implemented |
+| `src/app/dashboard/quick/students/page.tsx` | mobile-first active student quick search route | authenticated people session, student keyword or grade/class filters | compact student result cards with full authorized active-student details, including case-insensitive dormitory-number keyword search through student profile data and grade-first class filter linkage | implemented for Step 7 task-entry optimization |
 | `src/app/dashboard/quick/inspection/page.tsx` | mobile-first inspection quick entry route | inspection-recorder session, target type/date/item parameters | focused student or teacher quantification entry form that stays in quick-entry flow after save | implemented for Step 7 task-entry optimization |
 | `start-school-pilot.cmd` | Windows double-click workstation pilot launcher | user double-click | calls the school-pilot PowerShell helper from the project root | implemented for Step 7 pilot hardening |
 | `package-for-school.cmd` | home-computer transfer packager | project files | creates a zip under `artifacts\school-transfer` while excluding local data, dependencies, build output, logs, backups, and `.env.local` | implemented for Step 7 transfer convenience |
@@ -114,7 +122,7 @@ The planned version 1 architecture is:
 | `src/app/dashboard/data-management/page.tsx` | data management route entry | system-admin session, query filters | guarded data management center | implemented for Step 7 operations |
 | `src/app/api/auth/[...nextauth]/route.ts` | NextAuth route handler | auth requests | session and auth responses | implemented |
 | `src/components/auth/login-form.tsx` | Bootstrap admin login UI | username and password | sign-in attempt and redirect | implemented |
-| `src/components/shell/dashboard-shell.tsx` | internal admin layout shell | authenticated user name, role, current route, current query view, and child content | consistent archive-style backend shell with ink-green sidebar navigation, single people entry, sticky status header, role display, and flat working canvas | implemented |
+| `src/components/shell/dashboard-shell.tsx` | internal admin layout shell | authenticated user name, role, current route, current query view, and child content | desktop sidebar plus mobile drawer navigation, single people entry, desktop-sticky but mobile-non-sticky topbar, role display, quick-task actions, and flat working canvas without process-facing status clutter | implemented |
 | `src/components/shell/logout-button.tsx` | logout interaction | current session | sign-out and redirect | implemented |
 | `src/lib/auth.ts` | auth configuration and Bootstrap credential check | credentials, env vars | `NextAuthOptions` | implemented |
 | `src/lib/authorization.ts` | server-side role checks for protected workflows | current session | allow or redirect decisions | implemented |
@@ -342,10 +350,9 @@ Current implementation note:
 
 Current implementation note:
 
-- The earlier pilot workstation database used native PostgreSQL 17 under `D:\PostgreSQL\17`, with data under `D:\PostgreSQL\data` and service `postgresql-xiaowuxitong`.
-- The current migrated workstation verified on 2026-05-09 uses native PostgreSQL 17 under `C:\Program Files\PostgreSQL\17`, with data under `C:\Program Files\PostgreSQL\17\data` and service `postgresql-x64-17`.
-- The current verified application database is `school_affairs` owned by `school_admin`.
-- The current real workstation application password in operator docs is `PilotDb2026!Q7mX9rL2`; if `.env.local` is reverted to the older `school_password`, login can still work through the Bootstrap fallback while data-backed pages such as people, structure, inspection, and exports fail at runtime.
+- The current live pilot workstation is again tracked on native PostgreSQL 17 under `D:\PostgreSQL\17`, with data under `D:\PostgreSQL\data`, service `postgresql-xiaowuxitong`, and the verified application database `school_affairs` owned by `school_admin`.
+- A separate migrated workstation was historically accepted with the installer-default `C:\Program Files\PostgreSQL\17` layout and service `postgresql-x64-17`; that path remains a valid migration outcome, but it is no longer the current live-pilot default.
+- The consolidated source of truth for the live pilot's current passwords, login URLs, and operator-side usage steps is now `docs/pilot-accounts-and-usage-guide.md`; if `.env.local` is reverted to the older `school_password`, login can still appear to work through the Bootstrap fallback while data-backed pages such as people, structure, inspection, and exports fail at runtime.
 - After a real reboot check, `postgresql-xiaowuxitong` is verified to auto-start cleanly as an Automatic Windows service and still listens only on `127.0.0.1:5432` and `[::1]:5432`.
 - The production pilot launcher has been verified on the workstation LAN path: `.env.local` currently points `NEXTAUTH_URL` at the chosen school-network address, the app listens on `0.0.0.0:3000`, and office PCs should access only the web application URL while PostgreSQL remains local-only.
 - A separate office PC on the same school network has now confirmed it can open the pilot site, so the current workstation-to-LAN access model is verified beyond localhost.

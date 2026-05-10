@@ -12,12 +12,13 @@ import {
 } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import {
-  archivePeopleRecordSchema,
   peopleRecordDeleteSchema,
   profileFieldDefinitionDeleteSchema,
   profileFieldDefinitionMutationSchema,
   profileFieldDefinitionStatusSchema,
+  studentRecordStatusSchema,
   studentMutationSchema,
+  teacherRecordStatusSchema,
   teacherMutationSchema,
 } from "@/lib/validation/people";
 import {
@@ -37,6 +38,10 @@ import {
   studentImportColumnAliases,
   teacherImportColumnAliases,
 } from "@/modules/people/spreadsheet";
+import {
+  getStudentStatusLabel,
+  getTeacherStatusLabel,
+} from "@/modules/people/status-options";
 import { getSystemProfileFieldByName } from "@/modules/people/system-profile-fields";
 
 type NoticeTone = "success" | "error";
@@ -140,8 +145,20 @@ function getMutationErrorMessage(error: unknown) {
 function normalizeTeacherStatus(value: string) {
   const normalized = value.trim().toUpperCase();
 
-  if (["停用", "离职", "INACTIVE", "DISABLED"].includes(normalized)) {
-    return "INACTIVE";
+  if (["备孕", "PREGNANCY_PREPARATION"].includes(normalized)) {
+    return "PREGNANCY_PREPARATION";
+  }
+
+  if (["产假", "MATERNITY_LEAVE"].includes(normalized)) {
+    return "MATERNITY_LEAVE";
+  }
+
+  if (
+    ["停用", "离职", "长病假", "INACTIVE", "DISABLED", "LONG_SICK_LEAVE"].includes(
+      normalized,
+    )
+  ) {
+    return "LONG_SICK_LEAVE";
   }
 
   return "ACTIVE";
@@ -150,8 +167,16 @@ function normalizeTeacherStatus(value: string) {
 function normalizeStudentStatus(value: string) {
   const normalized = value.trim().toUpperCase();
 
-  if (["停用", "离校", "休学", "INACTIVE", "DISABLED"].includes(normalized)) {
-    return "INACTIVE";
+  if (["休学", "SUSPENDED"].includes(normalized)) {
+    return "SUSPENDED";
+  }
+
+  if (
+    ["停用", "离校", "长期请假", "INACTIVE", "DISABLED", "LONG_TERM_LEAVE"].includes(
+      normalized,
+    )
+  ) {
+    return "LONG_TERM_LEAVE";
   }
 
   return "ACTIVE";
@@ -881,7 +906,7 @@ export async function setTeacherStatus(formData: FormData) {
   await requirePeopleEditor();
   const redirectPath = getTeacherViewPath();
 
-  const parsed = archivePeopleRecordSchema.safeParse({
+  const parsed = teacherRecordStatusSchema.safeParse({
     id: getStringValue(formData, "id"),
     status: getStringValue(formData, "status"),
   });
@@ -904,7 +929,9 @@ export async function setTeacherStatus(formData: FormData) {
   }
 
   redirectWithNotice(
-    parsed.data.status === "ACTIVE" ? "教师档案已恢复启用。" : "教师档案已停用。",
+    parsed.data.status === "ACTIVE"
+      ? "教师档案已恢复正常。"
+      : `教师档案状态已设置为${getTeacherStatusLabel(parsed.data.status)}。`,
     "success",
     redirectPath,
   );
@@ -1157,7 +1184,7 @@ export async function setStudentStatus(formData: FormData) {
 
   const studentViewMode = getStudentViewMode(formData);
   const redirectPath = getStudentViewPath(studentViewMode);
-  const parsed = archivePeopleRecordSchema.safeParse({
+  const parsed = studentRecordStatusSchema.safeParse({
     id: getStringValue(formData, "id"),
     status: getStringValue(formData, "status"),
   });
@@ -1182,7 +1209,9 @@ export async function setStudentStatus(formData: FormData) {
   }
 
   redirectWithNotice(
-    parsed.data.status === "ACTIVE" ? "学生档案已恢复启用。" : "学生档案已停用。",
+    parsed.data.status === "ACTIVE"
+      ? "学生档案已恢复正常。"
+      : `学生档案状态已设置为${getStudentStatusLabel(parsed.data.status)}。`,
     "success",
     redirectPath,
   );

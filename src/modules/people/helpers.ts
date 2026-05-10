@@ -69,6 +69,21 @@ export function normalizeProfileFieldValue(value: string) {
   return value.trim();
 }
 
+function normalizeDormitoryFieldValue(value: string) {
+  return normalizeProfileFieldValue(value).toUpperCase();
+}
+
+function normalizeDefinitionProfileValue(
+  definition: ProfileFieldDefinitionLike,
+  value: string,
+) {
+  if (definition.name.includes("宿舍")) {
+    return normalizeDormitoryFieldValue(value);
+  }
+
+  return normalizeProfileFieldValue(value);
+}
+
 export function getProfileFieldInputName(fieldId: string) {
   return `${PROFILE_FIELD_INPUT_PREFIX}${fieldId}`;
 }
@@ -163,7 +178,7 @@ export function collectProfileValuesFromFormData(
     touchedFieldIds.push(definition.id);
     const value = formData.get(inputName);
     values[definition.id] =
-      typeof value === "string" ? normalizeProfileFieldValue(value) : "";
+      typeof value === "string" ? normalizeDefinitionProfileValue(definition, value) : "";
   }
 
   return {
@@ -189,7 +204,7 @@ export function collectProfileValuesFromRow(
     values[definition.id] =
       rawValue === undefined || rawValue === null
         ? ""
-        : normalizeProfileFieldValue(String(rawValue));
+        : normalizeDefinitionProfileValue(definition, String(rawValue));
   }
 
   return {

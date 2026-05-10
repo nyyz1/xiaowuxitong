@@ -13,6 +13,8 @@ import {
   getStudentQuickSearchData,
   normalizePeopleFilters,
 } from "@/modules/people/queries";
+import { getStudentStatusLabel } from "@/modules/people/status-options";
+import { QuickStudentScopeFields } from "./quick-student-scope-fields";
 
 type QuickStudentSearchPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -57,7 +59,7 @@ function buildPeopleHref(filters: ReturnType<typeof normalizePeopleFilters>) {
 }
 
 function statusLabel(status: string) {
-  return status === "ACTIVE" ? "正常在校" : "已停用";
+  return status === "ACTIVE" ? "正常在校" : getStudentStatusLabel(status);
 }
 
 export default async function QuickStudentSearchPage({
@@ -81,7 +83,7 @@ export default async function QuickStudentSearchPage({
           <div>
             <span className="soft-kicker">学生快查</span>
             <h1 className="mt-3 text-2xl font-semibold text-[var(--text-primary)]">
-              搜姓名、身份证号、学籍号或联系方式
+              搜姓名、身份证号、学籍号、电话或宿舍号
             </h1>
             <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
               这里只做快速查询，不显示导入导出、统计类目配置和新增表单。
@@ -107,7 +109,7 @@ export default async function QuickStudentSearchPage({
 
         {isScoped ? (
           <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            当前账号已绑定年级范围，快查结果只包含负责年级内的在校学生。
+            当前账号已经绑定年级范围，快查结果只包含负责年级内的在校学生。
           </div>
         ) : null}
 
@@ -116,33 +118,15 @@ export default async function QuickStudentSearchPage({
             type="search"
             name="studentKeyword"
             defaultValue={filters.studentKeyword}
-            placeholder="输入学生姓名、身份证号、学籍号、电话"
+            placeholder="输入学生姓名、身份证号、学籍号、电话或宿舍号"
             className="h-12 rounded-md border border-[var(--panel-border)] bg-white px-4 text-base text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
           />
-          <select
-            name="studentGradeId"
-            defaultValue={filters.studentGradeId}
-            className="h-12 rounded-md border border-[var(--panel-border)] bg-white px-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
-          >
-            <option value="">全部年级</option>
-            {data.gradeOptions.map((grade) => (
-              <option key={grade.id} value={grade.id}>
-                {grade.name}
-              </option>
-            ))}
-          </select>
-          <select
-            name="studentClassId"
-            defaultValue={filters.studentClassId}
-            className="h-12 rounded-md border border-[var(--panel-border)] bg-white px-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
-          >
-            <option value="">全部班级</option>
-            {data.classOptions.map((classItem) => (
-              <option key={classItem.id} value={classItem.id}>
-                {classItem.gradeName} / {classItem.name}
-              </option>
-            ))}
-          </select>
+          <QuickStudentScopeFields
+            grades={data.gradeOptions}
+            classes={data.classOptions}
+            defaultGradeId={filters.studentGradeId}
+            defaultClassId={filters.studentClassId}
+          />
           <button className="h-12 rounded-md bg-[var(--accent-strong)] px-5 text-sm font-semibold text-white">
             查询
           </button>
@@ -161,7 +145,7 @@ export default async function QuickStudentSearchPage({
             输入条件后开始查询
           </h2>
           <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-            手机上建议直接搜姓名、身份证号后几位、学籍号或联系电话。
+            手机上建议直接搜姓名、身份证号后几位、学籍号、联系电话或宿舍号。
           </p>
         </section>
       ) : (
