@@ -326,6 +326,7 @@ export async function getPeopleManagementData(
             departmentAssignments: {
               include: {
                 department: true,
+                position: true,
               },
               orderBy: [{ department: { name: "asc" } }],
             },
@@ -464,6 +465,7 @@ export async function getTeachersForExport(
       departmentAssignments: {
         include: {
           department: true,
+          position: true,
         },
         orderBy: [{ department: { name: "asc" } }],
       },

@@ -115,6 +115,29 @@ async function getIdByName(client, table, name) {
   return result.rows[0]?.id ?? null;
 }
 
+async function ensureDepartmentIdByName(client, name) {
+  const existingDepartmentId = await getIdByName(client, "Department", name);
+
+  if (existingDepartmentId) {
+    return existingDepartmentId;
+  }
+
+  const departmentId = `department-${Buffer.from(name).toString("hex").slice(0, 24)}`;
+
+  await client.query(
+    `
+      INSERT INTO "Department" ("id", "name", "createdAt", "updatedAt")
+      VALUES ($1, $2, now(), now())
+      ON CONFLICT ("name") DO UPDATE SET
+        "updatedAt" = now()
+      RETURNING "id"
+    `,
+    [departmentId, name],
+  );
+
+  return await getIdByName(client, "Department", name);
+}
+
 async function getUserByUsername(client, username) {
   const result = await client.query(
     'SELECT "id", "username", "displayName", "role", "teacherId" FROM "User" WHERE "username" = $1',
@@ -136,12 +159,39 @@ async function getTeacherIdByName(client, name) {
   return result.rows[0]?.id ?? null;
 }
 
-async function ensureAccount(client, account, passwordHash) {
-  const teacherId = await getTeacherIdByName(client, account.teacherName);
-
-  if (account.teacherName && !teacherId) {
-    throw new Error(`Teacher profile not found: ${account.teacherName}`);
+async function ensureTeacherProfile(client, account) {
+  if (!account.teacherName) {
+    return null;
   }
+
+  const existingTeacherId = await getTeacherIdByName(client, account.teacherName);
+
+  if (existingTeacherId) {
+    return existingTeacherId;
+  }
+
+  const teacherId = `teacher-profile-${account.username.replaceAll(".", "-")}`;
+  const employeeNumber = account.employeeNumber ?? account.username;
+
+  await client.query(
+    `
+      INSERT INTO "Teacher"
+        ("id", "employeeNumber", "name", "employmentStatus", "profileData", "duties", "createdAt", "updatedAt")
+      VALUES
+        ($1, $2, $3, 'ACTIVE', '{}'::jsonb, ARRAY[]::text[], now(), now())
+      ON CONFLICT ("id") DO UPDATE SET
+        "name" = EXCLUDED."name",
+        "employmentStatus" = 'ACTIVE',
+        "updatedAt" = now()
+    `,
+    [teacherId, employeeNumber, account.teacherName],
+  );
+
+  return teacherId;
+}
+
+async function ensureAccount(client, account, passwordHash) {
+  const teacherId = await ensureTeacherProfile(client, account);
 
   await client.query(
     `
@@ -181,7 +231,7 @@ async function ensureResponsibility(client, responsibility) {
     ? await getIdByName(client, "Subject", responsibility.subjectName)
     : null;
   const departmentId = responsibility.departmentName
-    ? await getIdByName(client, "Department", responsibility.departmentName)
+    ? await ensureDepartmentIdByName(client, responsibility.departmentName)
     : null;
 
   if (!approver) {
@@ -198,10 +248,6 @@ async function ensureResponsibility(client, responsibility) {
 
   if (responsibility.subjectName && !subjectId) {
     throw new Error(`Subject not found: ${responsibility.subjectName}`);
-  }
-
-  if (responsibility.departmentName && !departmentId) {
-    throw new Error(`Department not found: ${responsibility.departmentName}`);
   }
 
   await client.query(

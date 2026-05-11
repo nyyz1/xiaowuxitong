@@ -20,6 +20,52 @@
 
 ## 2026-05-11
 
+- User asked to implement the desktop `PLAN.md` for teacher/student accounts and department-position ownership.
+- Changes made:
+  - added `AccountType`, `User.accountType`, `User.isSuperAdmin`, `User.studentId`, student login relations, `DepartmentPosition`, and `TeacherDepartmentAssignment.positionId` to the Prisma schema
+  - added account helpers so new teacher imports and new active student imports create bound login accounts from identity card numbers, with initial password equal to the identity-card-number last 8 characters and no password reset on update imports
+  - added `/dashboard/account/password` plus self-service password-change action; student accounts are redirected away from business routes and kept to password maintenance in this phase
+  - added department-position helpers, default position generation for grade departments, school leadership, and ordinary departments, and structure-page UI/actions for adding, updating, enabling/disabling, and deleting unreferenced department positions
+  - updated user management around account type, student/teacher binding, highest-administrator capability, and compatibility role handling
+  - added `scripts/seed-department-positions.mjs`, `npm.cmd run db:seed:department-positions`, and `npm.cmd run smoke:positions`
+  - pushed the schema to the local PostgreSQL database and seeded default department positions for existing departments
+- Verification:
+  - `npm.cmd run db:generate`
+  - `npm.cmd run db:validate`
+  - `npx.cmd prisma db push --accept-data-loss`
+  - `npm.cmd run db:seed:department-positions`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run smoke:positions`
+  - `npm.cmd run build`
+  - `npm.cmd run smoke:pages`
+- Result:
+  - the six data-heavy smoke pages still return `200`
+  - department-position derived permission assertions pass
+  - the only `db push` warning was the new unique constraint on `User.studentId`; the push completed successfully
+
+- User reported that after syncing the latest GitHub code, `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/archive/students`, `/dashboard/approvals`, and `/dashboard/exports` showed `This page couldn't load`.
+- Recovery and hardening:
+  - reproduced the authenticated page failures and confirmed the live database was missing the new `User.teacherId` column
+  - ran the approval-role migration, then `npx.cmd prisma db push --accept-data-loss` after confirming the old role values had already been remapped
+  - hardened `scripts/seed-approval-pilot-config.mjs` so the approval pilot seed can repair a missing standard teacher profile and the standard `校务办公室` department instead of failing on a fresh or partially seeded database
+  - added `scripts/smoke-authenticated-pages.mjs` plus `npm.cmd run smoke:pages` to automatically log in and verify the affected data-heavy pages return `200` without Next.js server-error markers
+  - rebuilt and restarted the live pilot service so the running process matches the new `.next` output
+- Verification:
+  - `npm.cmd run db:migrate:approval-roles`
+  - `npx.cmd prisma db push --accept-data-loss`
+  - `npm.cmd run db:seed:approval-defaults`
+  - `npm.cmd run db:seed:approval-pilot`
+  - `npm.cmd run smoke:pages`
+  - `npm.cmd run db:generate`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - live service restarted and `npm.cmd run smoke:pages` passed again against `http://127.0.0.1:3000`
+- Result:
+  - all six reported pages now return `200`: users, data management, people, archive students, approvals, and exports
+  - root cause was schema drift after syncing code with the newer V1.5 permission/approval schema, with an additional seed-script assumption that made approval pilot repair brittle
+
 - User asked for a project tidy-up pass.
 - Cleanup:
   - tightened `README.md` so the main handoff surface stays short and points readers to `docs/README.md` and `docs/pilot-accounts-and-usage-guide.md`

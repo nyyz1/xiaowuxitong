@@ -6,19 +6,26 @@ import {
   adjustGradeClassCount,
   createClass,
   createDepartment,
+  createDepartmentPosition,
   createGrade,
   createSubject,
   deleteClass,
   deleteDepartment,
+  deleteDepartmentPosition,
   deleteGrade,
   deleteSubject,
   rolloverAcademicYear,
   updateClass,
   updateDepartment,
+  updateDepartmentPosition,
   updateGrade,
   updateSubject,
 } from "@/modules/school-structure/actions";
 import { SubmitButton } from "@/modules/school-structure/submit-button";
+import {
+  teacherDepartmentIdentityLabels,
+  teacherDepartmentIdentityOptions,
+} from "@/modules/people/department-identities";
 
 type SchoolStructureData = Awaited<ReturnType<typeof getSchoolStructureSnapshot>>;
 type RawGrade = SchoolStructureData["grades"][number];
@@ -37,6 +44,15 @@ type VisibleGrade = RawGrade;
 type DictionaryItem = {
   id: string;
   name: string;
+  positions?: Array<{
+    id: string;
+    name: string;
+    identityType: keyof typeof teacherDepartmentIdentityLabels;
+    isActive: boolean;
+    _count: {
+      teacherAssignments: number;
+    };
+  }>;
   _count: {
     teachers: number;
   };
@@ -148,6 +164,8 @@ function DictionaryPanel({
   updateAction: (formData: FormData) => Promise<void>;
   deleteAction: (formData: FormData) => Promise<void>;
 }) {
+  const isDepartmentPanel = title === "部门";
+
   return (
     <SectionCard title={title} description={description}>
       <form action={createAction} className="grid gap-3 md:grid-cols-[1fr_auto]">
@@ -190,6 +208,99 @@ function DictionaryPanel({
                   tone="secondary"
                 />
               </form>
+
+              {isDepartmentPanel ? (
+                <div className="mt-4 rounded-2xl border border-dashed border-[var(--panel-border)] bg-white/78 p-4">
+                  <div className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+                    部门职务
+                  </div>
+                  <form
+                    action={createDepartmentPosition}
+                    className="grid gap-3 md:grid-cols-[1fr_1fr_auto]"
+                  >
+                    <input type="hidden" name="departmentId" value={item.id} />
+                    <TextInput name="name" placeholder="新增职务名称" />
+                    <select
+                      name="identityType"
+                      defaultValue="FRONTLINE_TEACHER"
+                      className="h-11 rounded-2xl border border-[var(--panel-border)] bg-white px-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent-strong)]"
+                    >
+                      {teacherDepartmentIdentityOptions.map((identityType) => (
+                        <option key={identityType} value={identityType}>
+                          {teacherDepartmentIdentityLabels[identityType]}
+                        </option>
+                      ))}
+                    </select>
+                    <SubmitButton idleLabel="新增职务" pendingLabel="保存中..." />
+                  </form>
+
+                  <div className="mt-4 space-y-3">
+                    {(item.positions ?? []).length === 0 ? (
+                      <div className="rounded-2xl bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                        暂无职务，保存部门名称后系统会补齐默认职务，也可以手动新增。
+                      </div>
+                    ) : (
+                      item.positions?.map((position) => (
+                        <div
+                          key={position.id}
+                          className="rounded-2xl border border-[var(--panel-border)] bg-white p-3"
+                        >
+                          <div className="mb-2 flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--text-secondary)]">
+                            <span>
+                              已绑定教师：{position._count.teacherAssignments}，状态：
+                              {position.isActive ? "启用" : "停用"}
+                            </span>
+                            <form action={deleteDepartmentPosition}>
+                              <input type="hidden" name="id" value={position.id} />
+                              <SubmitButton
+                                idleLabel="删除职务"
+                                pendingLabel="删除中..."
+                                tone="danger"
+                              />
+                            </form>
+                          </div>
+                          <form
+                            action={updateDepartmentPosition}
+                            className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]"
+                          >
+                            <input type="hidden" name="id" value={position.id} />
+                            <input type="hidden" name="departmentId" value={item.id} />
+                            <TextInput
+                              name="name"
+                              defaultValue={position.name}
+                              placeholder="职务名称"
+                            />
+                            <select
+                              name="identityType"
+                              defaultValue={position.identityType}
+                              className="h-11 rounded-2xl border border-[var(--panel-border)] bg-white px-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent-strong)]"
+                            >
+                              {teacherDepartmentIdentityOptions.map((identityType) => (
+                                <option key={identityType} value={identityType}>
+                                  {teacherDepartmentIdentityLabels[identityType]}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              name="isActive"
+                              defaultValue={position.isActive ? "true" : "false"}
+                              className="h-11 rounded-2xl border border-[var(--panel-border)] bg-white px-4 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent-strong)]"
+                            >
+                              <option value="true">启用</option>
+                              <option value="false">停用</option>
+                            </select>
+                            <SubmitButton
+                              idleLabel="保存职务"
+                              pendingLabel="保存中..."
+                              tone="secondary"
+                            />
+                          </form>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ))
         )}

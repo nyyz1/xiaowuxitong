@@ -49,6 +49,7 @@
 - Completed in environment/verification: the 2026-05-01 live workstation outage follow-up restored the web service on `192.168.1.3:3000`, hardened the startup launcher against duplicate starts, resynced the live PostgreSQL schema after Prisma `P2022 ColumnNotFound` errors, and reverified the four affected business pages
 - Completed in code/schema/local database/docs: V1.5 Step 8 application and approval module for teacher repair, material printing, and other configured daily requests, including print quantity tracking and default approval type seeding
 - Completed in environment/verification: Step 8 pilot approval configuration now has a bound teacher account, standard approval accounts, and approval responsibilities covering repair, teaching-print, grade-admin-print, school-admin-print, and other requests; authenticated `/dashboard/approvals` access plus database-backed routing and permission assertions pass
+- Completed in code/schema/environment/verification: the Step 3/4/7 teacher-student account and department-position refactor now limits login account type to teacher/student, adds highest-administrator capability, student-account binding, identity-card-based import account creation, self-service password changes, department-configured positions, and default department-position seeding
 - Next recommended action: if another office PC on the same network still cannot open the current `SameNetworkLoginUrl` from `logs/current-school-pilot-url.txt` while the workstation itself returns `200`, check the Windows Firewall profile and inbound TCP `3000` rule on that network.
 
 ## Step 0: Freeze Version 1 Scope
@@ -246,7 +247,10 @@ Add a lightweight teacher-facing request workflow for daily repair, material pri
 ### Deliverables
 
 - role model expanded to system administrator, school leader, department leader, grade manager, student affairs staff, academic affairs staff, admin office staff, logistics staff, and teacher
+- login account type is now separated from permission capability: accounts are teacher or student accounts, with highest-administrator capability stored as a flag and `UserRole` retained as a compatibility layer
 - teacher user accounts can bind to teacher profile records
+- student user accounts can bind to active student profile records and are limited to self-service password maintenance in this phase
+- department positions can be configured under departments and teacher department assignments bind to those positions while preserving old identity-type compatibility
 - application type configuration for repair, printing, and other request types
 - approval responsibility configuration with optional request type, grade, subject, and department scope
 - teacher-facing application submission and personal request tracking
@@ -262,6 +266,9 @@ Add a lightweight teacher-facing request workflow for daily repair, material pri
 - `npm.cmd run lint`
 - `npm.cmd run build`
 - teacher accounts can only see and submit their own requests
+- student accounts can log in only to the self-service password page and cannot enter business management workflows
+- newly imported teacher and active-student profiles create identity-card-number login accounts only on first profile creation, and repeated imports do not reset passwords
+- default department positions are generated for existing and newly created departments, and deleting a referenced position is blocked
 - printing requests cannot submit without material type, print mode, paper size, and print quantity
 - users without matching approval responsibility cannot approve requests
 - configured repair, printing, and other request types route to matching approval responsibilities

@@ -24,6 +24,14 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
+export const AccountType = {
+  STUDENT: 'STUDENT',
+  TEACHER: 'TEACHER'
+} as const
+
+export type AccountType = (typeof AccountType)[keyof typeof AccountType]
+
+
 export const InspectionValueType = {
   SCORE: 'SCORE',
   COUNT: 'COUNT',

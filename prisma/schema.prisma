@@ -19,6 +19,11 @@ enum UserRole {
   TEACHER
 }
 
+enum AccountType {
+  STUDENT
+  TEACHER
+}
+
 enum InspectionValueType {
   SCORE
   COUNT
@@ -95,11 +100,15 @@ model User {
   username     String     @unique
   displayName  String
   passwordHash String?
+  accountType  AccountType @default(TEACHER)
+  isSuperAdmin Boolean    @default(false)
   role         UserRole   @default(TEACHER)
   managedGradeId String?
   managedGrade Grade?     @relation("ManagedGradeUsers", fields: [managedGradeId], references: [id], onDelete: SetNull)
   teacherId    String?    @unique
   teacher      Teacher?   @relation("TeacherLoginUsers", fields: [teacherId], references: [id], onDelete: SetNull)
+  studentId    String?    @unique
+  student      Student?   @relation("StudentLoginUsers", fields: [studentId], references: [id], onDelete: SetNull)
   isActive     Boolean    @default(true)
   auditLogs    AuditLog[]
   inspections  InspectionRecord[]
@@ -112,6 +121,9 @@ model User {
 
   @@index([managedGradeId])
   @@index([teacherId])
+  @@index([studentId])
+  @@index([accountType, isActive])
+  @@index([isSuperAdmin, isActive])
 }
 
 model AcademicYear {
@@ -169,10 +181,30 @@ model Department {
   name               String                     @unique
   teachers           Teacher[]
   teacherAssignments TeacherDepartmentAssignment[]
+  positions          DepartmentPosition[]
   approvalResponsibilities ApprovalResponsibility[]
   approvalRequests ApprovalRequest[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
+}
+
+model DepartmentPosition {
+  id                 String                        @id @default(cuid())
+  departmentId       String
+  department         Department                    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  name               String
+  identityType       TeacherDepartmentIdentityType @default(FRONTLINE_TEACHER)
+  permissionTags     String[]                      @default([])
+  sortOrder          Int                           @default(0)
+  isActive           Boolean                       @default(true)
+  teacherAssignments TeacherDepartmentAssignment[]
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+
+  @@unique([departmentId, name])
+  @@index([departmentId, sortOrder])
+  @@index([identityType])
+  @@index([isActive])
 }
 
 model Subject {
@@ -229,6 +261,7 @@ model Student {
   phone            String?
   guardianContact  String?
   remarks          String?
+  loginUsers       User[]   @relation("StudentLoginUsers")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -241,13 +274,16 @@ model Student {
 model TeacherDepartmentAssignment {
   teacherId    String
   departmentId String
+  positionId   String?
   identityType TeacherDepartmentIdentityType @default(FRONTLINE_TEACHER)
   teacher      Teacher    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  position     DepartmentPosition? @relation(fields: [positionId], references: [id], onDelete: SetNull)
   createdAt    DateTime   @default(now())
 
   @@id([teacherId, departmentId])
   @@index([departmentId])
+  @@index([positionId])
   @@index([identityType])
 }
 

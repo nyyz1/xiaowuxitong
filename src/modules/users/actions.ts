@@ -3,7 +3,7 @@
 import { hash } from "bcryptjs";
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
-import { UserRole } from "@/generated/prisma/enums";
+import { AccountType, UserRole } from "@/generated/prisma/enums";
 import { requireSystemAdmin } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import {
@@ -36,10 +36,20 @@ function optionalManagedGradeId(role: UserRole, managedGradeId: string) {
   return normalized;
 }
 
-function optionalTeacherId(role: UserRole, teacherId: string) {
+function optionalTeacherId(accountType: AccountType, teacherId: string) {
   const normalized = teacherId.trim();
 
-  if (!normalized) {
+  if (accountType !== AccountType.TEACHER || !normalized) {
+    return null;
+  }
+
+  return normalized;
+}
+
+function optionalStudentId(accountType: AccountType, studentId: string) {
+  const normalized = studentId.trim();
+
+  if (accountType !== AccountType.STUDENT || !normalized) {
     return null;
   }
 
@@ -80,6 +90,7 @@ function getAuditActorId(session: AdminSession) {
 async function assertKeepsActiveSystemAdmin(
   userId: string,
   nextRole: UserRole,
+  nextIsSuperAdmin: boolean,
   nextIsActive: boolean,
 ) {
   const target = await prisma.user.findUnique({
@@ -88,6 +99,7 @@ async function assertKeepsActiveSystemAdmin(
     },
     select: {
       role: true,
+      isSuperAdmin: true,
       isActive: true,
     },
   });
@@ -97,9 +109,9 @@ async function assertKeepsActiveSystemAdmin(
   }
 
   const targetWasActiveAdmin =
-    target.role === UserRole.SYSTEM_ADMIN && target.isActive;
+    (target.role === UserRole.SYSTEM_ADMIN || target.isSuperAdmin) && target.isActive;
   const targetWillRemainActiveAdmin =
-    nextRole === UserRole.SYSTEM_ADMIN && nextIsActive;
+    (nextRole === UserRole.SYSTEM_ADMIN || nextIsSuperAdmin) && nextIsActive;
 
   if (!targetWasActiveAdmin || targetWillRemainActiveAdmin) {
     return;
@@ -110,7 +122,7 @@ async function assertKeepsActiveSystemAdmin(
       id: {
         not: userId,
       },
-      role: UserRole.SYSTEM_ADMIN,
+      OR: [{ role: UserRole.SYSTEM_ADMIN }, { isSuperAdmin: true }],
       isActive: true,
     },
   });
@@ -126,9 +138,12 @@ export async function createUser(formData: FormData) {
   const parsed = userCreateSchema.safeParse({
     username: getStringValue(formData, "username"),
     displayName: getStringValue(formData, "displayName"),
+    accountType: getStringValue(formData, "accountType"),
+    isSuperAdmin: getBooleanValue(formData, "isSuperAdmin"),
     role: getStringValue(formData, "role"),
     managedGradeId: getStringValue(formData, "managedGradeId"),
     teacherId: getStringValue(formData, "teacherId"),
+    studentId: getStringValue(formData, "studentId"),
     password: getStringValue(formData, "password"),
     isActive: getBooleanValue(formData, "isActive"),
   });
@@ -143,7 +158,8 @@ export async function createUser(formData: FormData) {
       parsed.data.role,
       parsed.data.managedGradeId,
     );
-    const teacherId = optionalTeacherId(parsed.data.role, parsed.data.teacherId);
+    const teacherId = optionalTeacherId(parsed.data.accountType, parsed.data.teacherId);
+    const studentId = optionalStudentId(parsed.data.accountType, parsed.data.studentId);
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -151,9 +167,12 @@ export async function createUser(formData: FormData) {
           username: parsed.data.username,
           displayName: parsed.data.displayName,
           passwordHash,
+          accountType: parsed.data.accountType,
+          isSuperAdmin: parsed.data.isSuperAdmin,
           role: parsed.data.role,
           managedGradeId,
           teacherId,
+          studentId,
           isActive: parsed.data.isActive,
         },
         include: {
@@ -175,12 +194,15 @@ export async function createUser(formData: FormData) {
           summary: `新增系统用户：${user.displayName}（${user.username}）。`,
           metadata: {
             role: user.role,
+            accountType: user.accountType,
+            isSuperAdmin: user.isSuperAdmin,
             isActive: user.isActive,
             managedGradeId,
             managedGradeName: user.managedGrade
               ? user.managedGrade.name
               : null,
             teacherId,
+            studentId,
           },
         },
       });
@@ -198,9 +220,12 @@ export async function updateUser(formData: FormData) {
   const parsed = userUpdateSchema.safeParse({
     id: getStringValue(formData, "id"),
     displayName: getStringValue(formData, "displayName"),
+    accountType: getStringValue(formData, "accountType"),
+    isSuperAdmin: getBooleanValue(formData, "isSuperAdmin"),
     role: getStringValue(formData, "role"),
     managedGradeId: getStringValue(formData, "managedGradeId"),
     teacherId: getStringValue(formData, "teacherId"),
+    studentId: getStringValue(formData, "studentId"),
   });
 
   if (!parsed.success) {
@@ -209,9 +234,10 @@ export async function updateUser(formData: FormData) {
 
   if (
     session.user.id === parsed.data.id &&
-    parsed.data.role !== UserRole.SYSTEM_ADMIN
+    parsed.data.role !== UserRole.SYSTEM_ADMIN &&
+    !parsed.data.isSuperAdmin
   ) {
-    redirectWithNotice("不能把自己的系统管理员角色改为其他角色。", "error");
+    redirectWithNotice("不能移除自己的最高管理员能力。", "error");
   }
 
   try {
@@ -231,6 +257,7 @@ export async function updateUser(formData: FormData) {
     await assertKeepsActiveSystemAdmin(
       parsed.data.id,
       parsed.data.role,
+      parsed.data.isSuperAdmin,
       current.isActive,
     );
 
@@ -238,7 +265,8 @@ export async function updateUser(formData: FormData) {
       parsed.data.role,
       parsed.data.managedGradeId,
     );
-    const teacherId = optionalTeacherId(parsed.data.role, parsed.data.teacherId);
+    const teacherId = optionalTeacherId(parsed.data.accountType, parsed.data.teacherId);
+    const studentId = optionalStudentId(parsed.data.accountType, parsed.data.studentId);
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
@@ -247,9 +275,12 @@ export async function updateUser(formData: FormData) {
         },
         data: {
           displayName: parsed.data.displayName,
+          accountType: parsed.data.accountType,
+          isSuperAdmin: parsed.data.isSuperAdmin,
           role: parsed.data.role,
           managedGradeId,
           teacherId,
+          studentId,
         },
         include: {
           managedGrade: {
@@ -270,11 +301,14 @@ export async function updateUser(formData: FormData) {
           summary: `更新系统用户：${user.displayName}（${user.username}）。`,
           metadata: {
             role: user.role,
+            accountType: user.accountType,
+            isSuperAdmin: user.isSuperAdmin,
             managedGradeId,
             managedGradeName: user.managedGrade
               ? user.managedGrade.name
               : null,
             teacherId,
+            studentId,
           },
         },
       });
@@ -309,6 +343,7 @@ export async function setUserStatus(formData: FormData) {
       },
       select: {
         role: true,
+        isSuperAdmin: true,
       },
     });
 
@@ -319,6 +354,7 @@ export async function setUserStatus(formData: FormData) {
     await assertKeepsActiveSystemAdmin(
       parsed.data.id,
       current.role,
+      current.isSuperAdmin,
       parsed.data.isActive,
     );
 

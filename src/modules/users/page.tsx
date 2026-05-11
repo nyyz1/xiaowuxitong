@@ -1,4 +1,4 @@
-import { UserRole } from "@/generated/prisma/enums";
+import { AccountType, UserRole } from "@/generated/prisma/enums";
 import { SubmitButton } from "@/components/form/submit-button";
 import {
   userRoleDescriptions,
@@ -137,6 +137,24 @@ function TeacherOptions({
   );
 }
 
+function StudentOptions({
+  studentOptions,
+}: {
+  studentOptions: UserManagementData["studentOptions"];
+}) {
+  return (
+    <>
+      <option value="">不绑定学生档案</option>
+      {studentOptions.map((student) => (
+        <option key={student.id} value={student.id}>
+          {student.name}（{student.grade.name}
+          {student.class ? ` / ${student.class.name}` : ""}）
+        </option>
+      ))}
+    </>
+  );
+}
+
 function SectionCard({
   title,
   description,
@@ -164,7 +182,12 @@ function getScopeLabel(user: UserManagementData["users"][number]) {
     const identityLabels = user.teacher.departmentAssignments
       .map((assignment) =>
         assignment.department
-          ? `${assignment.department.name} / ${teacherDepartmentIdentityLabels[assignment.identityType]}`
+          ? `${assignment.department.name} / ${
+              assignment.position?.name ??
+              teacherDepartmentIdentityLabels[
+                assignment.position?.identityType ?? assignment.identityType
+              ]
+            }`
           : "",
       )
       .filter(Boolean);
@@ -172,6 +195,12 @@ function getScopeLabel(user: UserManagementData["users"][number]) {
     return identityLabels.length > 0
       ? `${user.teacher.name}：${identityLabels.join("、")}`
       : `教师档案：${user.teacher.name}`;
+  }
+
+  if (user.student) {
+    return `学生档案：${user.student.name}（${user.student.grade.name}${
+      user.student.class ? ` / ${user.student.class.name}` : ""
+    }）`;
   }
 
   if (user.managedGrade) {
@@ -206,7 +235,15 @@ function UserCard({
               {user.isActive ? "启用" : "停用"}
             </span>
             <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]">
-              {userRoleLabels[user.role]}
+              {user.accountType === AccountType.STUDENT ? "学生账号" : "教师账号"}
+            </span>
+            {user.isSuperAdmin ? (
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                最高管理员
+              </span>
+            ) : null}
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              兼容角色：{userRoleLabels[user.role]}
             </span>
           </div>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -223,7 +260,7 @@ function UserCard({
       </div>
 
       <div className="grid gap-4 pt-5 xl:grid-cols-[1.7fr_0.9fr_0.55fr]">
-        <form action={updateUser} className="grid gap-3 md:grid-cols-5">
+        <form action={updateUser} className="grid gap-3 md:grid-cols-7">
           <input type="hidden" name="id" value={user.id} />
           <TextInput
             name="displayName"
@@ -231,6 +268,14 @@ function UserCard({
             placeholder="显示名称"
             required
           />
+          <SelectBox name="accountType" defaultValue={user.accountType}>
+            <option value={AccountType.TEACHER}>教师账号</option>
+            <option value={AccountType.STUDENT}>学生账号</option>
+          </SelectBox>
+          <SelectBox name="isSuperAdmin" defaultValue={user.isSuperAdmin ? "true" : "false"}>
+            <option value="false">普通能力</option>
+            <option value="true">最高管理员</option>
+          </SelectBox>
           <SelectBox name="role" defaultValue={user.role}>
             <RoleOptions />
           </SelectBox>
@@ -239,6 +284,9 @@ function UserCard({
           </SelectBox>
           <SelectBox name="teacherId" defaultValue={user.teacherId ?? ""}>
             <TeacherOptions teacherOptions={data.teacherOptions} />
+          </SelectBox>
+          <SelectBox name="studentId" defaultValue={user.studentId ?? ""}>
+            <StudentOptions studentOptions={data.studentOptions} />
           </SelectBox>
           <SubmitButton
             idleLabel="保存资料"
@@ -328,11 +376,19 @@ export function UsersPage({ data, notice }: UsersPageProps) {
 
       <SectionCard
         title="新增用户"
-        description="需要教师自助申请能力的账号请绑定教师档案；年级管理员必须绑定负责年级。"
+        description="账号类型只区分教师和学生；最高管理员是一项能力开关，不作为第三类账号。"
       >
-        <form action={createUser} className="grid gap-3 lg:grid-cols-7">
+        <form action={createUser} className="grid gap-3 lg:grid-cols-9">
           <TextInput name="username" placeholder="用户名，例如 teacher.zhang" required />
           <TextInput name="displayName" placeholder="显示名称，例如 张老师" required />
+          <SelectBox name="accountType" defaultValue={AccountType.TEACHER}>
+            <option value={AccountType.TEACHER}>教师账号</option>
+            <option value={AccountType.STUDENT}>学生账号</option>
+          </SelectBox>
+          <SelectBox name="isSuperAdmin" defaultValue="false">
+            <option value="false">普通能力</option>
+            <option value="true">最高管理员</option>
+          </SelectBox>
           <SelectBox name="role" defaultValue={UserRole.TEACHER}>
             <RoleOptions />
           </SelectBox>
@@ -341,6 +397,9 @@ export function UsersPage({ data, notice }: UsersPageProps) {
           </SelectBox>
           <SelectBox name="teacherId" defaultValue="">
             <TeacherOptions teacherOptions={data.teacherOptions} />
+          </SelectBox>
+          <SelectBox name="studentId" defaultValue="">
+            <StudentOptions studentOptions={data.studentOptions} />
           </SelectBox>
           <PasswordInput name="password" placeholder="初始密码，至少 8 位" />
           <div className="grid gap-3">

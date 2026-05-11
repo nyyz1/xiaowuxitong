@@ -1,5 +1,11 @@
 ﻿# Lessons
 
+## 2026-05-11 - GitHub sync recovery needs an executable authenticated page smoke
+
+- Trigger: after pulling the latest code, the same family of data-heavy pages again showed `This page couldn't load`, and the live database was missing the newer `User.teacherId` column expected by the synced code.
+- Pattern: a manual memory note saying "run db push and check pages" is too easy to skip; the app also requires a separate browser-session cookie, so naive HTTP checks can falsely report redirects instead of exercising the protected pages.
+- Rule: after GitHub sync or schema-affecting changes, run the role migration, live Prisma schema sync, and `npm.cmd run smoke:pages` so user permissions, data management, people records, archive students, approvals, and exports are checked through a real authenticated session.
+
 ## 2026-05-11 - Schema sync must cover admin and data-management pages too
 
 - Trigger: after the approval-role and approval-routing work, `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` all showed `This page couldn't load` while login and static chunks were still healthy.

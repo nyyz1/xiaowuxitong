@@ -13,6 +13,7 @@ Current assumptions:
 - the approved trial starts with Grade 11 only while still keeping the system data model school-wide
 - the approved trial role model includes one system administrator, three school leader accounts, three Grade 11-scoped manager accounts, one data manager, and one inspection staff account
 - the school now requires explicit year-transition rollover rules, an alumni archive center, batch class-count maintenance, support for multiple teacher duties, support for teachers belonging to multiple departments, configurable teacher or student information statistics categories, an enrollment-year cohort model that keeps only the latest three cohorts active, identity-card-number-based import updates or unique identification for teacher and student records, and a lightweight teacher-facing application and approval workflow for repair, printing, and other daily requests
+- the account model now separates login account type from permission capability: login accounts are either teacher or student accounts, while highest-administrator capability is an account flag; newly imported active teacher or student records can create bound login accounts from identity card numbers, and department-level teacher duties are configured as department positions
 
 ## One-Sentence Product Summary
 
@@ -49,7 +50,7 @@ The system should give school staff one place to maintain master data, enter rou
 
 ## Roles In V1.5 Approval Scope
 
-- `System Admin`: full access, user and permission management, application type configuration, and approval responsibility configuration
+- `System Admin`: full access, user and permission management, application type configuration, and approval responsibility configuration; now represented as highest-administrator capability on a teacher-type account rather than a third login account type
 - `School Leader`: school-wide read access for operational data and application records
 - `Department Leader`: department-level management and approval work when bound through approval responsibilities
 - `Grade Manager`: grade-scoped management and grade administrative printing approval when bound to a grade
@@ -58,6 +59,17 @@ The system should give school staff one place to maintain master data, enter rou
 - `Admin Office Staff`: school administrative office work and school administrative printing approval when bound through approval responsibilities
 - `Logistics Staff`: logistics office work and daily repair approval when bound through approval responsibilities
 - `Teacher`: teacher self-service account for submitting daily repair, material printing, and other configured requests
+- `Student`: student login account used only for login and self-service password maintenance in this phase; student business pages remain closed
+
+## Account Model
+
+- login account type is limited to `Teacher` and `Student`
+- highest-administrator access is controlled by an administrator capability flag, while the legacy role field remains as an internal compatibility layer
+- teacher imports create a bound teacher login account only when a new teacher profile is created from a previously unseen identity card number; updating an existing profile does not reset its password
+- active student imports create a bound student login account only when a new active student profile is created from a previously unseen identity card number; archived student imports do not create login accounts
+- automatically created usernames use the identity card number, and the initial password uses the last 8 characters of that identity card number
+- if an identity-card-number account already exists but is bound to another teacher or student profile, the import row must fail instead of silently rebinding the account
+- teacher department affiliations now bind to department-configured positions; old teacher identity categories remain as a compatibility signal behind each position
 
 ## Approved Trial Assumptions
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { UserRole } from "@/generated/prisma/enums";
+import { redirect } from "next/navigation";
+import { AccountType, UserRole } from "@/generated/prisma/enums";
 import { moduleHighlights } from "@/lib/app-config";
 import {
   canRecordInspection,
@@ -67,6 +68,11 @@ function getTaskLinks(
 
 export default async function DashboardPage() {
   const session = await requireAuthenticatedSession();
+
+  if (session.user.accountType === AccountType.STUDENT) {
+    redirect("/dashboard/account/password");
+  }
+
   const positions = await getTeacherPositionContext(session);
   const taskLinks = getTaskLinks(session.user.role, positions);
 

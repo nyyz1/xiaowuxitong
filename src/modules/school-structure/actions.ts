@@ -9,6 +9,7 @@ import {
   buildArchivedCohortLifecycle,
   buildCompatibilityAcademicYearDateRange,
   buildCompatibilityAcademicYearName,
+  buildGradeDepartmentName,
   buildGradeDepartmentNameSyncPlan,
   buildNumberedClassName,
   buildVisibleCohortLifecycle,
@@ -25,12 +26,18 @@ import {
   classCreateSchema,
   classUpdateSchema,
   deleteEntitySchema,
+  departmentPositionCreateSchema,
+  departmentPositionUpdateSchema,
   dictionaryCreateSchema,
   dictionaryUpdateSchema,
   gradeClassCountAdjustSchema,
   gradeCreateSchema,
   gradeUpdateSchema,
 } from "@/lib/validation/school-structure";
+import {
+  ensureDefaultDepartmentPositions,
+  getPermissionTagsForIdentityType,
+} from "@/modules/school-structure/department-positions";
 
 type NoticeTone = "success" | "error";
 type AdminSession = Awaited<ReturnType<typeof requireSystemAdmin>>;
@@ -137,6 +144,29 @@ function buildCompatibilityAcademicYearSeed(enrollmentYear: number) {
     name: buildCompatibilityAcademicYearName(enrollmentYear),
     ...buildCompatibilityAcademicYearDateRange(enrollmentYear),
   };
+}
+
+async function ensureGradeDepartmentForEnrollmentYear(
+  tx: SchoolStructureTx,
+  enrollmentYear: number,
+) {
+  const department = await tx.department.upsert({
+    where: {
+      name: buildGradeDepartmentName(enrollmentYear),
+    },
+    update: {},
+    create: {
+      name: buildGradeDepartmentName(enrollmentYear),
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  await ensureDefaultDepartmentPositions(tx, department);
+
+  return department;
 }
 
 async function ensureCurrentCompatibilityAcademicYear(enrollmentYear: number) {
@@ -507,15 +537,18 @@ export async function createGrade(formData: FormData) {
       parsed.data.enrollmentYear,
     );
 
-    await prisma.grade.create({
-      data: {
-        academicYearId,
-        name: lifecycle.name,
-        stage: lifecycle.stage,
-        enrollmentYear: lifecycle.enrollmentYear,
-        isVisibleInMain: lifecycle.isVisibleInMain,
-        graduationYear: lifecycle.graduationYear,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.grade.create({
+        data: {
+          academicYearId,
+          name: lifecycle.name,
+          stage: lifecycle.stage,
+          enrollmentYear: lifecycle.enrollmentYear,
+          isVisibleInMain: lifecycle.isVisibleInMain,
+          graduationYear: lifecycle.graduationYear,
+        },
+      });
+      await ensureGradeDepartmentForEnrollmentYear(tx, lifecycle.enrollmentYear);
     });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error");
@@ -539,17 +572,20 @@ export async function updateGrade(formData: FormData) {
   try {
     const lifecycle = buildVisibleCohortLifecycle(parsed.data.enrollmentYear);
 
-    await prisma.grade.update({
-      where: {
-        id: parsed.data.id,
-      },
-      data: {
-        name: lifecycle.name,
-        stage: lifecycle.stage,
-        enrollmentYear: lifecycle.enrollmentYear,
-        isVisibleInMain: lifecycle.isVisibleInMain,
-        graduationYear: lifecycle.graduationYear,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.grade.update({
+        where: {
+          id: parsed.data.id,
+        },
+        data: {
+          name: lifecycle.name,
+          stage: lifecycle.stage,
+          enrollmentYear: lifecycle.enrollmentYear,
+          isVisibleInMain: lifecycle.isVisibleInMain,
+          graduationYear: lifecycle.graduationYear,
+        },
+      });
+      await ensureGradeDepartmentForEnrollmentYear(tx, lifecycle.enrollmentYear);
     });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error");
@@ -1048,6 +1084,9 @@ export async function rolloverAcademicYear(formData: FormData) {
         tx,
         activeEnrollmentYearsAfterRollover,
       );
+      for (const enrollmentYear of activeEnrollmentYearsAfterRollover) {
+        await ensureGradeDepartmentForEnrollmentYear(tx, enrollmentYear);
+      }
 
       await tx.auditLog.create({
         data: {
@@ -1088,10 +1127,17 @@ export async function createDepartment(formData: FormData) {
   }
 
   try {
-    await prisma.department.create({
-      data: {
-        name: parsed.data.name,
-      },
+    await prisma.$transaction(async (tx) => {
+      const department = await tx.department.create({
+        data: {
+          name: parsed.data.name,
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      await ensureDefaultDepartmentPositions(tx, department);
     });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error");
@@ -1113,13 +1159,20 @@ export async function updateDepartment(formData: FormData) {
   }
 
   try {
-    await prisma.department.update({
-      where: {
-        id: parsed.data.id,
-      },
-      data: {
-        name: parsed.data.name,
-      },
+    await prisma.$transaction(async (tx) => {
+      const department = await tx.department.update({
+        where: {
+          id: parsed.data.id,
+        },
+        data: {
+          name: parsed.data.name,
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      await ensureDefaultDepartmentPositions(tx, department);
     });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error");
@@ -1150,6 +1203,103 @@ export async function deleteDepartment(formData: FormData) {
   }
 
   redirectWithNotice("部门已删除。");
+}
+
+export async function createDepartmentPosition(formData: FormData) {
+  await requireSystemAdmin();
+
+  const parsed = departmentPositionCreateSchema.safeParse({
+    departmentId: getStringValue(formData, "departmentId"),
+    name: getStringValue(formData, "name"),
+    identityType: getStringValue(formData, "identityType"),
+  });
+
+  if (!parsed.success) {
+    redirectWithNotice(parsed.error.issues[0]?.message ?? "职务信息不完整。", "error");
+  }
+
+  try {
+    await prisma.departmentPosition.create({
+      data: {
+        departmentId: parsed.data.departmentId,
+        name: parsed.data.name,
+        identityType: parsed.data.identityType,
+        permissionTags: getPermissionTagsForIdentityType(parsed.data.identityType),
+      },
+    });
+  } catch (error) {
+    redirectWithNotice(getMutationErrorMessage(error), "error");
+  }
+
+  redirectWithNotice("部门职务已新增。");
+}
+
+export async function updateDepartmentPosition(formData: FormData) {
+  await requireSystemAdmin();
+
+  const parsed = departmentPositionUpdateSchema.safeParse({
+    id: getStringValue(formData, "id"),
+    departmentId: getStringValue(formData, "departmentId"),
+    name: getStringValue(formData, "name"),
+    identityType: getStringValue(formData, "identityType"),
+    isActive: getBooleanValue(formData, "isActive"),
+  });
+
+  if (!parsed.success) {
+    redirectWithNotice(parsed.error.issues[0]?.message ?? "职务信息不完整。", "error");
+  }
+
+  try {
+    await prisma.departmentPosition.update({
+      where: {
+        id: parsed.data.id,
+      },
+      data: {
+        name: parsed.data.name,
+        identityType: parsed.data.identityType,
+        permissionTags: getPermissionTagsForIdentityType(parsed.data.identityType),
+        isActive: parsed.data.isActive,
+      },
+    });
+  } catch (error) {
+    redirectWithNotice(getMutationErrorMessage(error), "error");
+  }
+
+  redirectWithNotice("部门职务已更新。");
+}
+
+export async function deleteDepartmentPosition(formData: FormData) {
+  await requireSystemAdmin();
+
+  const parsed = deleteEntitySchema.safeParse({
+    id: getStringValue(formData, "id"),
+  });
+
+  if (!parsed.success) {
+    redirectWithNotice("部门职务删除请求无效。", "error");
+  }
+
+  try {
+    const referenced = await prisma.teacherDepartmentAssignment.count({
+      where: {
+        positionId: parsed.data.id,
+      },
+    });
+
+    if (referenced > 0) {
+      throw new Error("该职务已有教师归属，请先调整教师档案后再删除。");
+    }
+
+    await prisma.departmentPosition.delete({
+      where: {
+        id: parsed.data.id,
+      },
+    });
+  } catch (error) {
+    redirectWithNotice(getMutationErrorMessage(error), "error");
+  }
+
+  redirectWithNotice("部门职务已删除。");
 }
 
 export async function createSubject(formData: FormData) {

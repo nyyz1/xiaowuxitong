@@ -12,6 +12,11 @@ const UserRole = {
   TEACHER: "TEACHER",
 };
 
+const AccountType = {
+  STUDENT: "STUDENT",
+  TEACHER: "TEACHER",
+};
+
 const Identity = {
   FRONTLINE_TEACHER: "FRONTLINE_TEACHER",
   DEPARTMENT_LEADER: "DEPARTMENT_LEADER",
@@ -57,7 +62,14 @@ function hasIdentity(positionContext, identityType) {
 }
 
 function canCreateApprovalRequest(session) {
-  return session.role === UserRole.SYSTEM_ADMIN || Boolean(session.teacherId);
+  return (
+    session.accountType !== AccountType.STUDENT &&
+    (session.isSuperAdmin || session.role === UserRole.SYSTEM_ADMIN || Boolean(session.teacherId))
+  );
+}
+
+function canAccessBusinessDashboard(session) {
+  return session.accountType !== AccountType.STUDENT;
 }
 
 function canRecordInspectionTarget(role, targetType, positions) {
@@ -154,6 +166,7 @@ const frontlinePosition = context([Identity.FRONTLINE_TEACHER], ["dept-grade"]);
 
 assert.equal(
   canCreateApprovalRequest({
+    accountType: AccountType.TEACHER,
     role: UserRole.ACADEMIC_AFFAIRS_STAFF,
     teacherId: "teacher-1",
   }),
@@ -161,9 +174,32 @@ assert.equal(
   "非 TEACHER 角色绑定教师档案后应可提交申请",
 );
 assert.equal(
-  canCreateApprovalRequest({ role: UserRole.ACADEMIC_AFFAIRS_STAFF, teacherId: null }),
+  canCreateApprovalRequest({
+    accountType: AccountType.TEACHER,
+    role: UserRole.ACADEMIC_AFFAIRS_STAFF,
+    teacherId: null,
+  }),
   false,
   "未绑定教师档案的非系统管理员账号不应提交教师自助申请",
+);
+assert.equal(
+  canCreateApprovalRequest({
+    accountType: AccountType.STUDENT,
+    role: UserRole.TEACHER,
+    studentId: "student-1",
+    teacherId: null,
+  }),
+  false,
+  "学生账号不应提交教师自助申请",
+);
+assert.equal(
+  canAccessBusinessDashboard({
+    accountType: AccountType.STUDENT,
+    role: UserRole.TEACHER,
+    studentId: "student-1",
+  }),
+  false,
+  "学生账号本期只能进入本人改密页",
 );
 
 assert.equal(

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UserRole } from "@/generated/prisma/enums";
+import { AccountType, UserRole } from "@/generated/prisma/enums";
 
 export const userRoleSchema = z.enum([
   UserRole.SYSTEM_ADMIN,
@@ -12,6 +12,8 @@ export const userRoleSchema = z.enum([
   UserRole.LOGISTICS_STAFF,
   UserRole.TEACHER,
 ]);
+
+export const accountTypeSchema = z.enum([AccountType.STUDENT, AccountType.TEACHER]);
 
 export const usernameSchema = z
   .string()
@@ -41,8 +43,23 @@ const optionalIdSchema = z
   .transform((value) => value || "");
 
 function validateUserScope<
-  T extends { role: UserRole; managedGradeId: string; teacherId: string },
+  T extends {
+    accountType: AccountType;
+    role: UserRole;
+    managedGradeId: string;
+    teacherId: string;
+    studentId: string;
+    isSuperAdmin?: boolean;
+  },
 >(input: T) {
+  if (input.accountType === AccountType.STUDENT && !input.studentId) {
+    throw new Error("学生账号必须绑定学生档案。");
+  }
+
+  if (input.accountType === AccountType.TEACHER && !input.teacherId && !input.isSuperAdmin) {
+    throw new Error("教师账号应绑定教师档案；只有最高管理员可以不绑定。");
+  }
+
   if (input.role === UserRole.GRADE_MANAGER && !input.managedGradeId) {
     throw new Error("年级管理员必须指定一个负责年级。");
   }
@@ -51,12 +68,21 @@ function validateUserScope<
     ...input,
     managedGradeId:
       input.role === UserRole.GRADE_MANAGER ? input.managedGradeId : "",
-    teacherId: input.teacherId,
+    teacherId: input.accountType === AccountType.TEACHER ? input.teacherId : "",
+    studentId: input.accountType === AccountType.STUDENT ? input.studentId : "",
+    role: input.isSuperAdmin ? UserRole.SYSTEM_ADMIN : input.role,
   };
 }
 
 function scopeTransform<
-  T extends { role: UserRole; managedGradeId: string; teacherId: string },
+  T extends {
+    accountType: AccountType;
+    role: UserRole;
+    managedGradeId: string;
+    teacherId: string;
+    studentId: string;
+    isSuperAdmin?: boolean;
+  },
 >(input: T) {
   try {
     return validateUserScope(input);
@@ -76,9 +102,12 @@ export const userCreateSchema = z
   .object({
     username: usernameSchema,
     displayName: displayNameSchema,
+    accountType: accountTypeSchema,
+    isSuperAdmin: z.boolean(),
     role: userRoleSchema,
     managedGradeId: optionalIdSchema,
     teacherId: optionalIdSchema,
+    studentId: optionalIdSchema,
     password: passwordSchema,
     isActive: z.boolean(),
   })
@@ -88,9 +117,12 @@ export const userUpdateSchema = z
   .object({
     id: z.string().trim().min(1, "用户编号不能为空。"),
     displayName: displayNameSchema,
+    accountType: accountTypeSchema,
+    isSuperAdmin: z.boolean(),
     role: userRoleSchema,
     managedGradeId: optionalIdSchema,
     teacherId: optionalIdSchema,
+    studentId: optionalIdSchema,
   })
   .transform(scopeTransform);
 

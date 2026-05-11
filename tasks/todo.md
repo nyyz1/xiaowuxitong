@@ -1,5 +1,26 @@
 ﻿# Current Task Plan
 
+## Step 3/4/7 teacher-student account and department-position refactor
+
+- [x] Restate the desktop `PLAN.md` scope and map it to Step 3 school structure/permissions, Step 4 people imports, and Step 7 account security.
+- [x] Extend the Prisma model for two account types, super-admin capability, student/teacher account binding, and department-configured positions.
+- [x] Add account and department-position helpers for identity-card usernames, initial passwords, default positions, and legacy identity migration.
+- [x] Wire teacher/student imports so newly created active profiles create bound login accounts once, without resetting passwords on updates.
+- [x] Add self-service password change and keep student accounts limited to password maintenance.
+- [x] Update school-structure and people/user UI flows to use department positions instead of exposing raw teacher identity types.
+- [x] Add executable smoke assertions for import account creation, student-only access, department-position defaults, and super-admin access.
+- [x] Run schema/client generation plus typecheck, lint, and build.
+- [x] Update `memory-bank/progress.md` and `memory-bank/architecture.md` after verification.
+
+## Step 7 synced-code page-load recovery
+
+- [x] Re-read required memory-bank files and map the report to Step 7 stabilization, with Step 4/6/8 page-smoke impact.
+- [x] Reproduce the `This page couldn't load` failure on users, data management, people, archive, approvals, and exports.
+- [x] Identify whether the root cause is stale Next.js chunks, Prisma Client/schema drift, route runtime code, or a missing live schema sync.
+- [x] Apply the smallest durable fix and add a repeatable regression check for the affected page set.
+- [x] Verify with typecheck, lint/build as needed, and authenticated route smoke.
+- [x] Update `memory-bank/progress.md`, `memory-bank/architecture.md`, and lessons if a recurring failure pattern is confirmed.
+
 ## V1.5 application approval documentation cleanup
 
 - [x] Reconcile main README and delivery docs from the old six-module wording to the current seven-module application.

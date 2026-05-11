@@ -18,12 +18,16 @@ The repository now contains a runnable Next.js application scaffold with:
 - the public-tunnel launcher can now self-download PuTTY `plink.exe` into ignored local `artifacts\plink.exe` when the tool is missing from both the project artifact path and PATH
 - duplicate-start protection and existing-port detection in the Windows school-pilot launcher
 - user and permission management module for system administrators, now including the V1.5 role model and teacher-account to teacher-profile binding
+- login account type is now separated from permission capability: `User.accountType` is limited to teacher or student accounts, `User.isSuperAdmin` carries highest-administrator capability, `User.teacherId` and `User.studentId` bind accounts to teacher or active-student profiles, and `UserRole` remains as a compatibility layer
+- self-service password maintenance now lives at `/dashboard/account/password`; student accounts are limited to this route in the current phase and are redirected away from management workflows
 - approved school trial role model with school leaders, grade-scoped managers, and an optional managed-grade relation on database users; V1.5 additionally supports department leaders, student affairs staff, academic affairs staff, admin office staff, logistics staff, and teacher accounts
 - Grade-scoped pilot account pack and school-leader read-only inspection access
 - verified native PostgreSQL 17 workstation installation with a real `school_affairs` database and a localhost-only live instance
 - school structure management module for visible grade, class, department, and subject maintenance, with `AcademicYear` retained only as an internal compatibility layer
 - grade lifecycle helper for enrollment-year cohort naming, academic-year rollover, alumni cohort rules, and grade-department name synchronization
+- department-position configuration under each department through `DepartmentPosition`, with default positions for `XXXX级年级`, `校领导`, and ordinary departments; teacher department assignments bind to positions while preserving old `identityType` compatibility metadata
 - people management module for active teacher and student manual maintenance, mistaken-entry deletion with audit logging, configurable information statistics category add/disable/delete flows, identity-card-number-based import updates, Excel import templates, Excel import, filtered export, teacher multi-duty support, and teacher multi-department support
+- people imports create bound login accounts only when a new teacher profile or new active student profile is created by identity card number; repeated imports update the profile without resetting passwords, archived-student imports do not create student accounts, and conflicting existing account bindings fail at row level
 - people status configuration is now role-aware inside the people module: teachers use `正常 / 备孕 / 产假 / 长病假`, while students use `正常 / 休学 / 长期请假`, and the same shared definitions drive forms, filters, import normalization, and export labels
 - the active people module is exposed as a single `师生档案` sidebar entry, while the people page can still internally focus student or teacher records through query state
 - alumni archive module for archived student query, edit, import, and export flows
@@ -109,6 +113,7 @@ The planned version 1 architecture is:
 | `scripts/autostart-school-pilot.cmd` | current-user logon auto-start helper | current Windows user logon, existing build, current `.env.local` | launches the school-pilot site in the background after this Windows account signs in | implemented for Step 7 hardening |
 | `src/app/dashboard/structure/page.tsx` | school structure route entry | authenticated request, query status | structure management screen | implemented |
 | `src/app/dashboard/users/page.tsx` | user management route entry | system-admin session, query status | user and permission management screen | implemented for Step 7 |
+| `src/app/dashboard/account/password/page.tsx` | self-service password route | authenticated account session | current-password verification and password update form; student accounts are limited to this route in the current phase | implemented for Step 7 account hardening |
 | `src/app/dashboard/people/page.tsx` | people management route entry | authenticated request, `view=students` or `view=teachers`, query filters | focused active-student or teacher management screen | implemented |
 | `src/app/dashboard/archive/page.tsx` | archive-module entry redirect | authenticated request | forwards archive traffic to the student archive center | implemented |
 | `src/app/dashboard/archive/students/page.tsx` | alumni archive route entry | authenticated request, query filters | archived-student management screen | implemented |
@@ -388,6 +393,9 @@ Current implementation note:
 - A 2026-05-01 live recovery confirmed that data-heavy pages can fail with Prisma `P2022 ColumnNotFound` when the running app expects schema columns that have not yet been pushed to the live PostgreSQL database; the operational recovery is to run the Prisma schema sync against the local PostgreSQL database and then re-smoke the affected pages.
 - Operator-facing docs now separate the two common `This page couldn't load` recovery paths: stale Next.js static chunks require restarting the live site process, while Prisma schema drift requires syncing the live PostgreSQL schema and rechecking the data-heavy pages.
 - A 2026-05-11 recovery confirmed `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` can all fail together with server-side `500` when the live PostgreSQL schema lags behind the current Prisma schema after role or approval-model changes; the successful recovery was `npx.cmd prisma db push`, followed by authenticated route checks returning `200`.
+- A later 2026-05-11 synced-code recovery confirmed the same schema-drift class can break the broader data-heavy page set after pulling from GitHub, specifically `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/archive/students`, `/dashboard/approvals`, and `/dashboard/exports`; the live database was missing `User.teacherId`, and recovery required the approval-role migration plus `npx.cmd prisma db push --accept-data-loss`.
+- `npm.cmd run smoke:pages` now performs an authenticated admin HTTP smoke against those six data-heavy pages, including the extra browser-session cookie required by the live auth hardening, and fails if a page returns non-`200` or contains a Next.js server-error marker.
+- The approval pilot seed is now more self-repairing for transferred or partially seeded databases: it creates the standard bound teacher profile for `teacher.wangming` and the standard `校务办公室` department if they are missing before binding accounts and responsibilities.
 - The handoff docs now treat `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/approvals`, and the existing data-heavy pages as the minimum smoke surface after schema-affecting approval or role changes.
 - Operator-facing docs now also describe row-level correction and mistaken-entry deletion for people records, archived students, and routine inspection records, including the teacher deletion guard when inspection history already references that teacher.
 - The remaining rollout follow-ups are now operational rather than structural: keep the current detached-process story stable when needed, manually rebind the one legacy teacher-quantification record, decide when to use cohort rollover in practice, and only later upgrade to machine-wide pre-login auto-start if the school asks for it.
@@ -399,24 +407,25 @@ Current implementation note:
 3. `src/lib/auth.ts` validates input, normalizes the username, and first tries to load an active database `User`.
 4. If the database user exists and has a password hash, the submitted password is checked with `bcryptjs`.
 5. If the database is unavailable or no matching database user is found, the Bootstrap admin credentials from environment variables remain available as a fallback.
-6. On success, NextAuth creates a JWT-backed session with the user id, role, and optional `managedGradeId`.
+6. On success, NextAuth creates a JWT-backed session with the user id, account type, highest-administrator flag, compatibility role, optional `managedGradeId`, optional `teacherId`, and optional `studentId`.
 7. The login form also writes a separate browser-session cookie with no explicit expiry, so it disappears when the browser session ends.
 8. `getBrowserBoundServerSession()` now treats a session as valid only when both the NextAuth session and the browser-session cookie are present.
 9. `/dashboard` routes check that browser-bound session server-side before rendering the app shell.
 10. Domain routes add explicit server-side role checks before allowing sensitive actions.
-11. Grade-scoped roles derive their allowed grade from the session and enforce it again inside people, inspection, reporting, and approval server logic.
-12. Teacher accounts can carry a `teacherId` in the session so self-service approval requests can be tied back to the teacher profile.
+11. Student accounts are redirected to `/dashboard/account/password` in the current phase instead of entering business-management workflows.
+12. Grade-scoped roles derive their allowed grade from the session and enforce it again inside people, inspection, reporting, and approval server logic.
+13. Teacher accounts can carry a `teacherId` in the session so self-service approval requests can be tied back to the teacher profile.
 
 ### User Management Data Flow
 
 1. A system administrator opens `/dashboard/users`.
 2. The server checks `requireSystemAdmin()` before loading or mutating users.
 3. User form input is validated by `src/lib/validation/users.ts`.
-4. The role model supports `SYSTEM_ADMIN`, `SCHOOL_LEADER`, `DEPARTMENT_LEADER`, `GRADE_MANAGER`, `STUDENT_AFFAIRS_STAFF`, `ACADEMIC_AFFAIRS_STAFF`, `ADMIN_OFFICE_STAFF`, `LOGISTICS_STAFF`, and `TEACHER`.
-5. Grade managers must be bound to exactly one `Grade` through `User.managedGradeId`; non-grade-scoped roles clear that field.
+4. The visible account model supports teacher and student account types, while highest-administrator capability is stored on `User.isSuperAdmin`; the compatibility role model still supports `SYSTEM_ADMIN`, `SCHOOL_LEADER`, `DEPARTMENT_LEADER`, `GRADE_MANAGER`, `STUDENT_AFFAIRS_STAFF`, `ACADEMIC_AFFAIRS_STAFF`, `ADMIN_OFFICE_STAFF`, `LOGISTICS_STAFF`, and `TEACHER`.
+5. Teacher accounts can bind to `Teacher` through `User.teacherId`, student accounts can bind to active `Student` rows through `User.studentId`, and grade managers must be bound to exactly one `Grade` through `User.managedGradeId`.
 6. New or reset passwords are hashed with `bcryptjs` before being stored in `User.passwordHash`.
 7. User records are not hard-deleted; administrators can enable or disable accounts.
-8. The action layer prevents the current database admin from disabling itself and prevents removing the last active system administrator.
+8. The action layer prevents the current database admin from disabling itself and prevents removing the last active highest-administrator account.
 9. User creation, role updates, status changes, and password resets write `AuditLog` entries.
 
 ### Application Approval Data Flow
@@ -472,3 +481,10 @@ Current implementation note:
 - The dashboard shell now receives teacher identity types from the server so quick-entry and menu visibility can reflect teacher-side duties.
 - The approval submit flow now validates teacher-bound department scope before saving a school-administrative print request.
 - A standalone script assertion was added to keep the requested permission matrix executable outside the browser.
+
+## 2026-05-11 Account-Type And Department-Position Update
+
+- `AccountType` now limits login accounts to `TEACHER` and `STUDENT`; `isSuperAdmin` carries highest-administrator capability so administrator access is not a third account type.
+- `DepartmentPosition` is the configurable position layer under departments. Each position stores an old identity-type compatibility value plus permission tags, and teacher department assignments now bind to the position through `positionId`.
+- `src/modules/accounts/helpers.ts` centralizes identity-card-number username normalization, initial password generation, and import-time account creation.
+- `scripts/seed-department-positions.mjs` backfills default positions for existing departments after schema sync, and `npm.cmd run smoke:positions` keeps the position-derived permission matrix executable.

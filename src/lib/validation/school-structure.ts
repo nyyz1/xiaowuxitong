@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TeacherDepartmentIdentityType } from "@/generated/prisma/enums";
 
 const idSchema = z
   .string()
@@ -76,4 +77,23 @@ export const dictionaryCreateSchema = z.object({
 export const dictionaryUpdateSchema = z.object({
   id: idSchema,
   name: displayNameSchema,
+});
+
+export const departmentPositionCreateSchema = z.object({
+  departmentId: idSchema,
+  name: displayNameSchema,
+  identityType: z.enum([
+    TeacherDepartmentIdentityType.FRONTLINE_TEACHER,
+    TeacherDepartmentIdentityType.DEPARTMENT_LEADER,
+    TeacherDepartmentIdentityType.GRADE_MANAGER,
+    TeacherDepartmentIdentityType.STUDENT_AFFAIRS_STAFF,
+    TeacherDepartmentIdentityType.ACADEMIC_AFFAIRS_STAFF,
+    TeacherDepartmentIdentityType.LOGISTICS_STAFF,
+    TeacherDepartmentIdentityType.GRADE_SUBJECT_LEADER,
+  ]),
+});
+
+export const departmentPositionUpdateSchema = departmentPositionCreateSchema.extend({
+  id: idSchema,
+  isActive: z.boolean(),
 });

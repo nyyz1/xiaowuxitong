@@ -28,6 +28,10 @@ type TeacherDepartmentAssignmentLike = {
   departmentId: string;
   identityType?: TeacherDepartmentIdentityType | null;
   department?: DepartmentLike | null;
+  position?: {
+    name: string;
+    identityType?: TeacherDepartmentIdentityType | null;
+  } | null;
 };
 
 type TeacherDepartmentLike = {
@@ -294,6 +298,12 @@ export function getTeacherDepartmentDisplayItems(teacher: TeacherDepartmentLike)
       }
 
       const identityType = assignment.identityType ?? "FRONTLINE_TEACHER";
+      const positionName = assignment.position?.name?.trim();
+
+      if (positionName) {
+        return `${departmentName} / ${positionName}`;
+      }
+
       return `${departmentName} / ${teacherDepartmentIdentityLabels[identityType]}`;
     })
     .filter(Boolean);

@@ -48,11 +48,17 @@ import {
   getTeacherStatusLabel,
 } from "@/modules/people/status-options";
 import { getSystemProfileFieldByName } from "@/modules/people/system-profile-fields";
+import {
+  ensureStudentLoginAccount,
+  ensureTeacherLoginAccount,
+} from "@/modules/accounts/helpers";
+import { findPositionForDepartmentIdentity } from "@/modules/school-structure/department-positions";
 
 type NoticeTone = "success" | "error";
 type ImportStats = {
   created: number;
   updated: number;
+  accountsCreated: number;
   skipped: number;
   errors: string[];
 };
@@ -203,7 +209,7 @@ function normalizeStudentStatus(value: string) {
 }
 
 function buildImportMessage(target: string, stats: ImportStats) {
-  const base = `${target}导入完成：新增 ${stats.created}，更新 ${stats.updated}，跳过 ${stats.skipped}。`;
+  const base = `${target}导入完成：新增 ${stats.created}，更新 ${stats.updated}，新建账号 ${stats.accountsCreated}，跳过 ${stats.skipped}。`;
 
   if (stats.errors.length === 0) {
     return base;
@@ -212,50 +218,78 @@ function buildImportMessage(target: string, stats: ImportStats) {
   return `${base} 问题示例：${stats.errors.slice(0, 3).join("；")}`;
 }
 
-function buildTeacherDepartmentCreateData(
+async function buildTeacherDepartmentAssignments(
   departmentIds: string[],
   departmentIdentities: TeacherDepartmentIdentityMap = {},
 ) {
+  const assignments = [];
+
+  for (const departmentId of departmentIds) {
+    const identityType =
+      departmentIdentities[departmentId] ?? normalizeTeacherDepartmentIdentity("");
+    const position = await findPositionForDepartmentIdentity(prisma, {
+      departmentId,
+      identityType,
+    });
+
+    assignments.push({
+      identityType: position?.identityType ?? identityType,
+      ...(position
+        ? {
+            position: {
+              connect: {
+                id: position.id,
+              },
+            },
+          }
+        : {}),
+      department: {
+        connect: {
+          id: departmentId,
+        },
+      },
+    });
+  }
+
+  return assignments;
+}
+
+async function buildTeacherDepartmentCreateData(
+  departmentIds: string[],
+  departmentIdentities: TeacherDepartmentIdentityMap = {},
+) {
+  const assignments = await buildTeacherDepartmentAssignments(
+    departmentIds,
+    departmentIdentities,
+  );
+
   return {
     departmentId: departmentIds[0] ?? null,
     departmentAssignments:
       departmentIds.length > 0
         ? {
-            create: departmentIds.map((departmentId) => ({
-              identityType:
-                departmentIdentities[departmentId] ??
-                normalizeTeacherDepartmentIdentity(""),
-              department: {
-                connect: {
-                  id: departmentId,
-                },
-              },
-            })),
+            create: assignments,
           }
         : undefined,
   };
 }
 
-function buildTeacherDepartmentUpdateData(
+async function buildTeacherDepartmentUpdateData(
   departmentIds: string[],
   departmentIdentities: TeacherDepartmentIdentityMap = {},
 ) {
+  const assignments = await buildTeacherDepartmentAssignments(
+    departmentIds,
+    departmentIdentities,
+  );
+
   return {
     departmentId: departmentIds[0] ?? null,
     departmentAssignments: {
       deleteMany: {},
       ...(departmentIds.length > 0
         ? {
-            create: departmentIds.map((departmentId) => ({
-              identityType:
-                departmentIdentities[departmentId] ??
-                normalizeTeacherDepartmentIdentity(""),
-              department: {
-                connect: {
-                  id: departmentId,
-                },
-              },
-            })),
+            create: assignments,
           }
         : {}),
     },
@@ -864,10 +898,10 @@ export async function createTeacher(formData: FormData) {
         remarks:
           getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ||
           null,
-        ...buildTeacherDepartmentCreateData(
+        ...(await buildTeacherDepartmentCreateData(
           parsed.data.departmentIds,
           parsed.data.departmentIdentities,
-        ),
+        )),
       },
     });
   } catch (error) {
@@ -970,10 +1004,10 @@ export async function updateTeacher(formData: FormData) {
         remarks:
           getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ??
           existingTeacher.remarks,
-        ...buildTeacherDepartmentUpdateData(
+        ...(await buildTeacherDepartmentUpdateData(
           parsed.data.departmentIds,
           parsed.data.departmentIdentities,
-        ),
+        )),
       },
     });
   } catch (error) {
@@ -1392,6 +1426,7 @@ export async function importTeachers(formData: FormData) {
     const stats: ImportStats = {
       created: 0,
       updated: 0,
+      accountsCreated: 0,
       skipped: 0,
       errors: [],
     };
@@ -1511,16 +1546,22 @@ export async function importTeachers(formData: FormData) {
                   profileValues,
                   "remarks",
                 ) ?? existing.remarks,
-              ...buildTeacherDepartmentUpdateData(
+              ...(await buildTeacherDepartmentUpdateData(
                 parsed.data.departmentIds,
                 parsed.data.departmentIdentities,
-              ),
+              )),
             },
           });
           stats.updated += 1;
         } else {
-          await prisma.teacher.create({
-            data: {
+          const teacherDepartmentData = await buildTeacherDepartmentCreateData(
+            parsed.data.departmentIds,
+            parsed.data.departmentIdentities,
+          );
+
+          const accountResult = await prisma.$transaction(async (tx) => {
+            const teacher = await tx.teacher.create({
+              data: {
               idCardNumber: parsed.data.idCardNumber,
               employeeNumber: employeeNumber || parsed.data.idCardNumber,
               name: parsed.data.name,
@@ -1546,15 +1587,25 @@ export async function importTeachers(formData: FormData) {
                 getTouchedSystemProfileValue(
                   teacherProfileFields,
                   profileValues,
-                  "remarks",
+                "remarks",
                 ) || null,
-              ...buildTeacherDepartmentCreateData(
-                parsed.data.departmentIds,
-                parsed.data.departmentIdentities,
-              ),
-            },
+                ...teacherDepartmentData,
+              },
+              select: {
+                id: true,
+              },
+            });
+
+            return ensureTeacherLoginAccount(tx, {
+              idCardNumber: parsed.data.idCardNumber,
+              teacherId: teacher.id,
+              displayName: parsed.data.name,
+            });
           });
           stats.created += 1;
+          if (accountResult.created) {
+            stats.accountsCreated += 1;
+          }
         }
       } catch (error) {
         stats.skipped += 1;
@@ -1596,6 +1647,7 @@ export async function importStudents(formData: FormData) {
     const stats: ImportStats = {
       created: 0,
       updated: 0,
+      accountsCreated: 0,
       skipped: 0,
       errors: [],
     };
@@ -1706,46 +1758,67 @@ export async function importStudents(formData: FormData) {
           });
           stats.updated += 1;
         } else {
-          await prisma.student.create({
-            data: {
+          const accountResult = await prisma.$transaction(async (tx) => {
+            const student = await tx.student.create({
+              data: {
+                idCardNumber: parsed.data.idCardNumber,
+                studentNumber: studentNumber || parsed.data.idCardNumber,
+                name: parsed.data.name,
+                gender:
+                  getTouchedSystemProfileValue(
+                    studentProfileFields,
+                    profileValues,
+                    "gender",
+                  ) || null,
+                gradeId,
+                classId,
+                enrollmentStatus: parsed.data.enrollmentStatus,
+                isArchived: studentViewMode === "archived",
+                archivedAt: studentViewMode === "archived" ? new Date() : null,
+                profileData: profileDataToJsonInput(
+                  mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
+                ),
+                phone:
+                  getTouchedSystemProfileValue(
+                    studentProfileFields,
+                    profileValues,
+                    "phone",
+                  ) || null,
+                guardianContact:
+                  getTouchedSystemProfileValue(
+                    studentProfileFields,
+                    profileValues,
+                    "guardianContact",
+                  ) || null,
+                remarks:
+                  getTouchedSystemProfileValue(
+                    studentProfileFields,
+                    profileValues,
+                    "remarks",
+                  ) || null,
+              },
+              select: {
+                id: true,
+              },
+            });
+
+            if (studentViewMode === "archived") {
+              return {
+                created: false,
+                userId: "",
+              };
+            }
+
+            return ensureStudentLoginAccount(tx, {
               idCardNumber: parsed.data.idCardNumber,
-              studentNumber: studentNumber || parsed.data.idCardNumber,
-              name: parsed.data.name,
-              gender:
-                getTouchedSystemProfileValue(
-                  studentProfileFields,
-                  profileValues,
-                  "gender",
-                ) || null,
-              gradeId,
-              classId,
-              enrollmentStatus: parsed.data.enrollmentStatus,
-              isArchived: studentViewMode === "archived",
-              archivedAt: studentViewMode === "archived" ? new Date() : null,
-              profileData: profileDataToJsonInput(
-                mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
-              ),
-              phone:
-                getTouchedSystemProfileValue(
-                  studentProfileFields,
-                  profileValues,
-                  "phone",
-                ) || null,
-              guardianContact:
-                getTouchedSystemProfileValue(
-                  studentProfileFields,
-                  profileValues,
-                  "guardianContact",
-                ) || null,
-              remarks:
-                getTouchedSystemProfileValue(
-                  studentProfileFields,
-                  profileValues,
-                  "remarks",
-                ) || null,
-            },
+              studentId: student.id,
+              displayName: parsed.data.name,
+            });
           });
           stats.created += 1;
+          if (accountResult.created) {
+            stats.accountsCreated += 1;
+          }
         }
       } catch (error) {
         stats.skipped += 1;

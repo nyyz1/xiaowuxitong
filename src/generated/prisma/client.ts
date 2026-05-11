@@ -67,6 +67,11 @@ export type Class = Prisma.ClassModel
  */
 export type Department = Prisma.DepartmentModel
 /**
+ * Model DepartmentPosition
+ * 
+ */
+export type DepartmentPosition = Prisma.DepartmentPositionModel
+/**
  * Model Subject
  * 
  */

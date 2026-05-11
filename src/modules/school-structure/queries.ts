@@ -25,6 +25,16 @@ export async function getSchoolStructureSnapshot() {
     prisma.department.findMany({
       orderBy: [{ name: "asc" }],
       include: {
+        positions: {
+          orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+          include: {
+            _count: {
+              select: {
+                teacherAssignments: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             teachers: true,

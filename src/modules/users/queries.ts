@@ -11,6 +11,7 @@ export async function getUserManagementData() {
     activeAdmins,
     gradeOptions,
     teacherOptions,
+    studentOptions,
   ] =
     await Promise.all([
       prisma.user.findMany({
@@ -24,6 +25,8 @@ export async function getUserManagementData() {
           id: true,
           username: true,
           displayName: true,
+          accountType: true,
+          isSuperAdmin: true,
           role: true,
           managedGradeId: true,
           managedGrade: {
@@ -34,6 +37,23 @@ export async function getUserManagementData() {
             },
           },
           teacherId: true,
+          studentId: true,
+          student: {
+            select: {
+              id: true,
+              name: true,
+              grade: {
+                select: {
+                  name: true,
+                },
+              },
+              class: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
           teacher: {
             select: {
               id: true,
@@ -46,6 +66,12 @@ export async function getUserManagementData() {
               departmentAssignments: {
                 select: {
                   identityType: true,
+                  position: {
+                    select: {
+                      name: true,
+                      identityType: true,
+                    },
+                  },
                   department: {
                     select: {
                       name: true,
@@ -69,7 +95,7 @@ export async function getUserManagementData() {
       }),
       prisma.user.count({
         where: {
-          role: UserRole.SYSTEM_ADMIN,
+          OR: [{ role: UserRole.SYSTEM_ADMIN }, { isSuperAdmin: true }],
           isActive: true,
         },
       }),
@@ -91,6 +117,27 @@ export async function getUserManagementData() {
           },
         },
       }),
+      prisma.student.findMany({
+        where: {
+          isArchived: false,
+        },
+        orderBy: [{ grade: { enrollmentYear: "asc" } }, { class: { name: "asc" } }, { name: "asc" }],
+        take: 2000,
+        select: {
+          id: true,
+          name: true,
+          grade: {
+            select: {
+              name: true,
+            },
+          },
+          class: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
     ]);
 
   return {
@@ -100,5 +147,6 @@ export async function getUserManagementData() {
     activeAdmins,
     gradeOptions,
     teacherOptions,
+    studentOptions,
   };
 }

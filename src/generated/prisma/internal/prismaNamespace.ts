@@ -389,6 +389,7 @@ export const ModelName = {
   Grade: 'Grade',
   Class: 'Class',
   Department: 'Department',
+  DepartmentPosition: 'DepartmentPosition',
   Subject: 'Subject',
   Teacher: 'Teacher',
   Student: 'Student',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "academicYear" | "grade" | "class" | "department" | "subject" | "teacher" | "student" | "teacherDepartmentAssignment" | "profileFieldDefinition" | "inspectionCategory" | "inspectionItem" | "inspectionRecord" | "approvalType" | "approvalResponsibility" | "approvalRequest" | "approvalLog" | "auditLog"
+    modelProps: "user" | "academicYear" | "grade" | "class" | "department" | "departmentPosition" | "subject" | "teacher" | "student" | "teacherDepartmentAssignment" | "profileFieldDefinition" | "inspectionCategory" | "inspectionItem" | "inspectionRecord" | "approvalType" | "approvalResponsibility" | "approvalRequest" | "approvalLog" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -788,6 +789,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DepartmentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DepartmentCountAggregateOutputType> | number
+        }
+      }
+    }
+    DepartmentPosition: {
+      payload: Prisma.$DepartmentPositionPayload<ExtArgs>
+      fields: Prisma.DepartmentPositionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DepartmentPositionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DepartmentPositionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        findFirst: {
+          args: Prisma.DepartmentPositionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DepartmentPositionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        findMany: {
+          args: Prisma.DepartmentPositionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>[]
+        }
+        create: {
+          args: Prisma.DepartmentPositionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        createMany: {
+          args: Prisma.DepartmentPositionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DepartmentPositionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>[]
+        }
+        delete: {
+          args: Prisma.DepartmentPositionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        update: {
+          args: Prisma.DepartmentPositionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        deleteMany: {
+          args: Prisma.DepartmentPositionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DepartmentPositionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DepartmentPositionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>[]
+        }
+        upsert: {
+          args: Prisma.DepartmentPositionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DepartmentPositionPayload>
+        }
+        aggregate: {
+          args: Prisma.DepartmentPositionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDepartmentPosition>
+        }
+        groupBy: {
+          args: Prisma.DepartmentPositionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DepartmentPositionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DepartmentPositionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DepartmentPositionCountAggregateOutputType> | number
         }
       }
     }
@@ -1797,9 +1872,12 @@ export const UserScalarFieldEnum = {
   username: 'username',
   displayName: 'displayName',
   passwordHash: 'passwordHash',
+  accountType: 'accountType',
+  isSuperAdmin: 'isSuperAdmin',
   role: 'role',
   managedGradeId: 'managedGradeId',
   teacherId: 'teacherId',
+  studentId: 'studentId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1857,6 +1935,21 @@ export const DepartmentScalarFieldEnum = {
 export type DepartmentScalarFieldEnum = (typeof DepartmentScalarFieldEnum)[keyof typeof DepartmentScalarFieldEnum]
 
 
+export const DepartmentPositionScalarFieldEnum = {
+  id: 'id',
+  departmentId: 'departmentId',
+  name: 'name',
+  identityType: 'identityType',
+  permissionTags: 'permissionTags',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DepartmentPositionScalarFieldEnum = (typeof DepartmentPositionScalarFieldEnum)[keyof typeof DepartmentPositionScalarFieldEnum]
+
+
 export const SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1912,6 +2005,7 @@ export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeo
 export const TeacherDepartmentAssignmentScalarFieldEnum = {
   teacherId: 'teacherId',
   departmentId: 'departmentId',
+  positionId: 'positionId',
   identityType: 'identityType',
   createdAt: 'createdAt'
 } as const
@@ -2129,6 +2223,27 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'AccountType'
+ */
+export type EnumAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountType'>
+    
+
+
+/**
+ * Reference to a field of type 'AccountType[]'
+ */
+export type ListEnumAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'UserRole'
  */
 export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
@@ -2139,13 +2254,6 @@ export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'UserRole[]'
  */
 export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2192,20 +2300,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
  * Reference to a field of type 'TeacherDepartmentIdentityType'
  */
 export type EnumTeacherDepartmentIdentityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeacherDepartmentIdentityType'>
@@ -2216,6 +2310,20 @@ export type EnumTeacherDepartmentIdentityTypeFieldRefInput<$PrismaModel> = Field
  * Reference to a field of type 'TeacherDepartmentIdentityType[]'
  */
 export type ListEnumTeacherDepartmentIdentityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TeacherDepartmentIdentityType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -2473,6 +2581,7 @@ export type GlobalOmitConfig = {
   grade?: Prisma.GradeOmit
   class?: Prisma.ClassOmit
   department?: Prisma.DepartmentOmit
+  departmentPosition?: Prisma.DepartmentPositionOmit
   subject?: Prisma.SubjectOmit
   teacher?: Prisma.TeacherOmit
   student?: Prisma.StudentOmit

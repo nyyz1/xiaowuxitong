@@ -2,7 +2,11 @@ import "server-only";
 
 import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
-import { TeacherDepartmentIdentityType, UserRole } from "@/generated/prisma/enums";
+import {
+  AccountType,
+  TeacherDepartmentIdentityType,
+  UserRole,
+} from "@/generated/prisma/enums";
 import { getBrowserBoundServerSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -10,8 +14,11 @@ export type AuthorizedSession = Session & {
   user: NonNullable<Session["user"]> & {
     id: string;
     role: UserRole;
+    accountType?: AccountType;
+    isSuperAdmin?: boolean;
     managedGradeId?: string | null;
     teacherId?: string | null;
+    studentId?: string | null;
   };
 };
 
@@ -273,15 +280,24 @@ export async function getTeacherPositionContext(
     select: {
       departmentId: true,
       identityType: true,
+      position: {
+        select: {
+          identityType: true,
+        },
+      },
     },
   });
+  const identityTypes = assignments.map(
+    (assignment) => assignment.position?.identityType ?? assignment.identityType,
+  );
 
   return {
-    identityTypes: new Set(assignments.map((assignment) => assignment.identityType)),
+    identityTypes: new Set(identityTypes),
     departmentLeaderDepartmentIds: assignments
       .filter(
         (assignment) =>
-          assignment.identityType === TeacherDepartmentIdentityType.DEPARTMENT_LEADER,
+          (assignment.position?.identityType ?? assignment.identityType) ===
+          TeacherDepartmentIdentityType.DEPARTMENT_LEADER,
       )
       .map((assignment) => assignment.departmentId),
     assignedDepartmentIds: assignments.map((assignment) => assignment.departmentId),
@@ -308,7 +324,17 @@ export async function requireRoles(allowedRoles: readonly UserRole[]) {
   const session = await requireAuthenticatedSession();
   const currentRole = session.user.role ?? UserRole.SYSTEM_ADMIN;
 
-  if (!(allowedRoles as readonly UserRole[]).includes(currentRole)) {
+  if (
+    session.user.accountType === AccountType.STUDENT &&
+    !allowedRoles.includes(UserRole.TEACHER)
+  ) {
+    redirect("/dashboard/account/password");
+  }
+
+  if (
+    !session.user.isSuperAdmin &&
+    !(allowedRoles as readonly UserRole[]).includes(currentRole)
+  ) {
     redirect("/dashboard?forbidden=1");
   }
 
@@ -464,7 +490,13 @@ export async function requireReportViewer() {
 }
 
 export async function requireApprovalAccess() {
-  return requireRoles(approvalAccessRoles);
+  const session = await requireRoles(approvalAccessRoles);
+
+  if (session.user.accountType === AccountType.STUDENT) {
+    redirect("/dashboard/account/password");
+  }
+
+  return session;
 }
 
 export async function requireApprovalConfigurator() {

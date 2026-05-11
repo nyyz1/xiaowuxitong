@@ -29,9 +29,12 @@ export type UserMinAggregateOutputType = {
   username: string | null
   displayName: string | null
   passwordHash: string | null
+  accountType: $Enums.AccountType | null
+  isSuperAdmin: boolean | null
   role: $Enums.UserRole | null
   managedGradeId: string | null
   teacherId: string | null
+  studentId: string | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -42,9 +45,12 @@ export type UserMaxAggregateOutputType = {
   username: string | null
   displayName: string | null
   passwordHash: string | null
+  accountType: $Enums.AccountType | null
+  isSuperAdmin: boolean | null
   role: $Enums.UserRole | null
   managedGradeId: string | null
   teacherId: string | null
+  studentId: string | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -55,9 +61,12 @@ export type UserCountAggregateOutputType = {
   username: number
   displayName: number
   passwordHash: number
+  accountType: number
+  isSuperAdmin: number
   role: number
   managedGradeId: number
   teacherId: number
+  studentId: number
   isActive: number
   createdAt: number
   updatedAt: number
@@ -70,9 +79,12 @@ export type UserMinAggregateInputType = {
   username?: true
   displayName?: true
   passwordHash?: true
+  accountType?: true
+  isSuperAdmin?: true
   role?: true
   managedGradeId?: true
   teacherId?: true
+  studentId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -83,9 +95,12 @@ export type UserMaxAggregateInputType = {
   username?: true
   displayName?: true
   passwordHash?: true
+  accountType?: true
+  isSuperAdmin?: true
   role?: true
   managedGradeId?: true
   teacherId?: true
+  studentId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -96,9 +111,12 @@ export type UserCountAggregateInputType = {
   username?: true
   displayName?: true
   passwordHash?: true
+  accountType?: true
+  isSuperAdmin?: true
   role?: true
   managedGradeId?: true
   teacherId?: true
+  studentId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -182,9 +200,12 @@ export type UserGroupByOutputType = {
   username: string
   displayName: string
   passwordHash: string | null
+  accountType: $Enums.AccountType
+  isSuperAdmin: boolean
   role: $Enums.UserRole
   managedGradeId: string | null
   teacherId: string | null
+  studentId: string | null
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -216,14 +237,18 @@ export type UserWhereInput = {
   username?: Prisma.StringFilter<"User"> | string
   displayName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
+  accountType?: Prisma.EnumAccountTypeFilter<"User"> | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   managedGradeId?: Prisma.StringNullableFilter<"User"> | string | null
   teacherId?: Prisma.StringNullableFilter<"User"> | string | null
+  studentId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   managedGrade?: Prisma.XOR<Prisma.GradeNullableScalarRelationFilter, Prisma.GradeWhereInput> | null
   teacher?: Prisma.XOR<Prisma.TeacherNullableScalarRelationFilter, Prisma.TeacherWhereInput> | null
+  student?: Prisma.XOR<Prisma.StudentNullableScalarRelationFilter, Prisma.StudentWhereInput> | null
   auditLogs?: Prisma.AuditLogListRelationFilter
   inspections?: Prisma.InspectionRecordListRelationFilter
   approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
@@ -237,14 +262,18 @@ export type UserOrderByWithRelationInput = {
   username?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  accountType?: Prisma.SortOrder
+  isSuperAdmin?: Prisma.SortOrder
   role?: Prisma.SortOrder
   managedGradeId?: Prisma.SortOrderInput | Prisma.SortOrder
   teacherId?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managedGrade?: Prisma.GradeOrderByWithRelationInput
   teacher?: Prisma.TeacherOrderByWithRelationInput
+  student?: Prisma.StudentOrderByWithRelationInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   inspections?: Prisma.InspectionRecordOrderByRelationAggregateInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityOrderByRelationAggregateInput
@@ -257,11 +286,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   username?: string
   teacherId?: string
+  studentId?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   displayName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
+  accountType?: Prisma.EnumAccountTypeFilter<"User"> | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   managedGradeId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
@@ -269,22 +301,26 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   managedGrade?: Prisma.XOR<Prisma.GradeNullableScalarRelationFilter, Prisma.GradeWhereInput> | null
   teacher?: Prisma.XOR<Prisma.TeacherNullableScalarRelationFilter, Prisma.TeacherWhereInput> | null
+  student?: Prisma.XOR<Prisma.StudentNullableScalarRelationFilter, Prisma.StudentWhereInput> | null
   auditLogs?: Prisma.AuditLogListRelationFilter
   inspections?: Prisma.InspectionRecordListRelationFilter
   approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
   submittedApprovalRequests?: Prisma.ApprovalRequestListRelationFilter
   decidedApprovalRequests?: Prisma.ApprovalRequestListRelationFilter
   approvalLogs?: Prisma.ApprovalLogListRelationFilter
-}, "id" | "username" | "teacherId">
+}, "id" | "username" | "teacherId" | "studentId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  accountType?: Prisma.SortOrder
+  isSuperAdmin?: Prisma.SortOrder
   role?: Prisma.SortOrder
   managedGradeId?: Prisma.SortOrderInput | Prisma.SortOrder
   teacherId?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -301,9 +337,12 @@ export type UserScalarWhereWithAggregatesInput = {
   username?: Prisma.StringWithAggregatesFilter<"User"> | string
   displayName?: Prisma.StringWithAggregatesFilter<"User"> | string
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  accountType?: Prisma.EnumAccountTypeWithAggregatesFilter<"User"> | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   managedGradeId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   teacherId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  studentId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -314,12 +353,15 @@ export type UserCreateInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -333,9 +375,12 @@ export type UserUncheckedCreateInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -352,12 +397,15 @@ export type UserUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -371,9 +419,12 @@ export type UserUncheckedUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,9 +441,12 @@ export type UserCreateManyInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -403,6 +457,8 @@ export type UserUpdateManyMutationInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -414,9 +470,12 @@ export type UserUncheckedUpdateManyInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,9 +486,12 @@ export type UserCountOrderByAggregateInput = {
   username?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  accountType?: Prisma.SortOrder
+  isSuperAdmin?: Prisma.SortOrder
   role?: Prisma.SortOrder
   managedGradeId?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -440,9 +502,12 @@ export type UserMaxOrderByAggregateInput = {
   username?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  accountType?: Prisma.SortOrder
+  isSuperAdmin?: Prisma.SortOrder
   role?: Prisma.SortOrder
   managedGradeId?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -453,9 +518,12 @@ export type UserMinOrderByAggregateInput = {
   username?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  accountType?: Prisma.SortOrder
+  isSuperAdmin?: Prisma.SortOrder
   role?: Prisma.SortOrder
   managedGradeId?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
+  studentId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -489,12 +557,16 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
-export type EnumUserRoleFieldUpdateOperationsInput = {
-  set?: $Enums.UserRole
+export type EnumAccountTypeFieldUpdateOperationsInput = {
+  set?: $Enums.AccountType
 }
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type EnumUserRoleFieldUpdateOperationsInput = {
+  set?: $Enums.UserRole
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -582,6 +654,48 @@ export type UserUncheckedUpdateManyWithoutTeacherNestedInput = {
   connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
   update?: Prisma.UserUpdateWithWhereUniqueWithoutTeacherInput | Prisma.UserUpdateWithWhereUniqueWithoutTeacherInput[]
   updateMany?: Prisma.UserUpdateManyWithWhereWithoutTeacherInput | Prisma.UserUpdateManyWithWhereWithoutTeacherInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserCreateNestedManyWithoutStudentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput> | Prisma.UserCreateWithoutStudentInput[] | Prisma.UserUncheckedCreateWithoutStudentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentInput | Prisma.UserCreateOrConnectWithoutStudentInput[]
+  createMany?: Prisma.UserCreateManyStudentInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutStudentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput> | Prisma.UserCreateWithoutStudentInput[] | Prisma.UserUncheckedCreateWithoutStudentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentInput | Prisma.UserCreateOrConnectWithoutStudentInput[]
+  createMany?: Prisma.UserCreateManyStudentInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutStudentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput> | Prisma.UserCreateWithoutStudentInput[] | Prisma.UserUncheckedCreateWithoutStudentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentInput | Prisma.UserCreateOrConnectWithoutStudentInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutStudentInput | Prisma.UserUpsertWithWhereUniqueWithoutStudentInput[]
+  createMany?: Prisma.UserCreateManyStudentInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutStudentInput | Prisma.UserUpdateWithWhereUniqueWithoutStudentInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutStudentInput | Prisma.UserUpdateManyWithWhereWithoutStudentInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutStudentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput> | Prisma.UserCreateWithoutStudentInput[] | Prisma.UserUncheckedCreateWithoutStudentInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentInput | Prisma.UserCreateOrConnectWithoutStudentInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutStudentInput | Prisma.UserUpsertWithWhereUniqueWithoutStudentInput[]
+  createMany?: Prisma.UserCreateManyStudentInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutStudentInput | Prisma.UserUpdateWithWhereUniqueWithoutStudentInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutStudentInput | Prisma.UserUpdateManyWithWhereWithoutStudentInput[]
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
@@ -682,11 +796,14 @@ export type UserCreateWithoutManagedGradeInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -700,8 +817,11 @@ export type UserUncheckedCreateWithoutManagedGradeInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -747,9 +867,12 @@ export type UserScalarWhereInput = {
   username?: Prisma.StringFilter<"User"> | string
   displayName?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
+  accountType?: Prisma.EnumAccountTypeFilter<"User"> | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   managedGradeId?: Prisma.StringNullableFilter<"User"> | string | null
   teacherId?: Prisma.StringNullableFilter<"User"> | string | null
+  studentId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -760,11 +883,14 @@ export type UserCreateWithoutTeacherInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -778,8 +904,11 @@ export type UserUncheckedCreateWithoutTeacherInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -817,17 +946,88 @@ export type UserUpdateManyWithWhereWithoutTeacherInput = {
   data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutTeacherInput>
 }
 
-export type UserCreateWithoutInspectionsInput = {
+export type UserCreateWithoutStudentInput = {
   id?: string
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
+  submittedApprovalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutApplicantUserInput
+  decidedApprovalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutDecidedByInput
+  approvalLogs?: Prisma.ApprovalLogCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutStudentInput = {
+  id?: string
+  username: string
+  displayName: string
+  passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
+  role?: $Enums.UserRole
+  managedGradeId?: string | null
+  teacherId?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutRecordedByInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutApproverInput
+  submittedApprovalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutApplicantUserInput
+  decidedApprovalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutDecidedByInput
+  approvalLogs?: Prisma.ApprovalLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutStudentInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput>
+}
+
+export type UserCreateManyStudentInputEnvelope = {
+  data: Prisma.UserCreateManyStudentInput | Prisma.UserCreateManyStudentInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithWhereUniqueWithoutStudentInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStudentInput, Prisma.UserUncheckedUpdateWithoutStudentInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudentInput, Prisma.UserUncheckedCreateWithoutStudentInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutStudentInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStudentInput, Prisma.UserUncheckedUpdateWithoutStudentInput>
+}
+
+export type UserUpdateManyWithWhereWithoutStudentInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutStudentInput>
+}
+
+export type UserCreateWithoutInspectionsInput = {
+  id?: string
+  username: string
+  displayName: string
+  passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
+  role?: $Enums.UserRole
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
+  teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
   submittedApprovalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutApplicantUserInput
@@ -840,9 +1040,12 @@ export type UserUncheckedCreateWithoutInspectionsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -874,12 +1077,15 @@ export type UserUpdateWithoutInspectionsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
   submittedApprovalRequests?: Prisma.ApprovalRequestUpdateManyWithoutApplicantUserNestedInput
@@ -892,9 +1098,12 @@ export type UserUncheckedUpdateWithoutInspectionsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -910,12 +1119,15 @@ export type UserCreateWithoutApprovalResponsibilitiesInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   submittedApprovalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutApplicantUserInput
@@ -928,9 +1140,12 @@ export type UserUncheckedCreateWithoutApprovalResponsibilitiesInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -962,12 +1177,15 @@ export type UserUpdateWithoutApprovalResponsibilitiesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   submittedApprovalRequests?: Prisma.ApprovalRequestUpdateManyWithoutApplicantUserNestedInput
@@ -980,9 +1198,12 @@ export type UserUncheckedUpdateWithoutApprovalResponsibilitiesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -998,12 +1219,15 @@ export type UserCreateWithoutSubmittedApprovalRequestsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -1016,9 +1240,12 @@ export type UserUncheckedCreateWithoutSubmittedApprovalRequestsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1039,12 +1266,15 @@ export type UserCreateWithoutDecidedApprovalRequestsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -1057,9 +1287,12 @@ export type UserUncheckedCreateWithoutDecidedApprovalRequestsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1091,12 +1324,15 @@ export type UserUpdateWithoutSubmittedApprovalRequestsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -1109,9 +1345,12 @@ export type UserUncheckedUpdateWithoutSubmittedApprovalRequestsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1138,12 +1377,15 @@ export type UserUpdateWithoutDecidedApprovalRequestsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -1156,9 +1398,12 @@ export type UserUncheckedUpdateWithoutDecidedApprovalRequestsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1174,12 +1419,15 @@ export type UserCreateWithoutApprovalLogsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
@@ -1192,9 +1440,12 @@ export type UserUncheckedCreateWithoutApprovalLogsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1226,12 +1477,15 @@ export type UserUpdateWithoutApprovalLogsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -1244,9 +1498,12 @@ export type UserUncheckedUpdateWithoutApprovalLogsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1262,12 +1519,15 @@ export type UserCreateWithoutAuditLogsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   managedGrade?: Prisma.GradeCreateNestedOneWithoutManagedUsersInput
   teacher?: Prisma.TeacherCreateNestedOneWithoutLoginUsersInput
+  student?: Prisma.StudentCreateNestedOneWithoutLoginUsersInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutRecordedByInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutApproverInput
   submittedApprovalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutApplicantUserInput
@@ -1280,9 +1540,12 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1314,12 +1577,15 @@ export type UserUpdateWithoutAuditLogsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
   submittedApprovalRequests?: Prisma.ApprovalRequestUpdateManyWithoutApplicantUserNestedInput
@@ -1332,9 +1598,12 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1350,8 +1619,11 @@ export type UserCreateManyManagedGradeInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   teacherId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1362,11 +1634,14 @@ export type UserUpdateWithoutManagedGradeInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -1380,8 +1655,11 @@ export type UserUncheckedUpdateWithoutManagedGradeInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1398,8 +1676,11 @@ export type UserUncheckedUpdateManyWithoutManagedGradeInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1410,8 +1691,11 @@ export type UserCreateManyTeacherInput = {
   username: string
   displayName: string
   passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
   role?: $Enums.UserRole
   managedGradeId?: string | null
+  studentId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1422,11 +1706,14 @@ export type UserUpdateWithoutTeacherInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
+  student?: Prisma.StudentUpdateOneWithoutLoginUsersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
   approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
@@ -1440,8 +1727,11 @@ export type UserUncheckedUpdateWithoutTeacherInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1458,8 +1748,83 @@ export type UserUncheckedUpdateManyWithoutTeacherInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserCreateManyStudentInput = {
+  id?: string
+  username: string
+  displayName: string
+  passwordHash?: string | null
+  accountType?: $Enums.AccountType
+  isSuperAdmin?: boolean
+  role?: $Enums.UserRole
+  managedGradeId?: string | null
+  teacherId?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutStudentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  managedGrade?: Prisma.GradeUpdateOneWithoutManagedUsersNestedInput
+  teacher?: Prisma.TeacherUpdateOneWithoutLoginUsersNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  inspections?: Prisma.InspectionRecordUpdateManyWithoutRecordedByNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutApproverNestedInput
+  submittedApprovalRequests?: Prisma.ApprovalRequestUpdateManyWithoutApplicantUserNestedInput
+  decidedApprovalRequests?: Prisma.ApprovalRequestUpdateManyWithoutDecidedByNestedInput
+  approvalLogs?: Prisma.ApprovalLogUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStudentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutRecordedByNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutApproverNestedInput
+  submittedApprovalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutApplicantUserNestedInput
+  decidedApprovalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+  approvalLogs?: Prisma.ApprovalLogUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutStudentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  isSuperAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  managedGradeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1546,14 +1911,18 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   username?: boolean
   displayName?: boolean
   passwordHash?: boolean
+  accountType?: boolean
+  isSuperAdmin?: boolean
   role?: boolean
   managedGradeId?: boolean
   teacherId?: boolean
+  studentId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   inspections?: boolean | Prisma.User$inspectionsArgs<ExtArgs>
   approvalResponsibilities?: boolean | Prisma.User$approvalResponsibilitiesArgs<ExtArgs>
@@ -1568,14 +1937,18 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   displayName?: boolean
   passwordHash?: boolean
+  accountType?: boolean
+  isSuperAdmin?: boolean
   role?: boolean
   managedGradeId?: boolean
   teacherId?: boolean
+  studentId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1583,14 +1956,18 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   displayName?: boolean
   passwordHash?: boolean
+  accountType?: boolean
+  isSuperAdmin?: boolean
   role?: boolean
   managedGradeId?: boolean
   teacherId?: boolean
+  studentId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1598,18 +1975,22 @@ export type UserSelectScalar = {
   username?: boolean
   displayName?: boolean
   passwordHash?: boolean
+  accountType?: boolean
+  isSuperAdmin?: boolean
   role?: boolean
   managedGradeId?: boolean
   teacherId?: boolean
+  studentId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "displayName" | "passwordHash" | "role" | "managedGradeId" | "teacherId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "displayName" | "passwordHash" | "accountType" | "isSuperAdmin" | "role" | "managedGradeId" | "teacherId" | "studentId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   inspections?: boolean | Prisma.User$inspectionsArgs<ExtArgs>
   approvalResponsibilities?: boolean | Prisma.User$approvalResponsibilitiesArgs<ExtArgs>
@@ -1621,10 +2002,12 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
 }
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   managedGrade?: boolean | Prisma.User$managedGradeArgs<ExtArgs>
   teacher?: boolean | Prisma.User$teacherArgs<ExtArgs>
+  student?: boolean | Prisma.User$studentArgs<ExtArgs>
 }
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1632,6 +2015,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     managedGrade: Prisma.$GradePayload<ExtArgs> | null
     teacher: Prisma.$TeacherPayload<ExtArgs> | null
+    student: Prisma.$StudentPayload<ExtArgs> | null
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     inspections: Prisma.$InspectionRecordPayload<ExtArgs>[]
     approvalResponsibilities: Prisma.$ApprovalResponsibilityPayload<ExtArgs>[]
@@ -1644,9 +2028,12 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     username: string
     displayName: string
     passwordHash: string | null
+    accountType: $Enums.AccountType
+    isSuperAdmin: boolean
     role: $Enums.UserRole
     managedGradeId: string | null
     teacherId: string | null
+    studentId: string | null
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -2046,6 +2433,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   managedGrade<T extends Prisma.User$managedGradeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$managedGradeArgs<ExtArgs>>): Prisma.Prisma__GradeClient<runtime.Types.Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   teacher<T extends Prisma.User$teacherArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$teacherArgs<ExtArgs>>): Prisma.Prisma__TeacherClient<runtime.Types.Result.GetResult<Prisma.$TeacherPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  student<T extends Prisma.User$studentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentArgs<ExtArgs>>): Prisma.Prisma__StudentClient<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inspections<T extends Prisma.User$inspectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$inspectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InspectionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   approvalResponsibilities<T extends Prisma.User$approvalResponsibilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$approvalResponsibilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalResponsibilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2085,9 +2473,12 @@ export interface UserFieldRefs {
   readonly username: Prisma.FieldRef<"User", 'String'>
   readonly displayName: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly accountType: Prisma.FieldRef<"User", 'AccountType'>
+  readonly isSuperAdmin: Prisma.FieldRef<"User", 'Boolean'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly managedGradeId: Prisma.FieldRef<"User", 'String'>
   readonly teacherId: Prisma.FieldRef<"User", 'String'>
+  readonly studentId: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -2527,6 +2918,25 @@ export type User$teacherArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   include?: Prisma.TeacherInclude<ExtArgs> | null
   where?: Prisma.TeacherWhereInput
+}
+
+/**
+ * User.student
+ */
+export type User$studentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Student
+   */
+  select?: Prisma.StudentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Student
+   */
+  omit?: Prisma.StudentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudentInclude<ExtArgs> | null
+  where?: Prisma.StudentWhereInput
 }
 
 /**

@@ -56,6 +56,7 @@ export const ModelName = {
   Grade: 'Grade',
   Class: 'Class',
   Department: 'Department',
+  DepartmentPosition: 'DepartmentPosition',
   Subject: 'Subject',
   Teacher: 'Teacher',
   Student: 'Student',
@@ -92,9 +93,12 @@ export const UserScalarFieldEnum = {
   username: 'username',
   displayName: 'displayName',
   passwordHash: 'passwordHash',
+  accountType: 'accountType',
+  isSuperAdmin: 'isSuperAdmin',
   role: 'role',
   managedGradeId: 'managedGradeId',
   teacherId: 'teacherId',
+  studentId: 'studentId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -152,6 +156,21 @@ export const DepartmentScalarFieldEnum = {
 export type DepartmentScalarFieldEnum = (typeof DepartmentScalarFieldEnum)[keyof typeof DepartmentScalarFieldEnum]
 
 
+export const DepartmentPositionScalarFieldEnum = {
+  id: 'id',
+  departmentId: 'departmentId',
+  name: 'name',
+  identityType: 'identityType',
+  permissionTags: 'permissionTags',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DepartmentPositionScalarFieldEnum = (typeof DepartmentPositionScalarFieldEnum)[keyof typeof DepartmentPositionScalarFieldEnum]
+
+
 export const SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -207,6 +226,7 @@ export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeo
 export const TeacherDepartmentAssignmentScalarFieldEnum = {
   teacherId: 'teacherId',
   departmentId: 'departmentId',
+  positionId: 'positionId',
   identityType: 'identityType',
   createdAt: 'createdAt'
 } as const

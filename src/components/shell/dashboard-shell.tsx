@@ -404,6 +404,12 @@ export function DashboardShell({
               </Link>
             ) : null}
             <Link
+              href="/dashboard/account/password"
+              className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
+            >
+              修改密码
+            </Link>
+            <Link
               href="/dashboard/approvals"
               className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
             >

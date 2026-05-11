@@ -5,7 +5,7 @@ import type { NextAuthOptions, Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { cookies } from "next/headers";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { UserRole } from "@/generated/prisma/enums";
+import { AccountType, UserRole } from "@/generated/prisma/enums";
 import { browserSessionCookieName } from "@/lib/browser-session";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validation/auth";
@@ -29,9 +29,12 @@ async function authorizeDatabaseUser(username: string, password: string) {
         username: true,
         displayName: true,
         passwordHash: true,
+        accountType: true,
+        isSuperAdmin: true,
         role: true,
         managedGradeId: true,
         teacherId: true,
+        studentId: true,
         isActive: true,
       },
     });
@@ -51,8 +54,11 @@ async function authorizeDatabaseUser(username: string, password: string) {
       name: user.displayName,
       email: `${user.username}@school.local`,
       role: user.role,
+      accountType: user.accountType,
+      isSuperAdmin: user.isSuperAdmin,
       managedGradeId: user.managedGradeId,
       teacherId: user.teacherId,
+      studentId: user.studentId,
     };
   } catch {
     // Keep the Bootstrap account usable while the database is not reachable.
@@ -111,8 +117,11 @@ export const authOptions: NextAuthOptions = {
           name: "系统管理员",
           email: "admin@school.local",
           role: UserRole.SYSTEM_ADMIN,
+          accountType: AccountType.TEACHER,
+          isSuperAdmin: true,
           managedGradeId: null,
           teacherId: null,
+          studentId: null,
         };
       },
     }),
@@ -128,6 +137,14 @@ export const authOptions: NextAuthOptions = {
           "role" in user && typeof user.role === "string"
             ? user.role
             : UserRole.SYSTEM_ADMIN;
+        token.accountType =
+          "accountType" in user && typeof user.accountType === "string"
+            ? user.accountType
+            : AccountType.TEACHER;
+        token.isSuperAdmin =
+          "isSuperAdmin" in user && typeof user.isSuperAdmin === "boolean"
+            ? user.isSuperAdmin
+            : token.role === UserRole.SYSTEM_ADMIN;
         token.managedGradeId =
           "managedGradeId" in user &&
           (typeof user.managedGradeId === "string" || user.managedGradeId === null)
@@ -137,6 +154,11 @@ export const authOptions: NextAuthOptions = {
           "teacherId" in user &&
           (typeof user.teacherId === "string" || user.teacherId === null)
             ? user.teacherId
+            : null;
+        token.studentId =
+          "studentId" in user &&
+          (typeof user.studentId === "string" || user.studentId === null)
+            ? user.studentId
             : null;
       }
 
@@ -149,6 +171,14 @@ export const authOptions: NextAuthOptions = {
           typeof token.role === "string"
             ? (token.role as UserRole)
             : UserRole.SYSTEM_ADMIN;
+        session.user.accountType =
+          typeof token.accountType === "string"
+            ? (token.accountType as AccountType)
+            : AccountType.TEACHER;
+        session.user.isSuperAdmin =
+          typeof token.isSuperAdmin === "boolean"
+            ? token.isSuperAdmin
+            : session.user.role === UserRole.SYSTEM_ADMIN;
         session.user.managedGradeId =
           typeof token.managedGradeId === "string" || token.managedGradeId === null
             ? token.managedGradeId
@@ -156,6 +186,10 @@ export const authOptions: NextAuthOptions = {
         session.user.teacherId =
           typeof token.teacherId === "string" || token.teacherId === null
             ? token.teacherId
+            : null;
+        session.user.studentId =
+          typeof token.studentId === "string" || token.studentId === null
+            ? token.studentId
             : null;
       }
 
