@@ -12,9 +12,13 @@
 export const UserRole = {
   SYSTEM_ADMIN: 'SYSTEM_ADMIN',
   SCHOOL_LEADER: 'SCHOOL_LEADER',
+  DEPARTMENT_LEADER: 'DEPARTMENT_LEADER',
   GRADE_MANAGER: 'GRADE_MANAGER',
-  DATA_MANAGER: 'DATA_MANAGER',
-  INSPECTION_STAFF: 'INSPECTION_STAFF'
+  STUDENT_AFFAIRS_STAFF: 'STUDENT_AFFAIRS_STAFF',
+  ACADEMIC_AFFAIRS_STAFF: 'ACADEMIC_AFFAIRS_STAFF',
+  ADMIN_OFFICE_STAFF: 'ADMIN_OFFICE_STAFF',
+  LOGISTICS_STAFF: 'LOGISTICS_STAFF',
+  TEACHER: 'TEACHER'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -53,3 +57,72 @@ export const ProfileFieldTargetType = {
 } as const
 
 export type ProfileFieldTargetType = (typeof ProfileFieldTargetType)[keyof typeof ProfileFieldTargetType]
+
+
+export const TeacherDepartmentIdentityType = {
+  FRONTLINE_TEACHER: 'FRONTLINE_TEACHER',
+  DEPARTMENT_LEADER: 'DEPARTMENT_LEADER',
+  GRADE_MANAGER: 'GRADE_MANAGER',
+  STUDENT_AFFAIRS_STAFF: 'STUDENT_AFFAIRS_STAFF',
+  ACADEMIC_AFFAIRS_STAFF: 'ACADEMIC_AFFAIRS_STAFF',
+  LOGISTICS_STAFF: 'LOGISTICS_STAFF',
+  GRADE_SUBJECT_LEADER: 'GRADE_SUBJECT_LEADER'
+} as const
+
+export type TeacherDepartmentIdentityType = (typeof TeacherDepartmentIdentityType)[keyof typeof TeacherDepartmentIdentityType]
+
+
+export const ApprovalRequestKind = {
+  MAINTENANCE: 'MAINTENANCE',
+  PRINT: 'PRINT',
+  OTHER: 'OTHER'
+} as const
+
+export type ApprovalRequestKind = (typeof ApprovalRequestKind)[keyof typeof ApprovalRequestKind]
+
+
+export const ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus]
+
+
+export const ApprovalResponsibilityKind = {
+  LOGISTICS: 'LOGISTICS',
+  PRINT_TEACHING: 'PRINT_TEACHING',
+  PRINT_GRADE_ADMIN: 'PRINT_GRADE_ADMIN',
+  PRINT_SCHOOL_ADMIN: 'PRINT_SCHOOL_ADMIN',
+  OTHER: 'OTHER'
+} as const
+
+export type ApprovalResponsibilityKind = (typeof ApprovalResponsibilityKind)[keyof typeof ApprovalResponsibilityKind]
+
+
+export const PrintMaterialType = {
+  TEACHING: 'TEACHING',
+  GRADE_ADMIN: 'GRADE_ADMIN',
+  SCHOOL_ADMIN: 'SCHOOL_ADMIN'
+} as const
+
+export type PrintMaterialType = (typeof PrintMaterialType)[keyof typeof PrintMaterialType]
+
+
+export const PrintMode = {
+  BLACK_WHITE: 'BLACK_WHITE',
+  COLOR: 'COLOR'
+} as const
+
+export type PrintMode = (typeof PrintMode)[keyof typeof PrintMode]
+
+
+export const PaperSize = {
+  A4: 'A4',
+  B5: 'B5',
+  B3: 'B3'
+} as const
+
+export type PaperSize = (typeof PaperSize)[keyof typeof PaperSize]

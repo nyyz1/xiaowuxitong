@@ -40,9 +40,13 @@ async function resetSchema(db) {
     CREATE TYPE "UserRole" AS ENUM (
       'SYSTEM_ADMIN',
       'SCHOOL_LEADER',
+      'DEPARTMENT_LEADER',
       'GRADE_MANAGER',
-      'DATA_MANAGER',
-      'INSPECTION_STAFF'
+      'STUDENT_AFFAIRS_STAFF',
+      'ACADEMIC_AFFAIRS_STAFF',
+      'ADMIN_OFFICE_STAFF',
+      'LOGISTICS_STAFF',
+      'TEACHER'
     );
 
     CREATE TYPE "InspectionValueType" AS ENUM (
@@ -73,8 +77,9 @@ async function resetSchema(db) {
       "username" TEXT NOT NULL UNIQUE,
       "displayName" TEXT NOT NULL,
       "passwordHash" TEXT,
-      "role" "UserRole" NOT NULL DEFAULT 'DATA_MANAGER',
+      "role" "UserRole" NOT NULL DEFAULT 'TEACHER',
       "managedGradeId" TEXT,
+      "teacherId" TEXT,
       "isActive" BOOLEAN NOT NULL DEFAULT TRUE,
       "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now(),
       "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -147,6 +152,7 @@ async function resetSchema(db) {
     CREATE TABLE "TeacherDepartmentAssignment" (
       "teacherId" TEXT NOT NULL REFERENCES "Teacher"("id") ON DELETE CASCADE,
       "departmentId" TEXT NOT NULL REFERENCES "Department"("id") ON DELETE RESTRICT,
+      "identityType" TEXT NOT NULL DEFAULT 'FRONTLINE_TEACHER',
       "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now(),
       PRIMARY KEY ("teacherId", "departmentId")
     );
@@ -257,6 +263,7 @@ function buildTeacherDepartmentAssignments(teachers) {
     (teacher.departmentIds ?? []).map((departmentId) => ({
       teacherId: teacher.id,
       departmentId,
+      identityType: teacher.departmentIdentities?.[departmentId] ?? "FRONTLINE_TEACHER",
       createdAt: new Date().toISOString(),
     })),
   );
@@ -329,7 +336,7 @@ async function seedDemoData(db) {
   await insertMany(
     db,
     "TeacherDepartmentAssignment",
-    ["teacherId", "departmentId", "createdAt"],
+    ["teacherId", "departmentId", "identityType", "createdAt"],
     buildTeacherDepartmentAssignments(dataset.teachers),
   );
   await insertMany(

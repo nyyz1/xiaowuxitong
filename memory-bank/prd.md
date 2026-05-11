@@ -12,7 +12,7 @@ Current assumptions:
 - the first live trial will use a school-controlled PostgreSQL deployment on the current school pilot workstation inside the school network
 - the approved trial starts with Grade 11 only while still keeping the system data model school-wide
 - the approved trial role model includes one system administrator, three school leader accounts, three Grade 11-scoped manager accounts, one data manager, and one inspection staff account
-- the school now requires explicit year-transition rollover rules, an alumni archive center, batch class-count maintenance, support for multiple teacher duties, support for teachers belonging to multiple departments, configurable teacher or student information statistics categories, an enrollment-year cohort model that keeps only the latest three cohorts active, and identity-card-number-based import updates or unique identification for teacher and student records
+- the school now requires explicit year-transition rollover rules, an alumni archive center, batch class-count maintenance, support for multiple teacher duties, support for teachers belonging to multiple departments, configurable teacher or student information statistics categories, an enrollment-year cohort model that keeps only the latest three cohorts active, identity-card-number-based import updates or unique identification for teacher and student records, and a lightweight teacher-facing application and approval workflow for repair, printing, and other daily requests
 
 ## One-Sentence Product Summary
 
@@ -46,6 +46,18 @@ The system should give school staff one place to maintain master data, enter rou
 - `Grade Manager`: must be bound to exactly one grade cohort; can only access student and inspection data inside that cohort
 - `Data Manager`: school-wide teacher and student data maintenance, import, and export
 - `Inspection Staff`: school-wide inspection item maintenance, inspection entry, statistics, and report export
+
+## Roles In V1.5 Approval Scope
+
+- `System Admin`: full access, user and permission management, application type configuration, and approval responsibility configuration
+- `School Leader`: school-wide read access for operational data and application records
+- `Department Leader`: department-level management and approval work when bound through approval responsibilities
+- `Grade Manager`: grade-scoped management and grade administrative printing approval when bound to a grade
+- `Student Affairs Staff`: student affairs and routine inspection work
+- `Academic Affairs Staff`: teaching affairs and teacher/student data maintenance
+- `Admin Office Staff`: school administrative office work and school administrative printing approval when bound through approval responsibilities
+- `Logistics Staff`: logistics office work and daily repair approval when bound through approval responsibilities
+- `Teacher`: teacher self-service account for submitting daily repair, material printing, and other configured requests
 
 ## Approved Trial Assumptions
 
@@ -163,6 +175,21 @@ Examples of inspection categories:
 - student morning exercise or routine activity checks
 - teacher attendance or duty performance checks
 
+### Application And Approval
+
+V1.5 adds a lightweight application and approval workflow:
+
+- teachers can submit daily repair applications, daily material printing applications, and other configured application types
+- repair applications route to users with logistics approval responsibility
+- daily material printing applications are categorized as teaching use, grade administrative use, or school administrative use
+- printing applications must record print mode such as black-and-white printing or color printing, paper size such as A4, B5, or B3, and print quantity
+- teaching-use printing applications route to a matching grade and subject leader responsibility
+- grade-administrative printing applications route to the matching grade manager responsibility
+- school-administrative printing applications route to an administrative office or department leadership responsibility
+- system administrators can configure other application types and approval responsibilities
+- applications support pending, approved, rejected, and reserved cancelled states
+- the first approval release records approval comments and audit logs but does not include attachments, notifications, multi-step workflow, or export
+
 ## Core Use Cases
 
 1. An authorized staff member can create and maintain school structure data such as grades, classes, departments, and subjects.
@@ -177,6 +204,9 @@ Examples of inspection categories:
 10. A leader, grade manager, or operator can view aggregated inspection statistics by time range, grade, class, teacher, and inspection item as appropriate to the selected quantification type and their allowed scope.
 11. An authorized user can export filtered personnel data or inspection statistics to Excel or CSV at any time.
 12. A system administrator can open a dedicated data management center to view all entered operational data, inspect dependency counts, delete selected rows, and run fixed cleanup actions after an automatic PostgreSQL backup succeeds.
+13. A teacher can submit a daily repair application and see its approval state after a logistics approver processes it.
+14. A teacher can submit a daily material printing application with material type, print mode, paper size, and print quantity, and the system routes it to the matching approval responsibility.
+15. A system administrator can configure other application types and bind approval responsibilities to users, grades, subjects, departments, or request types.
 
 ## Version 1 Scope
 
@@ -210,6 +240,7 @@ Examples of inspection categories:
 - payroll, finance, dormitory, or asset management
 - multi-school SaaS tenancy
 - advanced workflow approvals for every export or data change
+- attachments, notifications, multi-step workflow, and approval export for the first application-approval release
 - bulk hard deletion of user accounts from the data management center; account lifecycle stays in the user-permissions module
 
 ## Success Criteria
@@ -222,6 +253,9 @@ Examples of inspection categories:
 - a grade manager cannot read or export data outside the cohort assigned to that account
 - archived historical cohorts remain editable and exportable in the archive center while staying hidden from the main active-student front-end
 - users without export permission cannot export sensitive personal data
+- teachers can submit and track their own repair, printing, and configured daily applications
+- printing applications cannot be submitted without material type, print mode, paper size, and print quantity
+- users without matching approval responsibility cannot approve an application
 
 ## Constraints
 

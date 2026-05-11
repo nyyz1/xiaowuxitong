@@ -1,6 +1,12 @@
 import { UserRole } from "@/generated/prisma/enums";
 import { SubmitButton } from "@/components/form/submit-button";
 import {
+  userRoleDescriptions,
+  userRoleLabels,
+  userRoleOptions,
+} from "@/lib/role-labels";
+import { teacherDepartmentIdentityLabels } from "@/modules/people/department-identities";
+import {
   createUser,
   resetUserPassword,
   setUserStatus,
@@ -18,31 +24,6 @@ type UsersPageProps = {
   } | null;
 };
 
-const roleOptions = [
-  UserRole.SYSTEM_ADMIN,
-  UserRole.SCHOOL_LEADER,
-  UserRole.GRADE_MANAGER,
-  UserRole.DATA_MANAGER,
-  UserRole.INSPECTION_STAFF,
-] as const;
-
-const roleLabels: Record<UserRole, string> = {
-  [UserRole.SYSTEM_ADMIN]: "系统管理员",
-  [UserRole.SCHOOL_LEADER]: "校领导",
-  [UserRole.GRADE_MANAGER]: "年级管理员",
-  [UserRole.DATA_MANAGER]: "数据管理员",
-  [UserRole.INSPECTION_STAFF]: "常规检查员",
-};
-
-const roleDescriptions: Record<UserRole, string> = {
-  [UserRole.SYSTEM_ADMIN]: "唯一最高权限账号，维护系统账号、学校结构和全部业务模块。",
-  [UserRole.SCHOOL_LEADER]: "查看全校数据，并执行全校范围内的数据导入和导出。",
-  [UserRole.GRADE_MANAGER]:
-    "只查看本年级学生与检查数据，并在本年级范围内进行导入、导出和查询。",
-  [UserRole.DATA_MANAGER]: "维护全校教师、学生档案，并进行人员数据导入导出。",
-  [UserRole.INSPECTION_STAFF]: "维护常规检查项目，录入和查看检查记录。",
-};
-
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
@@ -51,42 +32,6 @@ function formatDate(value: Date) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(value);
-}
-
-function statusBadgeClass(isActive: boolean) {
-  return isActive
-    ? "bg-emerald-100 text-emerald-700"
-    : "bg-slate-200 text-slate-600";
-}
-
-function getScopeLabel(user: UserManagementData["users"][number]) {
-  if (!user.managedGrade) {
-    return "全校范围";
-  }
-
-  return user.managedGrade.name;
-}
-
-function SectionCard({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-[28px] border border-[var(--panel-border)] bg-white/78 p-6">
-      <div className="flex flex-col gap-2 border-b border-[var(--panel-border)] pb-5">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
-        <p className="max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
-          {description}
-        </p>
-      </div>
-      <div className="pt-6">{children}</div>
-    </section>
-  );
 }
 
 function TextInput({
@@ -112,13 +57,7 @@ function TextInput({
   );
 }
 
-function PasswordInput({
-  name,
-  placeholder,
-}: {
-  name: string;
-  placeholder: string;
-}) {
+function PasswordInput({ name, placeholder }: { name: string; placeholder: string }) {
   return (
     <input
       type="password"
@@ -154,9 +93,9 @@ function SelectBox({
 function RoleOptions() {
   return (
     <>
-      {roleOptions.map((role) => (
+      {userRoleOptions.map((role) => (
         <option key={role} value={role}>
-          {roleLabels[role]}
+          {userRoleLabels[role]}
         </option>
       ))}
     </>
@@ -170,7 +109,7 @@ function GradeScopeOptions({
 }) {
   return (
     <>
-      <option value="">全校范围 / 非年级限定</option>
+      <option value="">全校范围 / 非年级账号</option>
       {gradeOptions.map((grade) => (
         <option key={grade.id} value={grade.id}>
           {grade.name}
@@ -180,12 +119,74 @@ function GradeScopeOptions({
   );
 }
 
+function TeacherOptions({
+  teacherOptions,
+}: {
+  teacherOptions: UserManagementData["teacherOptions"];
+}) {
+  return (
+    <>
+      <option value="">不绑定教师档案</option>
+      {teacherOptions.map((teacher) => (
+        <option key={teacher.id} value={teacher.id}>
+          {teacher.name}
+          {teacher.subject ? `（${teacher.subject.name}）` : ""}
+        </option>
+      ))}
+    </>
+  );
+}
+
+function SectionCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-[28px] border border-[var(--panel-border)] bg-white/78 p-6">
+      <div className="flex flex-col gap-2 border-b border-[var(--panel-border)] pb-5">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
+        <p className="max-w-3xl text-sm leading-7 text-[var(--text-secondary)]">
+          {description}
+        </p>
+      </div>
+      <div className="pt-6">{children}</div>
+    </section>
+  );
+}
+
+function getScopeLabel(user: UserManagementData["users"][number]) {
+  if (user.teacher) {
+    const identityLabels = user.teacher.departmentAssignments
+      .map((assignment) =>
+        assignment.department
+          ? `${assignment.department.name} / ${teacherDepartmentIdentityLabels[assignment.identityType]}`
+          : "",
+      )
+      .filter(Boolean);
+
+    return identityLabels.length > 0
+      ? `${user.teacher.name}：${identityLabels.join("、")}`
+      : `教师档案：${user.teacher.name}`;
+  }
+
+  if (user.managedGrade) {
+    return user.managedGrade.name;
+  }
+
+  return "全校范围";
+}
+
 function UserCard({
   user,
-  gradeOptions,
+  data,
 }: {
   user: UserManagementData["users"][number];
-  gradeOptions: UserManagementData["gradeOptions"];
+  data: UserManagementData;
 }) {
   return (
     <article className="rounded-[26px] border border-[var(--panel-border)] bg-white p-5">
@@ -196,14 +197,16 @@ function UserCard({
               {user.displayName}
             </h3>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(
-                user.isActive,
-              )}`}
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                user.isActive
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-slate-200 text-slate-600"
+              }`}
             >
               {user.isActive ? "启用" : "停用"}
             </span>
             <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]">
-              {roleLabels[user.role]}
+              {userRoleLabels[user.role]}
             </span>
           </div>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -219,8 +222,8 @@ function UserCard({
         </div>
       </div>
 
-      <div className="grid gap-4 pt-5 xl:grid-cols-[1.55fr_0.9fr_0.55fr]">
-        <form action={updateUser} className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-4 pt-5 xl:grid-cols-[1.7fr_0.9fr_0.55fr]">
+        <form action={updateUser} className="grid gap-3 md:grid-cols-5">
           <input type="hidden" name="id" value={user.id} />
           <TextInput
             name="displayName"
@@ -231,11 +234,11 @@ function UserCard({
           <SelectBox name="role" defaultValue={user.role}>
             <RoleOptions />
           </SelectBox>
-          <SelectBox
-            name="managedGradeId"
-            defaultValue={user.managedGradeId ?? ""}
-          >
-            <GradeScopeOptions gradeOptions={gradeOptions} />
+          <SelectBox name="managedGradeId" defaultValue={user.managedGradeId ?? ""}>
+            <GradeScopeOptions gradeOptions={data.gradeOptions} />
+          </SelectBox>
+          <SelectBox name="teacherId" defaultValue={user.teacherId ?? ""}>
+            <TeacherOptions teacherOptions={data.teacherOptions} />
           </SelectBox>
           <SubmitButton
             idleLabel="保存资料"
@@ -247,7 +250,7 @@ function UserCard({
 
         <form action={resetUserPassword} className="grid gap-3 md:grid-cols-[1fr_auto]">
           <input type="hidden" name="id" value={user.id} />
-          <PasswordInput name="password" placeholder="输入新密码，至少 8 位" />
+          <PasswordInput name="password" placeholder="新密码，至少 8 位" />
           <SubmitButton
             idleLabel="重置密码"
             pendingLabel="重置中..."
@@ -284,8 +287,7 @@ export function UsersPage({ data, notice }: UsersPageProps) {
           用户与权限管理
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-white/78">
-          当前试点采用一名系统管理员、校领导账号、年级管理员账号的分层授权模型。
-          年级管理员必须绑定负责年级，系统会在后端限制其可访问的数据范围。
+          账号按学校岗位分工授权；需要教师自助申请能力的账号应绑定教师档案，年级管理员需要绑定负责年级，审批职责在申请审批模块中单独维护。
         </p>
       </section>
 
@@ -326,19 +328,22 @@ export function UsersPage({ data, notice }: UsersPageProps) {
 
       <SectionCard
         title="新增用户"
-        description="用户名建议使用岗位缩写或姓名拼音。只有选择“年级管理员”时，才需要指定负责年级。"
+        description="需要教师自助申请能力的账号请绑定教师档案；年级管理员必须绑定负责年级。"
       >
-        <form action={createUser} className="grid gap-3 lg:grid-cols-6">
-          <TextInput name="username" placeholder="用户名，例如 grade11.manager1" required />
-          <TextInput name="displayName" placeholder="显示名称，例如 2024级管理员 1" required />
-          <SelectBox name="role" defaultValue={UserRole.GRADE_MANAGER}>
+        <form action={createUser} className="grid gap-3 lg:grid-cols-7">
+          <TextInput name="username" placeholder="用户名，例如 teacher.zhang" required />
+          <TextInput name="displayName" placeholder="显示名称，例如 张老师" required />
+          <SelectBox name="role" defaultValue={UserRole.TEACHER}>
             <RoleOptions />
           </SelectBox>
           <SelectBox name="managedGradeId" defaultValue="">
             <GradeScopeOptions gradeOptions={data.gradeOptions} />
           </SelectBox>
+          <SelectBox name="teacherId" defaultValue="">
+            <TeacherOptions teacherOptions={data.teacherOptions} />
+          </SelectBox>
           <PasswordInput name="password" placeholder="初始密码，至少 8 位" />
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] lg:col-span-1">
+          <div className="grid gap-3">
             <SelectBox name="isActive" defaultValue="true">
               <option value="true">立即启用</option>
               <option value="false">暂不启用</option>
@@ -354,19 +359,19 @@ export function UsersPage({ data, notice }: UsersPageProps) {
 
       <SectionCard
         title="角色说明"
-        description="试点阶段先按学校已经确认的岗位分工落地；后续如果还要分班主任、学科组长等，再继续细化。"
+        description="角色决定基础模块访问权；审批范围由申请审批模块中的职责配置决定。"
       >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {roleOptions.map((role) => (
+          {userRoleOptions.map((role) => (
             <div
               key={role}
               className="rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-soft)] p-4"
             >
               <div className="font-semibold text-[var(--text-primary)]">
-                {roleLabels[role]}
+                {userRoleLabels[role]}
               </div>
               <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                {roleDescriptions[role]}
+                {userRoleDescriptions[role]}
               </p>
             </div>
           ))}
@@ -375,20 +380,16 @@ export function UsersPage({ data, notice }: UsersPageProps) {
 
       <SectionCard
         title="用户列表"
-        description="账号不做硬删除。离岗或暂停使用时请停用，审计记录和历史录入关系会继续保留。"
+        description="账号不做硬删除；离岗或暂停使用时请停用账号，审计记录和历史业务关系会继续保留。"
       >
         {data.users.length === 0 ? (
           <div className="rounded-2xl bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-            当前还没有数据库用户，可以先创建系统管理员、校领导和年级管理员账号。
+            当前还没有数据库用户。
           </div>
         ) : (
           <div className="space-y-4">
             {data.users.map((user) => (
-              <UserCard
-                key={user.id}
-                user={user}
-                gradeOptions={data.gradeOptions}
-              />
+              <UserCard key={user.id} user={user} data={data} />
             ))}
           </div>
         )}

@@ -8,14 +8,114 @@
 
 ## Current Verified State
 
-- The app is scoped to six live business modules: school structure, user permissions, people records, alumni archive, routine inspection, and statistics export.
+- The app is scoped to seven live business modules: school structure, user permissions, people records, alumni archive, routine inspection, application approval, and statistics export.
 - The live pilot workstation currently uses native PostgreSQL 17 under `D:\PostgreSQL\17` with data under `D:\PostgreSQL\data` and service `postgresql-xiaowuxitong`.
 - The current live pilot's operator passwords, database passwords, and login URLs are maintained in `docs/pilot-accounts-and-usage-guide.md`, not duplicated across every handoff document.
+- The main README now stays compact and points readers to the operator doc index plus the live pilot guide instead of repeating long handoff detail in one place.
 - The dashboard shell now uses a desktop sidebar, mobile drawer navigation, and a mobile-non-sticky topbar so narrow screens keep more usable height.
 - Homepage cleanup has removed process-facing status clutter such as the old RBAC explainer, the `私有部署` badge, and the `下一阶段任务` card.
 - Inspection save feedback now returns to the record-entry area, and student grade/class selectors now use linked dependent selection in people maintenance.
 - The school-pilot and public-pilot launchers are both hardened around real workstation use: duplicate-start protection, current-LAN-IP refresh, relative callback safety, and public-tunnel startup through `scripts/start-school-pilot.ps1`.
 - Historical milestone detail before 2026-05-09 is summarized in `memory-bank/progress-archive.md`.
+
+## 2026-05-11
+
+- User asked for a project tidy-up pass.
+- Cleanup:
+  - tightened `README.md` so the main handoff surface stays short and points readers to `docs/README.md` and `docs/pilot-accounts-and-usage-guide.md`
+  - kept the current live values centralized in the operator guide instead of repeating them across the README
+  - left runtime code unchanged; this was a docs and project-memory cleanup pass only
+- Verification:
+  - re-read the required memory-bank files and the `neat-freak` skill before editing
+  - checked the current doc map and active handoff surface for stale or duplicated guidance
+  - no build or typecheck was needed because the change stayed in markdown and memory records
+
+- User asked for a `$neat-freak` project cleanup pass after the Step 8 approval work and the schema-drift recovery.
+- Documentation cleanup:
+  - reconciled README, deployment smoke guide, final delivery checklist, PostgreSQL acceptance runbook, security/deployment plan, pilot account guide, and lessons with the current approval pilot seed and 2026-05-11 schema-drift recovery
+  - added `db:seed:approval-pilot` to first-use and acceptance paths where the standard pilot approval configuration is expected
+  - expanded server-error troubleshooting from the earlier four data-heavy pages to include `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people`
+  - recorded the operational smoke surface after schema-affecting role or approval changes in `memory-bank/architecture.md`
+- Verification:
+  - read the required memory-bank files and neat-freak instructions before editing
+  - enumerated high-value project docs and checked for stale role, approval seed, and schema-drift wording with `rg`
+  - docs-only change; no runtime build or typecheck was needed for this cleanup pass
+
+- User reported `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` all showed `This page couldn't load`.
+- Recovery:
+  - authenticated route probes confirmed all three pages were returning server-side `500` with `__next_error__`, while referenced `/_next/static/chunks/*.js` assets returned `200`, so this was not a stale chunk failure
+  - `npm.cmd run db:validate` confirmed the Prisma schema was valid
+  - `npx.cmd prisma db push` synchronized the live PostgreSQL schema with the current Prisma schema
+  - rechecked `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` with an authenticated admin session and confirmed all now return `200` without `__next_error__`
+  - checked `/dashboard/people` script dependencies and found no failed chunk requests
+- Verification:
+  - `npm.cmd run db:validate`
+  - `npx.cmd prisma db push`
+  - authenticated HTTP smoke for `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+- Result:
+  - the three broken pages are reachable again on the local pilot service
+  - root cause was live database schema drift after recent Step 8 schema changes, not missing frontend chunks
+
+- User asked to resume the interrupted "学校日常岗位与审批权限配置方案" plan and continue from the current execution point.
+- Continued Step 8 application approval verification and pilot configuration:
+  - added `scripts/seed-approval-pilot-config.mjs` plus `npm.cmd run db:seed:approval-pilot` and dry-run command
+  - seeded the live PostgreSQL pilot database with `teacher.wangming` bound to teacher profile `王明`, plus `logistics.office` and `admin.office`
+  - seeded standard active approval responsibilities for repair, teaching-use printing, `2024级` grade-administrative printing, school-administrative printing for `校务办公室`, and other daily requests
+  - tightened approval decision authorization so school leaders no longer have blanket approval power; outside system-admin fallback, an account must match an active approval responsibility
+  - updated README, deployment smoke docs, pilot account guide, implementation plan, architecture notes, and task tracking for the executable pilot approval configuration
+- Verification:
+  - `npm.cmd run db:seed:approval-pilot:dry-run`
+  - `npm.cmd run db:seed:approval-defaults`
+  - `npm.cmd run db:seed:approval-pilot`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - authenticated HTTP access to `http://127.0.0.1:3000/dashboard/approvals` for `teacher.wangming`, `logistics.office`, `admin.office`, `grade11.manager1`, `leader1`, and `admin`
+  - transaction-rolled-back database assertions confirmed repair routes to `logistics.office`, teaching printing to `data.manager`, grade-admin printing to `grade11.manager1`, school-admin printing to `admin.office`, and other requests to `leader1`; `teacher.wangming` cannot approve requests, `leader1` cannot approve unrelated repair or print requests, and `admin` retains system-admin fallback approval
+- Risks or blockers:
+  - the in-app browser plugin timed out during connection, so screenshot-level visual smoke for `/dashboard/approvals` remains a follow-up even though authenticated route and business-rule smoke passed
+  - the currently running `3000` process was started earlier in the day; after code updates, operators should restart the school-pilot service before relying on the tightened approval permission behavior in the browser
+
+- User asked to implement the V1.5 application and approval module for daily repair, daily material printing, and other configured application types, then added that printing applications must track print quantity.
+- Changes made:
+  - expanded the Prisma role model to the new school job roles and added teacher-profile binding on user accounts
+  - added approval request models, approval type configuration, approval responsibility configuration, approval logs, print material type, print mode, paper size, and print quantity
+  - added `/dashboard/approvals` with teacher request submission, visible request tracking, approval/rejection actions, and system-admin configuration forms
+  - implemented routing by approval responsibility, including logistics repair routing and material-print routing by teaching, grade administrative, or school administrative use
+  - updated user management so one-line teacher accounts can be bound to teacher profile records
+  - added `scripts/seed-approval-defaults.mjs` and `npm.cmd run db:seed:approval-defaults` for default repair, printing, and other request types
+  - updated the dashboard shell and homepage to expose application approval as a first-class module
+  - updated `memory-bank/prd.md`, `memory-bank/implementation-plan.md`, and `memory-bank/architecture.md` for the new V1.5 module
+- Verification so far:
+  - `npm.cmd run db:generate`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - `npm.cmd run test:demo-db`
+  - `npm.cmd run db:validate`
+  - `npm.cmd run db:migrate:approval-roles`
+  - `npx.cmd prisma db push --accept-data-loss` after confirming old `DATA_MANAGER` and `INSPECTION_STAFF` values had already been remapped
+  - `npm.cmd run db:seed:approval-defaults`
+- Risks or blockers:
+  - live browser smoke has not yet been run for `/dashboard/approvals`
+  - existing teacher self-service accounts still need to be created or bound to teacher profile records before teachers can submit requests themselves
+
+- User then asked for a `neat-freak` project tidy-up after the V1.5 application approval implementation.
+- Changes made for that cleanup pass:
+  - reconciled `README.md`, deployment smoke docs, delivery checklist, security notes, roadmap docs, and the V1.5 executable plan with the current seven-module app shape
+  - updated operator-facing account and acceptance docs from the old data-manager / inspection-staff wording to the current school job-role model
+  - added application-approval acceptance coverage, including approval default seeding, teacher profile binding, repair requests, printing requests, print material type, print mode, paper size, print quantity, approval comments, and audit checks
+  - rewrote `docs/final-delivery-checklist.md` into a clean current handoff checklist after finding it was no longer reliable for the new module and role model
+  - updated `tasks/todo.md` and `tasks/lessons.md` so the remaining approval smoke follow-ups and role-doc drift lesson are visible
+- Verification:
+  - re-read the required memory-bank files and the named `neat-freak` skill before editing
+  - enumerated current Markdown documentation and checked high-signal stale terms with `rg`
+  - left historical archived references in place where they describe the state at that earlier milestone
+- Risks or blockers:
+  - this cleanup pass changed docs and project-memory files only; it did not rerun runtime build tooling
+  - `/dashboard/approvals` still needs a live browser smoke after teacher self-service accounts and real approval responsibilities are configured
 
 ## 2026-05-10
 

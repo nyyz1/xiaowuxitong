@@ -66,15 +66,16 @@ export default async function QuickStudentSearchPage({
   searchParams,
 }: QuickStudentSearchPageProps) {
   const session = await requirePeopleManager();
+  const currentSession = session.session;
   const params = await searchParams;
   const filters = normalizePeopleFilters(params);
   const shouldSearch = hasSearchIntent(params);
   const data = await getStudentQuickSearchData(filters, {
-    gradeScopeId: getManagedGradeId(session),
+    gradeScopeId: getManagedGradeId(currentSession),
     shouldSearch,
   });
-  const canOpenArchive = canViewAlumniArchive(session.user.role);
-  const isScoped = isGradeManagerRole(session.user.role);
+  const canOpenArchive = canViewAlumniArchive(currentSession.user.role);
+  const isScoped = isGradeManagerRole(currentSession.user.role);
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">

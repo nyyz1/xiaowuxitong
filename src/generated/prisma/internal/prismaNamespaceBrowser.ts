@@ -64,6 +64,10 @@ export const ModelName = {
   InspectionCategory: 'InspectionCategory',
   InspectionItem: 'InspectionItem',
   InspectionRecord: 'InspectionRecord',
+  ApprovalType: 'ApprovalType',
+  ApprovalResponsibility: 'ApprovalResponsibility',
+  ApprovalRequest: 'ApprovalRequest',
+  ApprovalLog: 'ApprovalLog',
   AuditLog: 'AuditLog'
 } as const
 
@@ -90,6 +94,7 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   role: 'role',
   managedGradeId: 'managedGradeId',
+  teacherId: 'teacherId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -202,6 +207,7 @@ export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeo
 export const TeacherDepartmentAssignmentScalarFieldEnum = {
   teacherId: 'teacherId',
   departmentId: 'departmentId',
+  identityType: 'identityType',
   createdAt: 'createdAt'
 } as const
 
@@ -263,6 +269,76 @@ export const InspectionRecordScalarFieldEnum = {
 } as const
 
 export type InspectionRecordScalarFieldEnum = (typeof InspectionRecordScalarFieldEnum)[keyof typeof InspectionRecordScalarFieldEnum]
+
+
+export const ApprovalTypeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  kind: 'kind',
+  responsibilityKind: 'responsibilityKind',
+  description: 'description',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ApprovalTypeScalarFieldEnum = (typeof ApprovalTypeScalarFieldEnum)[keyof typeof ApprovalTypeScalarFieldEnum]
+
+
+export const ApprovalResponsibilityScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  kind: 'kind',
+  approverId: 'approverId',
+  requestTypeId: 'requestTypeId',
+  gradeId: 'gradeId',
+  subjectId: 'subjectId',
+  departmentId: 'departmentId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ApprovalResponsibilityScalarFieldEnum = (typeof ApprovalResponsibilityScalarFieldEnum)[keyof typeof ApprovalResponsibilityScalarFieldEnum]
+
+
+export const ApprovalRequestScalarFieldEnum = {
+  id: 'id',
+  typeId: 'typeId',
+  kind: 'kind',
+  applicantUserId: 'applicantUserId',
+  applicantTeacherId: 'applicantTeacherId',
+  title: 'title',
+  content: 'content',
+  gradeId: 'gradeId',
+  subjectId: 'subjectId',
+  departmentId: 'departmentId',
+  printMaterialType: 'printMaterialType',
+  printMode: 'printMode',
+  paperSize: 'paperSize',
+  printQuantity: 'printQuantity',
+  status: 'status',
+  currentApproverId: 'currentApproverId',
+  decidedById: 'decidedById',
+  decisionComment: 'decisionComment',
+  decidedAt: 'decidedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ApprovalRequestScalarFieldEnum = (typeof ApprovalRequestScalarFieldEnum)[keyof typeof ApprovalRequestScalarFieldEnum]
+
+
+export const ApprovalLogScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  actorId: 'actorId',
+  action: 'action',
+  comment: 'comment',
+  createdAt: 'createdAt'
+} as const
+
+export type ApprovalLogScalarFieldEnum = (typeof ApprovalLogScalarFieldEnum)[keyof typeof ApprovalLogScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

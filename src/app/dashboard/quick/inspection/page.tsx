@@ -1,5 +1,7 @@
 import Link from "next/link";
 import {
+  canRecordInspectionTarget,
+  getTeacherPositionContext,
   getManagedGradeId,
   requireInspectionRecorder,
 } from "@/lib/authorization";
@@ -96,6 +98,7 @@ export default async function QuickInspectionPage({
   searchParams,
 }: QuickInspectionPageProps) {
   const session = await requireInspectionRecorder();
+  const positions = await getTeacherPositionContext(session);
   const params = await searchParams;
   const gradeScopeId = getManagedGradeId(session);
   const normalizedFilters = normalizeInspectionFilters({
@@ -104,14 +107,27 @@ export default async function QuickInspectionPage({
     itemId: readParam(params.inspectionItemId) || readParam(params.itemId),
   });
   const filters = getEffectiveInspectionFilters(normalizedFilters, gradeScopeId);
-  const data = await getInspectionQuickEntryData(filters, {
+  const effectiveFilters = canRecordInspectionTarget(
+    session.user.role,
+    filters.targetType,
+    positions,
+  )
+    ? filters
+    : {
+        ...filters,
+        targetType: "STUDENT" as const,
+        teacherId: "",
+      };
+  const data = await getInspectionQuickEntryData(effectiveFilters, {
     gradeScopeId,
   });
   const selectedDate =
     readParam(params.inspectionDate) || readParam(params.dateFrom) || getTodayInputValue();
-  const selectedItemId = readParam(params.inspectionItemId) || filters.itemId;
+  const selectedItemId = readParam(params.inspectionItemId) || effectiveFilters.itemId;
   const notice = getNotice(params);
-  const canSwitchToTeacher = !gradeScopeId;
+  const canSwitchToTeacher =
+    !gradeScopeId &&
+    canRecordInspectionTarget(session.user.role, "TEACHER", positions);
   const targetTypeLabel = inspectionTargetTypeLabels[data.targetType];
   const hasMissingDependency =
     data.activeItems.length === 0 ||
@@ -230,9 +246,9 @@ export default async function QuickInspectionPage({
               grades={data.gradeOptions}
               classes={data.classOptions}
               teachers={data.teacherOptions}
-              defaultGradeId={filters.gradeId}
-              defaultClassId={filters.classId}
-              defaultTeacherId={filters.teacherId}
+              defaultGradeId={effectiveFilters.gradeId}
+              defaultClassId={effectiveFilters.classId}
+              defaultTeacherId={effectiveFilters.teacherId}
             />
           </div>
 

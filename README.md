@@ -1,33 +1,32 @@
-﻿# 校务系统
+# 校务系统
 
-面向高中学校内部使用的校务数据管理系统，当前按六个业务模块组织：
+面向高中学校内部使用的校务数据管理系统，当前按七个业务模块组织：
 
 - 用户权限
 - 学校结构
 - 师生档案
 - 往届存档
 - 常规检查
+- 申请审批
 - 统计导出
 
 ## 当前状态
 
 - 已完成 `Next.js + TypeScript + Prisma + PostgreSQL` 主体应用骨架。
 - 已完成数据库账号登录、兜底管理员登录、用户与权限管理。
-- 已完成学校结构、用户权限、师生档案、往届存档、常规检查、统计导出六个主要模块；师生档案和检查记录支持误录后的修改与删除。
-- 已完成前台与业务流程去学年化：结构、档案、检查、统计都按年级 / 班级工作，`AcademicYear` 仅保留为内部兼容层。
-- 已按六个业务模块收拢代码结构：学校结构、用户权限、师生档案、往届存档、常规检查、统计导出。
-- 已移除“成果展示”和“本地演示”两项非业务功能，后台入口只保留真实业务模块。
-- 已完成学校试点角色模型落地：`1` 个系统管理员、`3` 个校领导、`3` 个高二年级管理员、`1` 个数据管理员、`1` 个常规检查员。
+- 已完成学校结构、用户权限、师生档案、往届存档、常规检查、申请审批、统计导出七个业务模块。
+- 已完成前台与业务流程去学年化，结构、档案、检查和统计都按年级 / 班级工作，`AcademicYear` 仅保留为内部兼容层。
+- 已完成学校试点角色模型，并扩展到 V1.5 岗位体系：系统管理员、校领导、部门领导、年级管理员、政教工作人员、教务工作人员、行政办公人员、后勤办公人员、一线教师。
 
 ## 当前已批准试点
 
 - 先在高二年级试用，不直接切全校真实数据。
-- PostgreSQL 暂时安装在当前这台试点电脑的 `D` 盘，本项目应用也运行在这台电脑上。
+- PostgreSQL 安装在当前试点电脑的 `D` 盘，本项目应用也运行在这台电脑上。
 - 其他办公电脑通过这台试点电脑的校内网 IP 访问 Web 系统，不直接连接 PostgreSQL。
 - 系统只保留 `1` 个最高权限系统管理员账号。
 - `3` 个校领导账号具有全校数据查看、导入、导出权限。
 - `3` 个高二年级管理员账号具有高二范围内的查看、导入、导出权限。
-- 数据管理员负责全校师生档案维护、误录修改与删除；常规检查员负责检查项目维护、检查录入、误录修改与删除。
+- 教务工作人员和行政办公人员负责师生档案维护、误录修改与删除；政教工作人员负责检查项目维护、检查录入、误录修改与删除；后勤办公人员和其他管理岗位可通过申请审批职责处理对应申请。
 
 ## 目录说明
 
@@ -40,6 +39,7 @@
 - `src/modules/people/`：师生档案模块
 - `src/modules/alumni-archive/`：往届存档模块
 - `src/modules/inspection/`：常规检查模块
+- `src/modules/approvals/`：申请审批模块
 - `src/modules/reporting/`：统计导出模块
 - `prisma/`：数据库 schema
 - `scripts/`：数据库种子、PGlite 模拟、试点启动脚本
@@ -171,13 +171,13 @@ stop-school-public-pilot.cmd
 
 如果你刚执行过 `npm run build` 或刚更新过代码，而浏览器打开 `/login` 时出现 `This page couldn’t load`，通常不是登录页路由坏了，而是旧的 `next start` 进程还在提供旧版本页面、前端 chunk 对不上。此时请重新运行 `start-school-pilot.cmd` 或重新执行一次 `npm run pilot:school`。
 
-如果 `/login` 能正常打开，但登录后进入 `师生档案`、`往届存档`、`常规检查` 或 `统计导出` 时出现 `This page couldn’t load / A server error occurred`，优先检查 live PostgreSQL schema 是否落后于当前代码。典型服务端错误是 Prisma `P2022 ColumnNotFound`。处理顺序：
+如果 `/login` 能正常打开，但登录后进入 `用户权限`、`数据管理`、`师生档案`、`往届存档`、`常规检查` 或 `统计导出` 时出现 `This page couldn’t load / A server error occurred`，优先检查 live PostgreSQL schema 是否落后于当前代码。典型服务端错误是 Prisma `P2022 ColumnNotFound`；2026-05-11 的 live 恢复中，`/dashboard/users`、`/dashboard/data-management` 和 `/dashboard/people` 同时报错就是 schema drift。处理顺序：
 
 ```bash
 npm run db:push
 ```
 
-如果 Prisma 提示新增唯一约束需要确认，先检查目标表是否已有冲突数据；确认没有冲突后再按提示执行带确认参数的 schema 同步。同步后重新打开上述四个业务页，确认都能返回正常页面。
+如果 Prisma 提示新增唯一约束需要确认，先检查目标表是否已有冲突数据；确认没有冲突后再按提示执行带确认参数的 schema 同步。同步后重新打开上述受影响业务页，确认都能返回正常页面。
 
 ## 登录账号
 
@@ -193,8 +193,20 @@ npm run db:push
 - `admin`：系统管理员
 - `leader1`、`leader2`、`leader3`：校领导
 - `grade11.manager1`、`grade11.manager2`、`grade11.manager3`：高二年级管理员，均绑定高二
-- `data.manager`：数据管理员
-- `inspector`：常规检查员
+- `data.manager`：教务工作人员
+- `inspector`：政教工作人员
+
+申请审批模块的默认申请类型可通过以下命令写入或修复：
+
+```bash
+npm run db:seed:approval-defaults
+```
+
+试点用的教师自助账号和标准审批职责可通过以下命令写入或修复：
+
+```bash
+npm run db:seed:approval-pilot
+```
 
 ## 常用命令
 
@@ -207,6 +219,10 @@ npm run db:generate
 npm run db:validate
 npm run db:migrate
 npm run db:push
+npm run db:migrate:approval-roles
+npm run db:seed:approval-defaults
+npm run db:seed:approval-pilot
+npm run db:seed:approval-pilot:dry-run
 npm run db:seed:demo
 npm run db:seed:demo:dry-run
 npm run db:clear:demo

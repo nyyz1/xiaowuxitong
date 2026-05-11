@@ -4,7 +4,14 @@ import { UserRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 
 export async function getUserManagementData() {
-  const [users, totalUsers, activeUsers, activeAdmins, gradeOptions] =
+  const [
+    users,
+    totalUsers,
+    activeUsers,
+    activeAdmins,
+    gradeOptions,
+    teacherOptions,
+  ] =
     await Promise.all([
       prisma.user.findMany({
         orderBy: [
@@ -24,6 +31,29 @@ export async function getUserManagementData() {
               id: true,
               name: true,
               enrollmentYear: true,
+            },
+          },
+          teacherId: true,
+          teacher: {
+            select: {
+              id: true,
+              name: true,
+              subject: {
+                select: {
+                  name: true,
+                },
+              },
+              departmentAssignments: {
+                select: {
+                  identityType: true,
+                  department: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+                orderBy: [{ department: { name: "asc" } }],
+              },
             },
           },
           isActive: true,
@@ -49,6 +79,18 @@ export async function getUserManagementData() {
         },
         orderBy: [{ enrollmentYear: "asc" }, { name: "asc" }],
       }),
+      prisma.teacher.findMany({
+        orderBy: [{ name: "asc" }, { employeeNumber: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          subject: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
     ]);
 
   return {
@@ -57,5 +99,6 @@ export async function getUserManagementData() {
     activeUsers,
     activeAdmins,
     gradeOptions,
+    teacherOptions,
   };
 }

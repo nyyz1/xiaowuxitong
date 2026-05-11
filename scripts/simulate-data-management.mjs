@@ -90,6 +90,7 @@ async function resetSchema(db) {
     CREATE TABLE "TeacherDepartmentAssignment" (
       "teacherId" TEXT NOT NULL REFERENCES "Teacher"("id") ON DELETE CASCADE,
       "departmentId" TEXT NOT NULL REFERENCES "Department"("id") ON DELETE RESTRICT,
+      "identityType" TEXT NOT NULL DEFAULT 'FRONTLINE_TEACHER',
       PRIMARY KEY ("teacherId", "departmentId")
     );
 

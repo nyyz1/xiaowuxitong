@@ -1,4 +1,5 @@
 import {
+  getDepartmentLeaderDepartmentIds,
   getManagedGradeId,
   requireStudentImportAccess,
   requireTeacherImportAccess,
@@ -11,6 +12,7 @@ import {
 } from "@/modules/people/queries";
 import {
   getProfileFieldValue,
+  getTeacherDepartmentDisplayItems,
   getTeacherDepartmentNames,
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
@@ -31,12 +33,12 @@ function paramsToRecord(searchParams: URLSearchParams) {
 }
 
 export async function handleTeacherExportRequest(request: Request) {
-  await requireTeacherImportAccess();
+  const context = await requireTeacherImportAccess();
 
   const url = new URL(request.url);
   const filters = normalizePeopleFilters(paramsToRecord(url.searchParams));
   const [teachers, teacherProfileFields] = await Promise.all([
-    getTeachersForExport(filters),
+    getTeachersForExport(filters, getDepartmentLeaderDepartmentIds(context.positions)),
     getProfileFieldDefinitions("TEACHER", {
       activeOnly: true,
     }),
@@ -46,6 +48,7 @@ export async function handleTeacherExportRequest(request: Request) {
     teacher.idCardNumber ?? "",
     teacher.name,
     getTeacherDepartmentNames(teacher).join("、"),
+    getTeacherDepartmentDisplayItems(teacher).join("、"),
     teacher.subject?.name ?? "",
     getTeacherStatusLabel(teacher.employmentStatus),
     ...teacherProfileFields.map((field) =>
@@ -67,12 +70,12 @@ export async function handleTeacherExportRequest(request: Request) {
 }
 
 export async function handleStudentExportRequest(request: Request) {
-  const session = await requireStudentImportAccess();
+  const context = await requireStudentImportAccess();
 
   const url = new URL(request.url);
   const filters = normalizePeopleFilters(paramsToRecord(url.searchParams));
   const [students, studentProfileFields] = await Promise.all([
-    getStudentsForExport(filters, getManagedGradeId(session), "active"),
+    getStudentsForExport(filters, getManagedGradeId(context.session), "active"),
     getProfileFieldDefinitions("STUDENT", {
       activeOnly: true,
     }),
@@ -114,6 +117,7 @@ export async function handleTeacherTemplateRequest() {
       "110101198001010011",
       "张老师",
       "教务处、2025级年级",
+      "教务处/部门领导、2025级年级/一线教师",
       "语文",
       "正常",
       ...teacherProfileFields.map((field) =>

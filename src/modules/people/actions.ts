@@ -8,6 +8,8 @@ import {
   requireAlumniArchiveAccess,
   requirePeopleEditor,
   requireStudentImportAccess,
+  requireStudentDataEditor,
+  requireTeacherDataEditor,
   requireTeacherImportAccess,
 } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
@@ -29,6 +31,9 @@ import {
   profileDataToJsonInput,
   splitMultiValueText,
 } from "@/modules/people/helpers";
+import {
+  normalizeTeacherDepartmentIdentity,
+} from "@/modules/people/department-identities";
 import type { StudentViewMode } from "@/modules/people/queries";
 import { getProfileFieldDefinitions } from "@/modules/people/queries";
 import {
@@ -55,6 +60,7 @@ type ImportStats = {
 type PeopleReferenceMaps = Awaited<ReturnType<typeof loadPeopleReferenceMaps>>;
 type ProfileFieldCollection = ReturnType<typeof collectProfileValuesFromFormData>;
 type ActiveProfileField = Awaited<ReturnType<typeof getProfileFieldDefinitions>>[number];
+type TeacherDepartmentIdentityMap = Record<string, ReturnType<typeof normalizeTeacherDepartmentIdentity>>;
 
 function getStringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -69,6 +75,20 @@ function getStringValues(formData: FormData, key: string) {
         .flatMap((value) => (typeof value === "string" ? [value.trim()] : []))
         .filter(Boolean),
     ),
+  );
+}
+
+function getTeacherDepartmentIdentitiesFromFormData(
+  formData: FormData,
+  departmentIds: string[],
+) {
+  return Object.fromEntries(
+    departmentIds.map((departmentId) => [
+      departmentId,
+      normalizeTeacherDepartmentIdentity(
+        getStringValue(formData, `departmentIdentity__${departmentId}`),
+      ),
+    ]),
   );
 }
 
@@ -192,13 +212,19 @@ function buildImportMessage(target: string, stats: ImportStats) {
   return `${base} 问题示例：${stats.errors.slice(0, 3).join("；")}`;
 }
 
-function buildTeacherDepartmentCreateData(departmentIds: string[]) {
+function buildTeacherDepartmentCreateData(
+  departmentIds: string[],
+  departmentIdentities: TeacherDepartmentIdentityMap = {},
+) {
   return {
     departmentId: departmentIds[0] ?? null,
     departmentAssignments:
       departmentIds.length > 0
         ? {
             create: departmentIds.map((departmentId) => ({
+              identityType:
+                departmentIdentities[departmentId] ??
+                normalizeTeacherDepartmentIdentity(""),
               department: {
                 connect: {
                   id: departmentId,
@@ -210,7 +236,10 @@ function buildTeacherDepartmentCreateData(departmentIds: string[]) {
   };
 }
 
-function buildTeacherDepartmentUpdateData(departmentIds: string[]) {
+function buildTeacherDepartmentUpdateData(
+  departmentIds: string[],
+  departmentIdentities: TeacherDepartmentIdentityMap = {},
+) {
   return {
     departmentId: departmentIds[0] ?? null,
     departmentAssignments: {
@@ -218,6 +247,9 @@ function buildTeacherDepartmentUpdateData(departmentIds: string[]) {
       ...(departmentIds.length > 0
         ? {
             create: departmentIds.map((departmentId) => ({
+              identityType:
+                departmentIdentities[departmentId] ??
+                normalizeTeacherDepartmentIdentity(""),
               department: {
                 connect: {
                   id: departmentId,
@@ -415,6 +447,39 @@ function resolveDepartmentIdsByNames(
   }
 
   return Array.from(new Set(departmentIds));
+}
+
+function resolveTeacherDepartmentIdentityAssignments(
+  refs: PeopleReferenceMaps,
+  identityText: string,
+) {
+  const departmentIds: string[] = [];
+  const departmentIdentities: TeacherDepartmentIdentityMap = {};
+
+  for (const item of splitMultiValueText(identityText)) {
+    const [rawDepartmentName, rawIdentityName] = item
+      .split(/[\/|｜]/u)
+      .map((part) => part.trim());
+
+    if (!rawDepartmentName) {
+      continue;
+    }
+
+    const departmentId = refs.departmentByName.get(rawDepartmentName);
+
+    if (!departmentId) {
+      throw new Error(`找不到部门“${rawDepartmentName}”。`);
+    }
+
+    departmentIds.push(departmentId);
+    departmentIdentities[departmentId] =
+      normalizeTeacherDepartmentIdentity(rawIdentityName ?? "");
+  }
+
+  return {
+    departmentIds: Array.from(new Set(departmentIds)),
+    departmentIdentities,
+  };
 }
 
 async function assertProfileFieldDefinitionNameIsAllowed(
@@ -735,13 +800,18 @@ export async function deleteProfileFieldDefinition(formData: FormData) {
 }
 
 export async function createTeacher(formData: FormData) {
-  await requirePeopleEditor();
+  await requireTeacherDataEditor();
   const redirectPath = getTeacherViewPath();
+  const departmentIds = getStringValues(formData, "departmentIds");
 
   const parsed = teacherMutationSchema.safeParse({
     idCardNumber: getStringValue(formData, "idCardNumber"),
     name: getStringValue(formData, "name"),
-    departmentIds: getStringValues(formData, "departmentIds"),
+    departmentIds,
+    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(
+      formData,
+      departmentIds,
+    ),
     subjectId: getStringValue(formData, "subjectId"),
     employmentStatus: getStringValue(formData, "employmentStatus") || "ACTIVE",
   });
@@ -794,7 +864,10 @@ export async function createTeacher(formData: FormData) {
         remarks:
           getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ||
           null,
-        ...buildTeacherDepartmentCreateData(parsed.data.departmentIds),
+        ...buildTeacherDepartmentCreateData(
+          parsed.data.departmentIds,
+          parsed.data.departmentIdentities,
+        ),
       },
     });
   } catch (error) {
@@ -805,14 +878,19 @@ export async function createTeacher(formData: FormData) {
 }
 
 export async function updateTeacher(formData: FormData) {
-  await requirePeopleEditor();
+  await requireTeacherDataEditor();
   const redirectPath = getTeacherViewPath();
+  const departmentIds = getStringValues(formData, "departmentIds");
 
   const parsed = teacherMutationSchema.safeParse({
     id: getStringValue(formData, "id"),
     idCardNumber: getStringValue(formData, "idCardNumber"),
     name: getStringValue(formData, "name"),
-    departmentIds: getStringValues(formData, "departmentIds"),
+    departmentIds,
+    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(
+      formData,
+      departmentIds,
+    ),
     subjectId: getStringValue(formData, "subjectId"),
     employmentStatus: getStringValue(formData, "employmentStatus") || "ACTIVE",
   });
@@ -892,7 +970,10 @@ export async function updateTeacher(formData: FormData) {
         remarks:
           getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ??
           existingTeacher.remarks,
-        ...buildTeacherDepartmentUpdateData(parsed.data.departmentIds),
+        ...buildTeacherDepartmentUpdateData(
+          parsed.data.departmentIds,
+          parsed.data.departmentIdentities,
+        ),
       },
     });
   } catch (error) {
@@ -903,7 +984,7 @@ export async function updateTeacher(formData: FormData) {
 }
 
 export async function setTeacherStatus(formData: FormData) {
-  await requirePeopleEditor();
+  await requireTeacherDataEditor();
   const redirectPath = getTeacherViewPath();
 
   const parsed = teacherRecordStatusSchema.safeParse({
@@ -938,7 +1019,8 @@ export async function setTeacherStatus(formData: FormData) {
 }
 
 export async function deleteTeacher(formData: FormData) {
-  const session = await requirePeopleEditor();
+  const context = await requireTeacherDataEditor();
+  const session = context.session;
   const redirectPath = getTeacherViewPath();
 
   const parsed = peopleRecordDeleteSchema.safeParse({
@@ -1005,7 +1087,7 @@ export async function deleteTeacher(formData: FormData) {
 }
 
 export async function createStudent(formData: FormData) {
-  await requirePeopleEditor();
+  await requireStudentDataEditor();
 
   const studentViewMode = getStudentViewMode(formData);
   const redirectPath = getStudentViewPath(studentViewMode);
@@ -1078,7 +1160,7 @@ export async function createStudent(formData: FormData) {
 }
 
 export async function updateStudent(formData: FormData) {
-  await requirePeopleEditor();
+  await requireStudentDataEditor();
 
   const studentViewMode = getStudentViewMode(formData);
   const redirectPath = getStudentViewPath(studentViewMode);
@@ -1180,7 +1262,7 @@ export async function updateStudent(formData: FormData) {
 }
 
 export async function setStudentStatus(formData: FormData) {
-  await requirePeopleEditor();
+  await requireStudentDataEditor();
 
   const studentViewMode = getStudentViewMode(formData);
   const redirectPath = getStudentViewPath(studentViewMode);
@@ -1218,7 +1300,8 @@ export async function setStudentStatus(formData: FormData) {
 }
 
 export async function deleteStudent(formData: FormData) {
-  const session = await requirePeopleEditor();
+  const context = await requireStudentDataEditor();
+  const session = context.session;
 
   const studentViewMode = getStudentViewMode(formData);
   const redirectPath = getStudentViewPath(studentViewMode);
@@ -1321,10 +1404,27 @@ export async function importTeachers(formData: FormData) {
       const rowNumber = index + 2;
 
       try {
+        const departmentIdentityText = getCellText(
+          row,
+          teacherImportColumnAliases.departmentIdentities,
+        );
+        const departmentIdentityAssignments = departmentIdentityText
+          ? resolveTeacherDepartmentIdentityAssignments(refs, departmentIdentityText)
+          : null;
         const departmentNames = splitMultiValueText(
           getCellText(row, teacherImportColumnAliases.departments),
         );
-        const departmentIds = resolveDepartmentIdsByNames(refs, departmentNames);
+        const departmentIds =
+          departmentIdentityAssignments?.departmentIds ??
+          resolveDepartmentIdsByNames(refs, departmentNames);
+        const departmentIdentities =
+          departmentIdentityAssignments?.departmentIdentities ??
+          Object.fromEntries(
+            departmentIds.map((departmentId) => [
+              departmentId,
+              normalizeTeacherDepartmentIdentity(""),
+            ]),
+          );
         const subjectName = getCellText(row, teacherImportColumnAliases.subject);
         const subjectId = subjectName ? refs.subjectByName.get(subjectName) : null;
 
@@ -1336,6 +1436,7 @@ export async function importTeachers(formData: FormData) {
           idCardNumber: getCellText(row, teacherImportColumnAliases.idCardNumber),
           name: getCellText(row, teacherImportColumnAliases.name),
           departmentIds,
+          departmentIdentities,
           subjectId: subjectId ?? "",
           employmentStatus: normalizeTeacherStatus(
             getCellText(row, teacherImportColumnAliases.employmentStatus),
@@ -1410,7 +1511,10 @@ export async function importTeachers(formData: FormData) {
                   profileValues,
                   "remarks",
                 ) ?? existing.remarks,
-              ...buildTeacherDepartmentUpdateData(parsed.data.departmentIds),
+              ...buildTeacherDepartmentUpdateData(
+                parsed.data.departmentIds,
+                parsed.data.departmentIdentities,
+              ),
             },
           });
           stats.updated += 1;
@@ -1444,7 +1548,10 @@ export async function importTeachers(formData: FormData) {
                   profileValues,
                   "remarks",
                 ) || null,
-              ...buildTeacherDepartmentCreateData(parsed.data.departmentIds),
+              ...buildTeacherDepartmentCreateData(
+                parsed.data.departmentIds,
+                parsed.data.departmentIdentities,
+              ),
             },
           });
           stats.created += 1;
@@ -1471,7 +1578,9 @@ export async function importStudents(formData: FormData) {
       ? await requireAlumniArchiveAccess()
       : await requireStudentImportAccess();
   const gradeScopeId =
-    studentViewMode === "active" ? getManagedGradeId(session) : null;
+    studentViewMode === "active"
+      ? getManagedGradeId("session" in session ? session.session : session)
+      : null;
 
   let message = "";
 

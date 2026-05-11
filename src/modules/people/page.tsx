@@ -19,10 +19,15 @@ import {
 import {
   getProfileFieldEntries,
   getProfileFieldInputName,
+  getTeacherDepartmentDisplayItems,
   getTeacherDepartmentIds,
-  getTeacherDepartmentNames,
+  getTeacherDepartmentIdentityMap,
   mergeSystemProfileData,
 } from "@/modules/people/helpers";
+import {
+  teacherDepartmentIdentityLabels,
+  teacherDepartmentIdentityOptions,
+} from "@/modules/people/department-identities";
 import {
   getStudentStatusLabel,
   getTeacherStatusLabel,
@@ -52,9 +57,12 @@ type PeoplePageProps = {
     canViewTeacherData: boolean;
     canImportTeacherData: boolean;
     canImportStudentData: boolean;
+    canEditTeacherData: boolean;
+    canEditStudentData: boolean;
     canEditPeople: boolean;
     canViewAlumniArchive: boolean;
     isGradeScoped: boolean;
+    isDepartmentScoped: boolean;
   };
 };
 
@@ -402,9 +410,11 @@ function DynamicProfileSummary({
 function DepartmentCheckboxGroup({
   departments,
   selectedIds,
+  selectedIdentities,
 }: {
   departments: PeopleManagementData["departments"];
   selectedIds: string[];
+  selectedIdentities: Record<string, string>;
 }) {
   return (
     <div className="lg:col-span-4 rounded-2xl border border-[var(--panel-border)] bg-white px-4 py-3">
@@ -418,19 +428,35 @@ function DepartmentCheckboxGroup({
       ) : (
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {departments.map((department) => (
-            <label
+            <div
               key={department.id}
-              className="flex items-center gap-3 rounded-2xl border border-[var(--panel-border)] px-3 py-2 text-sm text-[var(--text-primary)]"
+              className="grid gap-2 rounded-2xl border border-[var(--panel-border)] px-3 py-2 text-sm text-[var(--text-primary)]"
             >
-              <input
-                type="checkbox"
-                name="departmentIds"
-                value={department.id}
-                defaultChecked={selectedIds.includes(department.id)}
-                className="h-4 w-4 rounded border-[var(--panel-border)] text-[var(--accent-strong)]"
-              />
-              <span>{department.name}</span>
-            </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="departmentIds"
+                  value={department.id}
+                  defaultChecked={selectedIds.includes(department.id)}
+                  className="h-4 w-4 rounded border-[var(--panel-border)] text-[var(--accent-strong)]"
+                />
+                <span>{department.name}</span>
+              </label>
+              <select
+                name={`departmentIdentity__${department.id}`}
+                defaultValue={
+                  selectedIdentities[department.id] ??
+                  "FRONTLINE_TEACHER"
+                }
+                className="h-9 rounded-xl border border-[var(--panel-border)] bg-white px-3 text-xs text-[var(--text-primary)] outline-none transition focus:border-[var(--accent-strong)]"
+              >
+                {teacherDepartmentIdentityOptions.map((identityType) => (
+                  <option key={identityType} value={identityType}>
+                    {teacherDepartmentIdentityLabels[identityType]}
+                  </option>
+                ))}
+              </select>
+            </div>
           ))}
         </div>
       )}
@@ -563,6 +589,9 @@ function TeacherForm({
 }) {
   const action = teacher ? updateTeacher : createTeacher;
   const selectedDepartmentIds = teacher ? getTeacherDepartmentIds(teacher) : [];
+  const selectedDepartmentIdentities = teacher
+    ? getTeacherDepartmentIdentityMap(teacher)
+    : {};
 
   return (
     <form action={action} className="grid gap-3 lg:grid-cols-4">
@@ -603,6 +632,7 @@ function TeacherForm({
       <DepartmentCheckboxGroup
         departments={departments}
         selectedIds={selectedDepartmentIds}
+        selectedIdentities={selectedDepartmentIdentities}
       />
       <DynamicProfileInputs
         fields={profileFields}
@@ -948,7 +978,7 @@ export function PeoplePage({
             />
           </div>
 
-          {access.canEditPeople ? (
+          {access.canEditTeacherData ? (
             <div className="mt-5 rounded-[24px] border border-dashed border-[var(--panel-border)] bg-[var(--panel-soft)] p-4">
               <h3 className="mb-3 text-base font-semibold text-[var(--text-primary)]">
                 新增教师
@@ -975,7 +1005,7 @@ export function PeoplePage({
               </div>
             ) : (
               data.teachers.map((teacher) => {
-                const departmentNames = getTeacherDepartmentNames(teacher);
+                const departmentNames = getTeacherDepartmentDisplayItems(teacher);
 
                 return (
                   <details
@@ -1017,7 +1047,7 @@ export function PeoplePage({
                       </div>
                     </summary>
 
-                    {access.canEditPeople ? (
+                    {access.canEditTeacherData ? (
                       <div className="mt-4 border-t border-[var(--panel-border)] pt-4">
                         <TeacherForm
                           departments={data.departments}
@@ -1104,7 +1134,11 @@ export function PeoplePage({
           <StudentFilterForm filters={filters} grades={grades} classes={classes} />
         </div>
 
-        {access.canEditPeople ? (
+        {access.isDepartmentScoped ? (
+          <div className="mt-5 rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            当前账号按部门领导身份限定为部门范围，学生档案暂不按部门映射开放。
+          </div>
+        ) : access.canEditStudentData ? (
           <div className="mt-5 rounded-[24px] border border-dashed border-[var(--panel-border)] bg-[var(--panel-soft)] p-4">
             <h3 className="mb-3 text-base font-semibold text-[var(--text-primary)]">
               新增学生
@@ -1163,7 +1197,7 @@ export function PeoplePage({
                   </div>
                 </summary>
 
-                {access.canEditPeople ? (
+                {access.canEditStudentData ? (
                   <div className="mt-4 border-t border-[var(--panel-border)] pt-4">
                     <StudentForm
                       grades={grades}

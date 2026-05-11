@@ -1,4 +1,4 @@
-export const departments = [
+﻿export const departments = [
   { id: "dept-admin", name: "校务办公室" },
   { id: "dept-teaching", name: "教务处" },
   { id: "dept-moral", name: "德育处" },
@@ -329,6 +329,22 @@ export function buildTeachers() {
     const departmentIds = Array.from(
       new Set([primaryDepartmentId, secondaryDepartmentId].filter(Boolean)),
     );
+    const departmentIdentities = Object.fromEntries(
+      departmentIds.map((departmentId, departmentIndex) => [
+        departmentId,
+        departmentId === "dept-teaching"
+          ? "ACADEMIC_AFFAIRS_STAFF"
+          : departmentId === "dept-moral"
+            ? "STUDENT_AFFAIRS_STAFF"
+            : departmentId.startsWith("dept-grade")
+              ? departmentIndex === 0
+                ? "FRONTLINE_TEACHER"
+                : "GRADE_SUBJECT_LEADER"
+              : departmentIndex === 0
+                ? "FRONTLINE_TEACHER"
+                : "DEPARTMENT_LEADER",
+      ]),
+    );
 
     return {
       id: `teacher-${index + 1}`,
@@ -338,6 +354,7 @@ export function buildTeachers() {
       gender: index % 2 === 0 ? "男" : "女",
       departmentId: primaryDepartmentId,
       departmentIds,
+      departmentIdentities,
       subjectId: subjects[index % subjects.length].id,
       duties: dutyPatterns[index % dutyPatterns.length],
       profileData: {
@@ -613,7 +630,7 @@ export function buildDemoDataset() {
         id: "user-data",
         username: "data.manager",
         displayName: "数据管理员",
-        role: "DATA_MANAGER",
+        role: "ACADEMIC_AFFAIRS_STAFF",
         managedGradeId: null,
         isActive: true,
         plainPassword: demoUserPassword,
@@ -622,7 +639,7 @@ export function buildDemoDataset() {
         id: "user-inspector",
         username: "inspector",
         displayName: "常规检查员",
-        role: "INSPECTION_STAFF",
+        role: "STUDENT_AFFAIRS_STAFF",
         managedGradeId: null,
         isActive: true,
         plainPassword: demoUserPassword,
@@ -641,3 +658,4 @@ export function buildDemoDataset() {
     inspectionRecords: buildInspectionRecords(classes, teachers),
   };
 }
+

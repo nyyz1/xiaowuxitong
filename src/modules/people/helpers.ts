@@ -1,4 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
+import type { TeacherDepartmentIdentityType } from "@/generated/prisma/enums";
+import { teacherDepartmentIdentityLabels } from "@/modules/people/department-identities";
 
 export const PROFILE_FIELD_INPUT_PREFIX = "profileField__";
 export const PROFILE_FIELD_VALUE_MAX_LENGTH = 120;
@@ -24,6 +26,7 @@ type DepartmentLike = {
 
 type TeacherDepartmentAssignmentLike = {
   departmentId: string;
+  identityType?: TeacherDepartmentIdentityType | null;
   department?: DepartmentLike | null;
 };
 
@@ -265,6 +268,38 @@ export function getTeacherDepartmentNames(teacher: TeacherDepartmentLike) {
 
   if (assignmentNames.length > 0) {
     return assignmentNames;
+  }
+
+  return teacher.department?.name ? [teacher.department.name] : [];
+}
+
+export function getTeacherDepartmentIdentityMap(teacher: TeacherDepartmentLike) {
+  return Object.fromEntries(
+    (teacher.departmentAssignments ?? [])
+      .map((assignment) => [
+        assignment.departmentId,
+        assignment.identityType ?? "FRONTLINE_TEACHER",
+      ])
+      .filter(([departmentId]) => Boolean(departmentId)),
+  ) as Record<string, TeacherDepartmentIdentityType>;
+}
+
+export function getTeacherDepartmentDisplayItems(teacher: TeacherDepartmentLike) {
+  const assignmentItems = (teacher.departmentAssignments ?? [])
+    .map((assignment) => {
+      const departmentName = assignment.department?.name?.trim();
+
+      if (!departmentName) {
+        return "";
+      }
+
+      const identityType = assignment.identityType ?? "FRONTLINE_TEACHER";
+      return `${departmentName} / ${teacherDepartmentIdentityLabels[identityType]}`;
+    })
+    .filter(Boolean);
+
+  if (assignmentItems.length > 0) {
+    return Array.from(new Set(assignmentItems));
   }
 
   return teacher.department?.name ? [teacher.department.name] : [];

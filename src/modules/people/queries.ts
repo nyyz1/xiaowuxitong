@@ -15,7 +15,9 @@ type RawSearchParams = Record<string, string | string[] | undefined>;
 type PeopleQueryOptions = {
   gradeScopeId?: string | null;
   includeTeacherData?: boolean;
+  includeStudentData?: boolean;
   studentViewMode?: StudentViewMode;
+  teacherDepartmentScopeIds?: string[];
 };
 
 function readParam(params: RawSearchParams, key: string) {
@@ -154,7 +156,10 @@ async function ensureSystemProfileFieldDefinitions(
   }
 }
 
-export function buildTeacherWhere(filters: PeopleFilters): Prisma.TeacherWhereInput {
+export function buildTeacherWhere(
+  filters: PeopleFilters,
+  departmentScopeIds: string[] = [],
+): Prisma.TeacherWhereInput {
   const andConditions: Prisma.TeacherWhereInput[] = [];
 
   if (filters.teacherKeyword) {
@@ -181,6 +186,18 @@ export function buildTeacherWhere(filters: PeopleFilters): Prisma.TeacherWhereIn
           },
         },
       ],
+    });
+  }
+
+  if (departmentScopeIds.length > 0) {
+    andConditions.push({
+      departmentAssignments: {
+        some: {
+          departmentId: {
+            in: departmentScopeIds,
+          },
+        },
+      },
     });
   }
 
@@ -281,8 +298,12 @@ export async function getPeopleManagementData(
 ) {
   const gradeScopeId = options.gradeScopeId ?? null;
   const includeTeacherData = options.includeTeacherData ?? true;
+  const includeStudentData = options.includeStudentData ?? true;
   const studentViewMode = options.studentViewMode ?? "active";
-  const teacherWhere = buildTeacherWhere(filters);
+  const teacherWhere = buildTeacherWhere(
+    filters,
+    options.teacherDepartmentScopeIds ?? [],
+  );
   const studentWhere = buildStudentWhere(filters, gradeScopeId, studentViewMode);
   const [
     teachers,
@@ -306,28 +327,33 @@ export async function getPeopleManagementData(
               include: {
                 department: true,
               },
+              orderBy: [{ department: { name: "asc" } }],
             },
             subject: true,
           },
         })
       : Promise.resolve([]),
-    prisma.student.findMany({
-      where: studentWhere,
-      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
-      take: 120,
-      include: {
-        grade: true,
-        class: true,
-      },
-    }),
+    includeStudentData
+      ? prisma.student.findMany({
+          where: studentWhere,
+          orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+          take: 120,
+          include: {
+            grade: true,
+            class: true,
+          },
+        })
+      : Promise.resolve([]),
     includeTeacherData
       ? prisma.teacher.count({
           where: teacherWhere,
         })
       : Promise.resolve(0),
-    prisma.student.count({
-      where: studentWhere,
-    }),
+    includeStudentData
+      ? prisma.student.count({
+          where: studentWhere,
+        })
+      : Promise.resolve(0),
     includeTeacherData
       ? prisma.department.findMany({
           orderBy: { name: "asc" },
@@ -338,7 +364,9 @@ export async function getPeopleManagementData(
           orderBy: { name: "asc" },
         })
       : Promise.resolve([]),
-    getStudentGrades(studentViewMode, gradeScopeId),
+    includeStudentData
+      ? getStudentGrades(studentViewMode, gradeScopeId)
+      : Promise.resolve([]),
     includeTeacherData
       ? getProfileFieldDefinitions("TEACHER")
       : Promise.resolve([]),
@@ -423,9 +451,12 @@ export async function getStudentQuickSearchData(
   };
 }
 
-export async function getTeachersForExport(filters: PeopleFilters) {
+export async function getTeachersForExport(
+  filters: PeopleFilters,
+  departmentScopeIds: string[] = [],
+) {
   return prisma.teacher.findMany({
-    where: buildTeacherWhere(filters),
+    where: buildTeacherWhere(filters, departmentScopeIds),
     orderBy: [{ department: { name: "asc" } }, { subject: { name: "asc" } }, { name: "asc" }],
     take: 5000,
     include: {
@@ -434,6 +465,7 @@ export async function getTeachersForExport(filters: PeopleFilters) {
         include: {
           department: true,
         },
+        orderBy: [{ department: { name: "asc" } }],
       },
       subject: true,
     },

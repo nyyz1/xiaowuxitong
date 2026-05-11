@@ -215,6 +215,7 @@ export async function getInspectionManagementData(
               include: {
                 department: true,
               },
+              orderBy: [{ department: { name: "asc" } }],
             },
             subject: true,
           },
@@ -258,6 +259,7 @@ export async function getInspectionManagementData(
             include: {
               department: true,
             },
+            orderBy: [{ department: { name: "asc" } }],
           },
           subject: true,
         },
@@ -332,6 +334,7 @@ export async function getInspectionQuickEntryData(
               include: {
                 department: true,
               },
+              orderBy: [{ department: { name: "asc" } }],
             },
             subject: true,
           },

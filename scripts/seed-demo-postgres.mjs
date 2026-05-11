@@ -30,6 +30,7 @@ function buildTeacherDepartmentAssignments(teachers) {
       id: `${teacher.id}::${departmentId}`,
       teacherId: teacher.id,
       departmentId,
+      identityType: teacher.departmentIdentities?.[departmentId] ?? "FRONTLINE_TEACHER",
       createdAt: seededAt,
     })),
   );
@@ -142,7 +143,7 @@ const tableSpecs = [
   },
   {
     table: "TeacherDepartmentAssignment",
-    columns: ["teacherId", "departmentId", "createdAt"],
+    columns: ["teacherId", "departmentId", "identityType", "createdAt"],
     rows: buildTeacherDepartmentAssignments(dataset.teachers),
   },
   {

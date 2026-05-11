@@ -10,9 +10,13 @@ datasource db {
 enum UserRole {
   SYSTEM_ADMIN
   SCHOOL_LEADER
+  DEPARTMENT_LEADER
   GRADE_MANAGER
-  DATA_MANAGER
-  INSPECTION_STAFF
+  STUDENT_AFFAIRS_STAFF
+  ACADEMIC_AFFAIRS_STAFF
+  ADMIN_OFFICE_STAFF
+  LOGISTICS_STAFF
+  TEACHER
 }
 
 enum InspectionValueType {
@@ -38,21 +42,76 @@ enum ProfileFieldTargetType {
   STUDENT
 }
 
+enum TeacherDepartmentIdentityType {
+  FRONTLINE_TEACHER
+  DEPARTMENT_LEADER
+  GRADE_MANAGER
+  STUDENT_AFFAIRS_STAFF
+  ACADEMIC_AFFAIRS_STAFF
+  LOGISTICS_STAFF
+  GRADE_SUBJECT_LEADER
+}
+
+enum ApprovalRequestKind {
+  MAINTENANCE
+  PRINT
+  OTHER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalResponsibilityKind {
+  LOGISTICS
+  PRINT_TEACHING
+  PRINT_GRADE_ADMIN
+  PRINT_SCHOOL_ADMIN
+  OTHER
+}
+
+enum PrintMaterialType {
+  TEACHING
+  GRADE_ADMIN
+  SCHOOL_ADMIN
+}
+
+enum PrintMode {
+  BLACK_WHITE
+  COLOR
+}
+
+enum PaperSize {
+  A4
+  B5
+  B3
+}
+
 model User {
   id           String     @id @default(cuid())
   username     String     @unique
   displayName  String
   passwordHash String?
-  role         UserRole   @default(DATA_MANAGER)
+  role         UserRole   @default(TEACHER)
   managedGradeId String?
   managedGrade Grade?     @relation("ManagedGradeUsers", fields: [managedGradeId], references: [id], onDelete: SetNull)
+  teacherId    String?    @unique
+  teacher      Teacher?   @relation("TeacherLoginUsers", fields: [teacherId], references: [id], onDelete: SetNull)
   isActive     Boolean    @default(true)
   auditLogs    AuditLog[]
   inspections  InspectionRecord[]
+  approvalResponsibilities ApprovalResponsibility[]
+  submittedApprovalRequests ApprovalRequest[] @relation("ApprovalApplicantUsers")
+  decidedApprovalRequests   ApprovalRequest[] @relation("ApprovalDecisionUsers")
+  approvalLogs ApprovalLog[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   @@index([managedGradeId])
+  @@index([teacherId])
 }
 
 model AcademicYear {
@@ -79,6 +138,8 @@ model Grade {
   managedUsers   User[]       @relation("ManagedGradeUsers")
   students       Student[]
   inspections    InspectionRecord[]
+  approvalResponsibilities ApprovalResponsibility[]
+  approvalRequests ApprovalRequest[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -108,6 +169,8 @@ model Department {
   name               String                     @unique
   teachers           Teacher[]
   teacherAssignments TeacherDepartmentAssignment[]
+  approvalResponsibilities ApprovalResponsibility[]
+  approvalRequests ApprovalRequest[]
   createdAt          DateTime                   @default(now())
   updatedAt          DateTime                   @updatedAt
 }
@@ -116,6 +179,8 @@ model Subject {
   id        String    @id @default(cuid())
   name      String    @unique
   teachers  Teacher[]
+  approvalResponsibilities ApprovalResponsibility[]
+  approvalRequests ApprovalRequest[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -137,6 +202,8 @@ model Teacher {
   employmentStatus    String                     @default("ACTIVE")
   remarks             String?
   inspections         InspectionRecord[]
+  loginUsers          User[]                     @relation("TeacherLoginUsers")
+  approvalRequests    ApprovalRequest[]
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
 
@@ -174,12 +241,14 @@ model Student {
 model TeacherDepartmentAssignment {
   teacherId    String
   departmentId String
+  identityType TeacherDepartmentIdentityType @default(FRONTLINE_TEACHER)
   teacher      Teacher    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   createdAt    DateTime   @default(now())
 
   @@id([teacherId, departmentId])
   @@index([departmentId])
+  @@index([identityType])
 }
 
 model ProfileFieldDefinition {
@@ -249,6 +318,105 @@ model InspectionRecord {
   @@index([gradeId])
   @@index([classId])
   @@index([teacherId])
+}
+
+model ApprovalType {
+  id                 String                     @id @default(cuid())
+  name               String                     @unique
+  kind               ApprovalRequestKind        @default(OTHER)
+  responsibilityKind ApprovalResponsibilityKind?
+  description        String?
+  isActive           Boolean                    @default(true)
+  responsibilities   ApprovalResponsibility[]
+  requests           ApprovalRequest[]
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+
+  @@index([kind, isActive])
+}
+
+model ApprovalResponsibility {
+  id            String                     @id @default(cuid())
+  name          String
+  kind          ApprovalResponsibilityKind
+  approverId    String
+  approver      User                       @relation(fields: [approverId], references: [id], onDelete: Cascade)
+  requestTypeId String?
+  requestType   ApprovalType?              @relation(fields: [requestTypeId], references: [id], onDelete: Cascade)
+  gradeId       String?
+  grade         Grade?                     @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  subjectId     String?
+  subject       Subject?                   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  departmentId  String?
+  department    Department?                @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  isActive      Boolean                    @default(true)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  @@index([kind, isActive])
+  @@index([approverId])
+  @@index([requestTypeId])
+  @@index([gradeId])
+  @@index([subjectId])
+  @@index([departmentId])
+}
+
+model ApprovalRequest {
+  id                 String              @id @default(cuid())
+  typeId             String
+  type               ApprovalType        @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  kind               ApprovalRequestKind
+  applicantUserId    String
+  applicantUser      User                @relation("ApprovalApplicantUsers", fields: [applicantUserId], references: [id], onDelete: Restrict)
+  applicantTeacherId String?
+  applicantTeacher   Teacher?            @relation(fields: [applicantTeacherId], references: [id], onDelete: SetNull)
+  title              String
+  content            String
+  gradeId            String?
+  grade              Grade?              @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  subjectId          String?
+  subject            Subject?            @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  departmentId       String?
+  department         Department?         @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  printMaterialType  PrintMaterialType?
+  printMode          PrintMode?
+  paperSize          PaperSize?
+  printQuantity      Int?
+  status             ApprovalStatus      @default(PENDING)
+  currentApproverId  String?
+  decidedById        String?
+  decidedBy          User?               @relation("ApprovalDecisionUsers", fields: [decidedById], references: [id], onDelete: SetNull)
+  decisionComment    String?
+  decidedAt          DateTime?
+  logs               ApprovalLog[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([typeId])
+  @@index([kind, status])
+  @@index([applicantUserId])
+  @@index([applicantTeacherId])
+  @@index([currentApproverId])
+  @@index([decidedById])
+  @@index([gradeId])
+  @@index([subjectId])
+  @@index([departmentId])
+  @@index([createdAt])
+}
+
+model ApprovalLog {
+  id        String          @id @default(cuid())
+  requestId String
+  request   ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  comment   String?
+  createdAt DateTime        @default(now())
+
+  @@index([requestId])
+  @@index([actorId])
+  @@index([createdAt])
 }
 
 model AuditLog {

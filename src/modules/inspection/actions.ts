@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import {
+  canRecordInspectionTarget,
+  getTeacherPositionContext,
   getManagedGradeId,
   requireInspectionConfigurator,
   requireInspectionRecorder,
@@ -604,6 +606,7 @@ export async function setInspectionItemStatus(formData: FormData) {
 
 export async function createInspectionRecord(formData: FormData) {
   const session = await requireInspectionRecorder();
+  const positions = await getTeacherPositionContext(session);
   const gradeScopeId = getManagedGradeId(session);
   const targetType = getTargetTypeValue(formData);
 
@@ -628,6 +631,10 @@ export async function createInspectionRecord(formData: FormData) {
   }
 
   try {
+    if (!canRecordInspectionTarget(session.user.role, parsed.data.targetType, positions)) {
+      throw new Error("当前账号不能录入或修改该类量化记录。");
+    }
+
     const item = await assertActiveInspectionItem(parsed.data.inspectionItemId);
 
     if (item.targetType !== parsed.data.targetType) {
@@ -674,6 +681,7 @@ export async function createInspectionRecord(formData: FormData) {
 
 export async function updateInspectionRecord(formData: FormData) {
   const session = await requireInspectionRecorder();
+  const positions = await getTeacherPositionContext(session);
   const gradeScopeId = getManagedGradeId(session);
   const targetType = getTargetTypeValue(formData);
 
@@ -694,6 +702,10 @@ export async function updateInspectionRecord(formData: FormData) {
   }
 
   try {
+    if (!canRecordInspectionTarget(session.user.role, parsed.data.targetType, positions)) {
+      throw new Error("当前账号不能录入或修改该类量化记录。");
+    }
+
     const item = await assertActiveInspectionItem(parsed.data.inspectionItemId);
 
     if (item.targetType !== parsed.data.targetType) {

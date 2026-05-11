@@ -74,6 +74,8 @@ DATABASE_URL=postgresql://school_admin:数据库密码@localhost:5432/school_aff
 npm install
 npm run db:generate
 npm run db:push
+npm run db:seed:approval-defaults
+npm run db:seed:approval-pilot
 ```
 
 如只想先检查配置，可先执行：
@@ -82,7 +84,7 @@ npm run db:push
 npm run db:validate
 ```
 
-后续每次代码或 Prisma schema 更新后，也要确认 live PostgreSQL 已经同步到当前 schema。否则可能出现 `/login` 正常，但师生档案、往届存档、常规检查、统计导出等业务页报 `This page couldn't load / A server error occurred`。典型服务端错误是 Prisma `P2022 ColumnNotFound`。
+`db:seed:approval-pilot` 会补齐当前试点的教师申请账号、后勤审批员、行政审批员和标准审批职责。后续每次代码或 Prisma schema 更新后，也要确认 live PostgreSQL 已经同步到当前 schema。否则可能出现 `/login` 正常，但用户权限、数据管理、师生档案、往届存档、常规检查、统计导出等业务页报 `This page couldn't load / A server error occurred`。典型服务端错误是 Prisma `P2022 ColumnNotFound`。
 
 ## 六、写入演示数据
 
@@ -106,8 +108,11 @@ npm run db:clear:demo
 - `admin`：系统管理员
 - `leader1`、`leader2`、`leader3`：校领导
 - `grade11.manager1`、`grade11.manager2`、`grade11.manager3`：高二年级管理员，均绑定高二
-- `data.manager`：数据管理员
-- `inspector`：常规检查员
+- `data.manager`：教务工作人员
+- `inspector`：政教工作人员
+- `logistics.office`：后勤办公人员，默认处理日常报修
+- `admin.office`：行政办公人员，默认处理学校行政用打印申请
+- `teacher.wangming`：已绑定教师档案的试点教师账号，可提交本人申请
 
 如学校不允许默认演示密码长期存在，完成验收后应立即重置或删除这些账号。
 
@@ -156,20 +161,28 @@ http://试点电脑IP:3000/login
    - 删除该临时班级
 
 5. 师生档案验收
-   - 用 `data.manager` 或 `leader1` 打开 `/dashboard/people`
+   - 用 `data.manager`（教务工作人员）或 `leader1` 打开 `/dashboard/people`
    - 筛选教师和学生
    - 下载教师模板和学生模板
    - 导出当前筛选结果
    - 用有权限账号修改或删除误录教师、误录学生；已有检查记录关联的教师应阻止硬删
 
 6. 常规检查验收
-   - 用 `inspector` 打开 `/dashboard/inspection`
+   - 用 `inspector`（政教工作人员）打开 `/dashboard/inspection`
    - 新增一条临时检查记录
    - 修改该临时检查记录
    - 用筛选条件查回该记录
    - 删除该误录检查记录
 
-7. 统计导出验收
+7. 申请审批验收
+   - 用 `admin` 打开 `/dashboard/approvals`
+   - 确认默认申请类型包含日常报修、日常材料打印和其他申请
+   - 如果已执行 `npm run db:seed:approval-pilot`，确认日常报修默认流向 `logistics.office`；如未使用试点配置，则先配置至少一个后勤审批职责或固定审批账号
+   - 用 `teacher.wangming` 或其他已绑定教师档案的教师账号提交一条报修申请
+   - 提交一条日常材料打印申请，确认必须填写材料类型、打印形式、纸张大小和打印数量
+   - 用对应审批账号进入待我审批，填写意见后通过或驳回
+
+8. 统计导出验收
    - 打开 `/dashboard/exports`
    - 按日期和年级筛选
    - 下载 Excel 和 CSV
@@ -234,7 +247,7 @@ ORDER BY action_count DESC;
 - 是否忘记在 live 数据库上执行 `npm run db:push`
 - 服务端日志是否出现 Prisma `P2022 ColumnNotFound`
 
-处理后需要重新打开 `/dashboard/people`、`/dashboard/archive/students`、`/dashboard/inspection` 和 `/dashboard/exports` 做页面级验证。
+处理后需要重新打开 `/dashboard/users`、`/dashboard/data-management`、`/dashboard/people`、`/dashboard/archive/students`、`/dashboard/inspection` 和 `/dashboard/exports` 做页面级验证。
 
 ### 3. 能打开登录页，但数据库账号登录失败
 

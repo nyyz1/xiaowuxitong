@@ -257,6 +257,8 @@ export type GradeWhereInput = {
   managedUsers?: Prisma.UserListRelationFilter
   students?: Prisma.StudentListRelationFilter
   inspections?: Prisma.InspectionRecordListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }
 
 export type GradeOrderByWithRelationInput = {
@@ -274,6 +276,8 @@ export type GradeOrderByWithRelationInput = {
   managedUsers?: Prisma.UserOrderByRelationAggregateInput
   students?: Prisma.StudentOrderByRelationAggregateInput
   inspections?: Prisma.InspectionRecordOrderByRelationAggregateInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityOrderByRelationAggregateInput
+  approvalRequests?: Prisma.ApprovalRequestOrderByRelationAggregateInput
 }
 
 export type GradeWhereUniqueInput = Prisma.AtLeast<{
@@ -296,6 +300,8 @@ export type GradeWhereUniqueInput = Prisma.AtLeast<{
   managedUsers?: Prisma.UserListRelationFilter
   students?: Prisma.StudentListRelationFilter
   inspections?: Prisma.InspectionRecordListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }, "id" | "academicYearId_name" | "academicYearId_enrollmentYear">
 
 export type GradeOrderByWithAggregationInput = {
@@ -344,6 +350,8 @@ export type GradeCreateInput = {
   managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateInput = {
@@ -360,6 +368,8 @@ export type GradeUncheckedCreateInput = {
   managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUpdateInput = {
@@ -376,6 +386,8 @@ export type GradeUpdateInput = {
   managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateInput = {
@@ -392,6 +404,8 @@ export type GradeUncheckedUpdateInput = {
   managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeCreateManyInput = {
@@ -619,6 +633,38 @@ export type GradeUpdateOneWithoutInspectionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.GradeUpdateToOneWithWhereWithoutInspectionsInput, Prisma.GradeUpdateWithoutInspectionsInput>, Prisma.GradeUncheckedUpdateWithoutInspectionsInput>
 }
 
+export type GradeCreateNestedOneWithoutApprovalResponsibilitiesInput = {
+  create?: Prisma.XOR<Prisma.GradeCreateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.GradeCreateOrConnectWithoutApprovalResponsibilitiesInput
+  connect?: Prisma.GradeWhereUniqueInput
+}
+
+export type GradeUpdateOneWithoutApprovalResponsibilitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.GradeCreateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.GradeCreateOrConnectWithoutApprovalResponsibilitiesInput
+  upsert?: Prisma.GradeUpsertWithoutApprovalResponsibilitiesInput
+  disconnect?: Prisma.GradeWhereInput | boolean
+  delete?: Prisma.GradeWhereInput | boolean
+  connect?: Prisma.GradeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GradeUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput, Prisma.GradeUpdateWithoutApprovalResponsibilitiesInput>, Prisma.GradeUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type GradeCreateNestedOneWithoutApprovalRequestsInput = {
+  create?: Prisma.XOR<Prisma.GradeCreateWithoutApprovalRequestsInput, Prisma.GradeUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.GradeCreateOrConnectWithoutApprovalRequestsInput
+  connect?: Prisma.GradeWhereUniqueInput
+}
+
+export type GradeUpdateOneWithoutApprovalRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.GradeCreateWithoutApprovalRequestsInput, Prisma.GradeUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.GradeCreateOrConnectWithoutApprovalRequestsInput
+  upsert?: Prisma.GradeUpsertWithoutApprovalRequestsInput
+  disconnect?: Prisma.GradeWhereInput | boolean
+  delete?: Prisma.GradeWhereInput | boolean
+  connect?: Prisma.GradeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GradeUpdateToOneWithWhereWithoutApprovalRequestsInput, Prisma.GradeUpdateWithoutApprovalRequestsInput>, Prisma.GradeUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
 export type GradeCreateWithoutManagedUsersInput = {
   id?: string
   name: string
@@ -632,6 +678,8 @@ export type GradeCreateWithoutManagedUsersInput = {
   classes?: Prisma.ClassCreateNestedManyWithoutGradeInput
   students?: Prisma.StudentCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateWithoutManagedUsersInput = {
@@ -647,6 +695,8 @@ export type GradeUncheckedCreateWithoutManagedUsersInput = {
   classes?: Prisma.ClassUncheckedCreateNestedManyWithoutGradeInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeCreateOrConnectWithoutManagedUsersInput = {
@@ -678,6 +728,8 @@ export type GradeUpdateWithoutManagedUsersInput = {
   classes?: Prisma.ClassUpdateManyWithoutGradeNestedInput
   students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateWithoutManagedUsersInput = {
@@ -693,6 +745,8 @@ export type GradeUncheckedUpdateWithoutManagedUsersInput = {
   classes?: Prisma.ClassUncheckedUpdateManyWithoutGradeNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeCreateWithoutAcademicYearInput = {
@@ -708,6 +762,8 @@ export type GradeCreateWithoutAcademicYearInput = {
   managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateWithoutAcademicYearInput = {
@@ -723,6 +779,8 @@ export type GradeUncheckedCreateWithoutAcademicYearInput = {
   managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeCreateOrConnectWithoutAcademicYearInput = {
@@ -779,6 +837,8 @@ export type GradeCreateWithoutClassesInput = {
   managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateWithoutClassesInput = {
@@ -794,6 +854,8 @@ export type GradeUncheckedCreateWithoutClassesInput = {
   managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
   inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeCreateOrConnectWithoutClassesInput = {
@@ -825,6 +887,8 @@ export type GradeUpdateWithoutClassesInput = {
   managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateWithoutClassesInput = {
@@ -840,6 +904,8 @@ export type GradeUncheckedUpdateWithoutClassesInput = {
   managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeCreateWithoutStudentsInput = {
@@ -855,6 +921,8 @@ export type GradeCreateWithoutStudentsInput = {
   classes?: Prisma.ClassCreateNestedManyWithoutGradeInput
   managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
   inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateWithoutStudentsInput = {
@@ -870,6 +938,8 @@ export type GradeUncheckedCreateWithoutStudentsInput = {
   classes?: Prisma.ClassUncheckedCreateNestedManyWithoutGradeInput
   managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
   inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeCreateOrConnectWithoutStudentsInput = {
@@ -901,6 +971,8 @@ export type GradeUpdateWithoutStudentsInput = {
   classes?: Prisma.ClassUpdateManyWithoutGradeNestedInput
   managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateWithoutStudentsInput = {
@@ -916,6 +988,8 @@ export type GradeUncheckedUpdateWithoutStudentsInput = {
   classes?: Prisma.ClassUncheckedUpdateManyWithoutGradeNestedInput
   managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
   inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeCreateWithoutInspectionsInput = {
@@ -931,6 +1005,8 @@ export type GradeCreateWithoutInspectionsInput = {
   classes?: Prisma.ClassCreateNestedManyWithoutGradeInput
   managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
 }
 
 export type GradeUncheckedCreateWithoutInspectionsInput = {
@@ -946,6 +1022,8 @@ export type GradeUncheckedCreateWithoutInspectionsInput = {
   classes?: Prisma.ClassUncheckedCreateNestedManyWithoutGradeInput
   managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
 }
 
 export type GradeCreateOrConnectWithoutInspectionsInput = {
@@ -977,6 +1055,8 @@ export type GradeUpdateWithoutInspectionsInput = {
   classes?: Prisma.ClassUpdateManyWithoutGradeNestedInput
   managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateWithoutInspectionsInput = {
@@ -992,6 +1072,176 @@ export type GradeUncheckedUpdateWithoutInspectionsInput = {
   classes?: Prisma.ClassUncheckedUpdateManyWithoutGradeNestedInput
   managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
+}
+
+export type GradeCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  stage?: $Enums.GradeStage | null
+  enrollmentYear?: number | null
+  isVisibleInMain?: boolean
+  graduationYear?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  academicYear: Prisma.AcademicYearCreateNestedOneWithoutGradesInput
+  classes?: Prisma.ClassCreateNestedManyWithoutGradeInput
+  managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
+  students?: Prisma.StudentCreateNestedManyWithoutGradeInput
+  inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutGradeInput
+}
+
+export type GradeUncheckedCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  academicYearId: string
+  stage?: $Enums.GradeStage | null
+  enrollmentYear?: number | null
+  isVisibleInMain?: boolean
+  graduationYear?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  classes?: Prisma.ClassUncheckedCreateNestedManyWithoutGradeInput
+  managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
+  inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutGradeInput
+}
+
+export type GradeCreateOrConnectWithoutApprovalResponsibilitiesInput = {
+  where: Prisma.GradeWhereUniqueInput
+  create: Prisma.XOR<Prisma.GradeCreateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedCreateWithoutApprovalResponsibilitiesInput>
+}
+
+export type GradeUpsertWithoutApprovalResponsibilitiesInput = {
+  update: Prisma.XOR<Prisma.GradeUpdateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+  create: Prisma.XOR<Prisma.GradeCreateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  where?: Prisma.GradeWhereInput
+}
+
+export type GradeUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput = {
+  where?: Prisma.GradeWhereInput
+  data: Prisma.XOR<Prisma.GradeUpdateWithoutApprovalResponsibilitiesInput, Prisma.GradeUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type GradeUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.NullableEnumGradeStageFieldUpdateOperationsInput | $Enums.GradeStage | null
+  enrollmentYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isVisibleInMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  graduationYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  academicYear?: Prisma.AcademicYearUpdateOneRequiredWithoutGradesNestedInput
+  classes?: Prisma.ClassUpdateManyWithoutGradeNestedInput
+  managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
+  students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
+  inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
+}
+
+export type GradeUncheckedUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  academicYearId?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.NullableEnumGradeStageFieldUpdateOperationsInput | $Enums.GradeStage | null
+  enrollmentYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isVisibleInMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  graduationYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  classes?: Prisma.ClassUncheckedUpdateManyWithoutGradeNestedInput
+  managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
+  inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
+}
+
+export type GradeCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  stage?: $Enums.GradeStage | null
+  enrollmentYear?: number | null
+  isVisibleInMain?: boolean
+  graduationYear?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  academicYear: Prisma.AcademicYearCreateNestedOneWithoutGradesInput
+  classes?: Prisma.ClassCreateNestedManyWithoutGradeInput
+  managedUsers?: Prisma.UserCreateNestedManyWithoutManagedGradeInput
+  students?: Prisma.StudentCreateNestedManyWithoutGradeInput
+  inspections?: Prisma.InspectionRecordCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutGradeInput
+}
+
+export type GradeUncheckedCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  academicYearId: string
+  stage?: $Enums.GradeStage | null
+  enrollmentYear?: number | null
+  isVisibleInMain?: boolean
+  graduationYear?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  classes?: Prisma.ClassUncheckedCreateNestedManyWithoutGradeInput
+  managedUsers?: Prisma.UserUncheckedCreateNestedManyWithoutManagedGradeInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutGradeInput
+  inspections?: Prisma.InspectionRecordUncheckedCreateNestedManyWithoutGradeInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutGradeInput
+}
+
+export type GradeCreateOrConnectWithoutApprovalRequestsInput = {
+  where: Prisma.GradeWhereUniqueInput
+  create: Prisma.XOR<Prisma.GradeCreateWithoutApprovalRequestsInput, Prisma.GradeUncheckedCreateWithoutApprovalRequestsInput>
+}
+
+export type GradeUpsertWithoutApprovalRequestsInput = {
+  update: Prisma.XOR<Prisma.GradeUpdateWithoutApprovalRequestsInput, Prisma.GradeUncheckedUpdateWithoutApprovalRequestsInput>
+  create: Prisma.XOR<Prisma.GradeCreateWithoutApprovalRequestsInput, Prisma.GradeUncheckedCreateWithoutApprovalRequestsInput>
+  where?: Prisma.GradeWhereInput
+}
+
+export type GradeUpdateToOneWithWhereWithoutApprovalRequestsInput = {
+  where?: Prisma.GradeWhereInput
+  data: Prisma.XOR<Prisma.GradeUpdateWithoutApprovalRequestsInput, Prisma.GradeUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
+export type GradeUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.NullableEnumGradeStageFieldUpdateOperationsInput | $Enums.GradeStage | null
+  enrollmentYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isVisibleInMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  graduationYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  academicYear?: Prisma.AcademicYearUpdateOneRequiredWithoutGradesNestedInput
+  classes?: Prisma.ClassUpdateManyWithoutGradeNestedInput
+  managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
+  students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
+  inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+}
+
+export type GradeUncheckedUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  academicYearId?: Prisma.StringFieldUpdateOperationsInput | string
+  stage?: Prisma.NullableEnumGradeStageFieldUpdateOperationsInput | $Enums.GradeStage | null
+  enrollmentYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isVisibleInMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  graduationYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  classes?: Prisma.ClassUncheckedUpdateManyWithoutGradeNestedInput
+  managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
+  inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeCreateManyAcademicYearInput = {
@@ -1018,6 +1268,8 @@ export type GradeUpdateWithoutAcademicYearInput = {
   managedUsers?: Prisma.UserUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateWithoutAcademicYearInput = {
@@ -1033,6 +1285,8 @@ export type GradeUncheckedUpdateWithoutAcademicYearInput = {
   managedUsers?: Prisma.UserUncheckedUpdateManyWithoutManagedGradeNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutGradeNestedInput
   inspections?: Prisma.InspectionRecordUncheckedUpdateManyWithoutGradeNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutGradeNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutGradeNestedInput
 }
 
 export type GradeUncheckedUpdateManyWithoutAcademicYearInput = {
@@ -1056,6 +1310,8 @@ export type GradeCountOutputType = {
   managedUsers: number
   students: number
   inspections: number
+  approvalResponsibilities: number
+  approvalRequests: number
 }
 
 export type GradeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1063,6 +1319,8 @@ export type GradeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   managedUsers?: boolean | GradeCountOutputTypeCountManagedUsersArgs
   students?: boolean | GradeCountOutputTypeCountStudentsArgs
   inspections?: boolean | GradeCountOutputTypeCountInspectionsArgs
+  approvalResponsibilities?: boolean | GradeCountOutputTypeCountApprovalResponsibilitiesArgs
+  approvalRequests?: boolean | GradeCountOutputTypeCountApprovalRequestsArgs
 }
 
 /**
@@ -1103,6 +1361,20 @@ export type GradeCountOutputTypeCountInspectionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.InspectionRecordWhereInput
 }
 
+/**
+ * GradeCountOutputType without action
+ */
+export type GradeCountOutputTypeCountApprovalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalResponsibilityWhereInput
+}
+
+/**
+ * GradeCountOutputType without action
+ */
+export type GradeCountOutputTypeCountApprovalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalRequestWhereInput
+}
+
 
 export type GradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1119,6 +1391,8 @@ export type GradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   managedUsers?: boolean | Prisma.Grade$managedUsersArgs<ExtArgs>
   students?: boolean | Prisma.Grade$studentsArgs<ExtArgs>
   inspections?: boolean | Prisma.Grade$inspectionsArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Grade$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Grade$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.GradeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["grade"]>
 
@@ -1167,6 +1441,8 @@ export type GradeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   managedUsers?: boolean | Prisma.Grade$managedUsersArgs<ExtArgs>
   students?: boolean | Prisma.Grade$studentsArgs<ExtArgs>
   inspections?: boolean | Prisma.Grade$inspectionsArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Grade$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Grade$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.GradeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GradeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1184,6 +1460,8 @@ export type $GradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     managedUsers: Prisma.$UserPayload<ExtArgs>[]
     students: Prisma.$StudentPayload<ExtArgs>[]
     inspections: Prisma.$InspectionRecordPayload<ExtArgs>[]
+    approvalResponsibilities: Prisma.$ApprovalResponsibilityPayload<ExtArgs>[]
+    approvalRequests: Prisma.$ApprovalRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1594,6 +1872,8 @@ export interface Prisma__GradeClient<T, Null = never, ExtArgs extends runtime.Ty
   managedUsers<T extends Prisma.Grade$managedUsersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Grade$managedUsersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   students<T extends Prisma.Grade$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Grade$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inspections<T extends Prisma.Grade$inspectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Grade$inspectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InspectionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalResponsibilities<T extends Prisma.Grade$approvalResponsibilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Grade$approvalResponsibilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalResponsibilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalRequests<T extends Prisma.Grade$approvalRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Grade$approvalRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2126,6 +2406,54 @@ export type Grade$inspectionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.InspectionRecordScalarFieldEnum | Prisma.InspectionRecordScalarFieldEnum[]
+}
+
+/**
+ * Grade.approvalResponsibilities
+ */
+export type Grade$approvalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalResponsibility
+   */
+  select?: Prisma.ApprovalResponsibilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalResponsibility
+   */
+  omit?: Prisma.ApprovalResponsibilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalResponsibilityInclude<ExtArgs> | null
+  where?: Prisma.ApprovalResponsibilityWhereInput
+  orderBy?: Prisma.ApprovalResponsibilityOrderByWithRelationInput | Prisma.ApprovalResponsibilityOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalResponsibilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalResponsibilityScalarFieldEnum | Prisma.ApprovalResponsibilityScalarFieldEnum[]
+}
+
+/**
+ * Grade.approvalRequests
+ */
+export type Grade$approvalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalRequest
+   */
+  select?: Prisma.ApprovalRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalRequest
+   */
+  omit?: Prisma.ApprovalRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalRequestInclude<ExtArgs> | null
+  where?: Prisma.ApprovalRequestWhereInput
+  orderBy?: Prisma.ApprovalRequestOrderByWithRelationInput | Prisma.ApprovalRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalRequestScalarFieldEnum | Prisma.ApprovalRequestScalarFieldEnum[]
 }
 
 /**

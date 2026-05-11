@@ -17,8 +17,8 @@ The repository now contains a runnable Next.js application scaffold with:
 - the public-tunnel runtime launcher `start-public-tunnel.cmd` is generated on demand by `scripts/start-school-public-tunnel.ps1` and is intentionally ignored by Git because it can contain workstation-specific paths and tunnel credentials
 - the public-tunnel launcher can now self-download PuTTY `plink.exe` into ignored local `artifacts\plink.exe` when the tool is missing from both the project artifact path and PATH
 - duplicate-start protection and existing-port detection in the Windows school-pilot launcher
-- user and permission management module for system administrators
-- approved school trial role model with school leaders, grade-scoped managers, and an optional managed-grade relation on database users
+- user and permission management module for system administrators, now including the V1.5 role model and teacher-account to teacher-profile binding
+- approved school trial role model with school leaders, grade-scoped managers, and an optional managed-grade relation on database users; V1.5 additionally supports department leaders, student affairs staff, academic affairs staff, admin office staff, logistics staff, and teacher accounts
 - Grade-scoped pilot account pack and school-leader read-only inspection access
 - verified native PostgreSQL 17 workstation installation with a real `school_affairs` database and a localhost-only live instance
 - school structure management module for visible grade, class, department, and subject maintenance, with `AcademicYear` retained only as an internal compatibility layer
@@ -29,10 +29,12 @@ The repository now contains a runnable Next.js application scaffold with:
 - alumni archive module for archived student query, edit, import, and export flows
 - inspection management module for student quantification and teacher quantification categories, items, record entry, filtered review, record edits, and mistaken-entry deletion
 - reporting module for student quantification and teacher quantification summaries, xlsx/csv exports, and export audit logging
+- application and approval module for teacher-submitted repair, material printing, and other configured requests, including approval responsibility routing, decision comments, print quantity tracking, and audit logging
+- approval pilot configuration seeding through `scripts/seed-approval-pilot-config.mjs`, which creates or repairs the bound teacher self-service account `teacher.wangming`, the `logistics.office` and `admin.office` approval accounts, and standard active responsibilities for repair, teaching printing, grade administrative printing, school administrative printing, and other daily requests
 - system-admin-only data management module for grouped record counts, search, pagination, selected-row deletion, fixed one-click cleanup, backup-before-delete protection, and read-only audit-log viewing
 - mobile-first quick task routes for active-student lookup and routine-inspection entry, keeping full maintenance workflows on the existing people and inspection pages; the student quick-search path now also treats dormitory-code keywords as case-insensitive, normalizes dormitory-related student profile values to uppercase on save/import so `C123` and `c123` resolve to the same dormitory, and requires grade-first class selection so quick-search class options stay limited to the chosen grade
 - visible grade/class selectors now load directly from `Grade` and `Class` instead of front-end academic-year groupings
-- the visible app shell now exposes only six business modules: school structure, user permissions, people records, alumni archive, routine inspection, and statistics export
+- the visible app shell now exposes seven business modules: school structure, user permissions, people records, alumni archive, routine inspection, application approval, and statistics export
 - the shared dashboard shell and global design tokens now use a lighter operator-facing visual system with a desktop sidebar, a mobile drawer navigation trigger, a desktop-sticky but mobile-non-sticky topbar, and consistent secondary-action styling for topbar controls
 - the Step 7 UI-delivery surface currently centers on `src/components/auth/login-form.tsx`, `src/components/shell/dashboard-shell.tsx`, `src/app/dashboard/page.tsx`, `src/components/form/submit-button.tsx`, and `docs/final-delivery-checklist.md`; the current shape removes the global RBAC explainer, the top `私有部署` badge, and the homepage `下一阶段任务` card so the dashboard reads as an operator work surface instead of a delivery checklist, and this slice has current static verification coverage through `typecheck`, `lint`, and `build`
 - the latest Step 7 feedback refinement also moves inspection save notices down into the record-entry section, anchors full-page inspection saves back to `#record-entry` for continuous data entry, links student grade/class selectors on the people page through a dedicated client component, removes duplicate topbar user-role wording, simplifies the homepage quick-task cards, and makes the mobile topbar non-sticky so it does not dominate narrow screens during scroll
@@ -70,6 +72,7 @@ The planned version 1 architecture is:
 - `progress.md` keeps the short active change log, while `progress-archive.md` keeps compressed older milestone history
 - `docs/README.md` is the operator-facing document index
 - `docs/pilot-accounts-and-usage-guide.md` is the live pilot source of truth for current workstation passwords, URLs, daily operator guidance, and the current quick-task usage rules
+- `README.md` is now kept intentionally short and mainly points readers toward `docs/README.md` plus the live pilot guide instead of repeating every operator detail inline
 - `docs/product-roadmap-v1-5-v2.md`, `docs/v1-5-executable-plan.md`, and `docs/roadmap-leadership-brief-v1-5-v2.pptx` are post-V1 planning and leadership-reporting artifacts; they should guide scope discussion but do not change the implemented architecture until explicitly approved
 - this file defines module boundaries, data flow, and architectural constraints
 
@@ -116,6 +119,7 @@ The planned version 1 architecture is:
 | `src/app/dashboard/people/export/teachers/route.ts` | teacher filtered export | filters, role context | `.xlsx` export | implemented |
 | `src/app/dashboard/people/export/students/route.ts` | student filtered export | filters, role context | `.xlsx` export | implemented |
 | `src/app/dashboard/inspection/page.tsx` | inspection management route entry | authenticated request, query filters | inspection management screen with read-only leader access and editable recorder/admin flows | implemented |
+| `src/app/dashboard/approvals/page.tsx` | application approval route entry | authenticated request, request types, approval responsibilities, query status | teacher request submission, approval decisions, request tracking, and admin configuration | implemented for V1.5 Step 8 |
 | `src/app/dashboard/exports/page.tsx` | export center route entry | authenticated request, report filters | inspection summary dashboard and export links | implemented |
 | `src/app/dashboard/exports/inspection/xlsx/route.ts` | inspection report Excel export | filters, role context | multi-sheet `.xlsx` export with detail rows plus summary sheets | implemented |
 | `src/app/dashboard/exports/inspection/csv/route.ts` | inspection report CSV export | filters, role context | `.csv` detail export with target-type-specific columns | implemented |
@@ -133,10 +137,12 @@ The planned version 1 architecture is:
 | `src/lib/validation/school-structure.ts` | structure management input validation | form submissions | normalized names and field constraints | implemented |
 | `src/lib/validation/people.ts` | teacher and student input validation | profile forms and filters | validated people payloads | implemented |
 | `src/lib/validation/inspection.ts` | inspection input validation | category, item, record, and filter forms | validated inspection payloads | implemented |
+| `src/lib/validation/approvals.ts` | application approval validation | type, responsibility, request, and decision forms | normalized approval payloads, including required print quantity fields | implemented for V1.5 Step 8 |
 | `src/lib/validation/reporting.ts` | report filter validation | export center filters | validated report filter payloads | implemented |
 | `src/lib/app-config.ts` | app metadata and dashboard highlight config | static config | UI labels and descriptions | implemented |
 | `src/modules/school-structure` | school structure module: page, actions, queries, and structure-specific UI helpers | admin form input | canonical school structure records | implemented |
 | `src/modules/users` | user permissions module: page, actions, queries, and role-management flows | system-admin forms | canonical login users and permission assignments | implemented for Step 7 |
+| `src/modules/approvals` | application approval module: page, actions, queries, labels, and routing helpers | teacher requests, approval configuration, decision forms | application requests, approval responsibility routing, decision logs, and audit rows | implemented for V1.5 Step 8 |
 | `src/modules/people` | people records module: page, actions, queries, helper utilities, spreadsheet helpers, category maintenance, and people export/template handlers | forms, filters, spreadsheet files | canonical teacher data, active student data, profile-field definitions, and `.xlsx` files | implemented for Step 4 plus lifecycle extension |
 | `src/modules/people/routes.ts` | people-module route handlers for teacher/student templates and exports | HTTP requests plus people filters | thin route results for `.xlsx` exports and templates | implemented |
 | `src/modules/alumni-archive` | alumni archive module: page plus archive-specific export/template handlers | archive filters, forms, spreadsheet files | canonical archived student data and `.xlsx` files | implemented for lifecycle extension |
@@ -381,6 +387,8 @@ Current implementation note:
 - `start-school-public-pilot.cmd` is now the one-click public startup entry: it prepares the app environment for the external base URL, ensures PuTTY `plink.exe` exists locally by downloading it to ignored `artifacts\plink.exe` when needed, ensures the visible `plink` tunnel launcher exists, opens or reuses the tunnel window, and opens a local app window through `scripts/start-school-pilot.ps1` so fresh clones get the normal dependency, build, duplicate-start, and production-start handling instead of assuming `.next` already exists.
 - A 2026-05-01 live recovery confirmed that data-heavy pages can fail with Prisma `P2022 ColumnNotFound` when the running app expects schema columns that have not yet been pushed to the live PostgreSQL database; the operational recovery is to run the Prisma schema sync against the local PostgreSQL database and then re-smoke the affected pages.
 - Operator-facing docs now separate the two common `This page couldn't load` recovery paths: stale Next.js static chunks require restarting the live site process, while Prisma schema drift requires syncing the live PostgreSQL schema and rechecking the data-heavy pages.
+- A 2026-05-11 recovery confirmed `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` can all fail together with server-side `500` when the live PostgreSQL schema lags behind the current Prisma schema after role or approval-model changes; the successful recovery was `npx.cmd prisma db push`, followed by authenticated route checks returning `200`.
+- The handoff docs now treat `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/approvals`, and the existing data-heavy pages as the minimum smoke surface after schema-affecting approval or role changes.
 - Operator-facing docs now also describe row-level correction and mistaken-entry deletion for people records, archived students, and routine inspection records, including the teacher deletion guard when inspection history already references that teacher.
 - The remaining rollout follow-ups are now operational rather than structural: keep the current detached-process story stable when needed, manually rebind the one legacy teacher-quantification record, decide when to use cohort rollover in practice, and only later upgrade to machine-wide pre-login auto-start if the school asks for it.
 
@@ -396,19 +404,35 @@ Current implementation note:
 8. `getBrowserBoundServerSession()` now treats a session as valid only when both the NextAuth session and the browser-session cookie are present.
 9. `/dashboard` routes check that browser-bound session server-side before rendering the app shell.
 10. Domain routes add explicit server-side role checks before allowing sensitive actions.
-11. Grade-scoped roles derive their allowed grade from the session and enforce it again inside people, inspection, and reporting server logic.
+11. Grade-scoped roles derive their allowed grade from the session and enforce it again inside people, inspection, reporting, and approval server logic.
+12. Teacher accounts can carry a `teacherId` in the session so self-service approval requests can be tied back to the teacher profile.
 
 ### User Management Data Flow
 
 1. A system administrator opens `/dashboard/users`.
 2. The server checks `requireSystemAdmin()` before loading or mutating users.
 3. User form input is validated by `src/lib/validation/users.ts`.
-4. The trial role model supports `SYSTEM_ADMIN`, `SCHOOL_LEADER`, `GRADE_MANAGER`, `DATA_MANAGER`, and `INSPECTION_STAFF`.
+4. The role model supports `SYSTEM_ADMIN`, `SCHOOL_LEADER`, `DEPARTMENT_LEADER`, `GRADE_MANAGER`, `STUDENT_AFFAIRS_STAFF`, `ACADEMIC_AFFAIRS_STAFF`, `ADMIN_OFFICE_STAFF`, `LOGISTICS_STAFF`, and `TEACHER`.
 5. Grade managers must be bound to exactly one `Grade` through `User.managedGradeId`; non-grade-scoped roles clear that field.
 6. New or reset passwords are hashed with `bcryptjs` before being stored in `User.passwordHash`.
 7. User records are not hard-deleted; administrators can enable or disable accounts.
 8. The action layer prevents the current database admin from disabling itself and prevents removing the last active system administrator.
 9. User creation, role updates, status changes, and password resets write `AuditLog` entries.
+
+### Application Approval Data Flow
+
+1. A teacher or system administrator opens `/dashboard/approvals` and submits a request from an active `ApprovalType`.
+2. Repair requests use the logistics responsibility kind; printing requests use material type to select teaching, grade administrative, or school administrative responsibility; other requests use their configured responsibility kind.
+3. The routing helper matches active `ApprovalResponsibility` rows by request type plus optional grade, subject, and department scope, then assigns the request to a current approver.
+4. Printing requests must include material type, print mode, paper size, and print quantity before they can be saved.
+5. Approvers can only approve pending requests when they are a system administrator or have an active matching approval responsibility.
+6. Approval or rejection writes decision status, decision comment, approver, decision time, an `ApprovalLog` row, and an `AuditLog` row.
+
+Current implementation note:
+
+- System administrators retain fallback approval authority for operational recovery.
+- School leaders can view approval records, but they no longer receive blanket decision authority; they must match an active approval responsibility unless they are operating through the system-admin role.
+- The pilot seed currently routes repair to `logistics.office`, teaching-use printing to `data.manager`, `2024级` grade-administrative printing to `grade11.manager1`, school-administrative printing for `校务办公室` to `admin.office`, and other daily requests to `leader1`.
 
 ## External Dependencies
 
@@ -440,3 +464,11 @@ Current implementation note:
 - Do we need guardian information in the first schema freeze, or can it remain optional?
 - Will the first release support only one campus, or do we need campus as a first-class entity?
 - After the first real system administrator account is verified, should the Bootstrap fallback remain enabled or be restricted further for production?
+
+## 2026-05-11 Permission-Context Update
+
+- The authorization layer now derives a teacher-position context from `User.teacherId` and `TeacherDepartmentAssignment`, including department-leader assignment tracking.
+- People, inspection, approval, and dashboard entrypoints now consume that context so permissions are no longer based on `User.role` alone where the plan required teacher-position awareness.
+- The dashboard shell now receives teacher identity types from the server so quick-entry and menu visibility can reflect teacher-side duties.
+- The approval submit flow now validates teacher-bound department scope before saving a school-administrative print request.
+- A standalone script assertion was added to keep the requested permission matrix executable outside the browser.

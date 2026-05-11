@@ -36,7 +36,7 @@
 - Completed in code/verification: the grade lifecycle has now been refactored from stage-based `HIGH_ONE/HIGH_TWO/HIGH_THREE` handling to an enrollment-year cohort model that keeps only the latest three cohorts active and archives older cohorts with labels such as `2022级入学 / 2025届毕业`
 - Completed in code/verification/docs: the approved low-risk de-academic-year compatibility pass now keeps visible workflows on grade and class only while `AcademicYear` remains a hidden compatibility layer, and the current local repo state has been re-verified after the interrupted earlier attempt
 - Completed in environment/verification: the live workstation deployment has now been re-smoked across `/dashboard/structure`, `/dashboard/people`, `/dashboard/inspection`, and `/dashboard/exports` for `admin`, `leader1`, and `grade11.manager1`, confirming the grade-first UI plus the expected role-scope boundaries after the compatibility pass
-- Completed in code/docs: the backend is now scoped to six business modules only - school structure, user permissions, people records, alumni archive, routine inspection, and statistics export - and the showcase/local-demo features have been removed
+- Completed in code/docs at Step 7: the backend was scoped to six business modules - school structure, user permissions, people records, alumni archive, routine inspection, and statistics export - and the showcase/local-demo features were removed; V1.5 Step 8 later expanded the live module count to seven by adding application approval
 - Completed in code/verification: routine inspection now splits into student quantification and teacher quantification, with teacher quantification records bound to teachers instead of classes across entry, query, statistics, export, and demo-seed flows
 - Completed in environment/verification: the inspection split schema has now been pushed to the live local PostgreSQL database, teacher-like legacy categories have been backfilled to teacher quantification, and role-based smoke checks now confirm student-versus-teacher quantification page behavior and export behavior
 - Completed in code/verification: Step 4 people records now support teacher multi-department affiliations plus configurable teacher or student information statistics categories, with templates and exports generated from the current active categories
@@ -47,6 +47,8 @@
 - Completed in code/docs/verification: Step 4 now treats former fixed statistics fields such as teacher employee number and student number as configurable profile categories, while identity card number is the required unique identifier for manual saves and spreadsheet import updates
 - Completed in code/docs/environment/verification: Step 3 cohort rollover now synchronizes teacher-facing grade-department names against the complete post-rollover active cohort set, and the live database has been repaired so its grade-department names match the current active cohorts
 - Completed in environment/verification: the 2026-05-01 live workstation outage follow-up restored the web service on `192.168.1.3:3000`, hardened the startup launcher against duplicate starts, resynced the live PostgreSQL schema after Prisma `P2022 ColumnNotFound` errors, and reverified the four affected business pages
+- Completed in code/schema/local database/docs: V1.5 Step 8 application and approval module for teacher repair, material printing, and other configured daily requests, including print quantity tracking and default approval type seeding
+- Completed in environment/verification: Step 8 pilot approval configuration now has a bound teacher account, standard approval accounts, and approval responsibilities covering repair, teaching-print, grade-admin-print, school-admin-print, and other requests; authenticated `/dashboard/approvals` access plus database-backed routing and permission assertions pass
 - Next recommended action: if another office PC on the same network still cannot open the current `SameNetworkLoginUrl` from `logs/current-school-pilot-url.txt` while the workstation itself returns `200`, check the Windows Firewall profile and inbound TCP `3000` rule on that network.
 
 ## Step 0: Freeze Version 1 Scope
@@ -234,6 +236,35 @@ Prepare the project for real use.
 - the release path is repeatable
 - the highest-value workflows pass smoke validation
 - data cleanup actions are covered by static checks plus a PGlite simulation of preview counts and foreign-key-safe deletion order
+
+## Step 8: Build Application And Approval Workflow
+
+### Goal
+
+Add a lightweight teacher-facing request workflow for daily repair, material printing, and other configured applications.
+
+### Deliverables
+
+- role model expanded to system administrator, school leader, department leader, grade manager, student affairs staff, academic affairs staff, admin office staff, logistics staff, and teacher
+- teacher user accounts can bind to teacher profile records
+- application type configuration for repair, printing, and other request types
+- approval responsibility configuration with optional request type, grade, subject, and department scope
+- teacher-facing application submission and personal request tracking
+- approval workbench for users with matching approval responsibilities
+- repair requests route to logistics approval responsibilities
+- printing requests route by material type: teaching use, grade administrative use, or school administrative use
+- printing requests require material type, print mode, paper size, and print quantity
+- approval and rejection actions save decision comments, approver, time, and audit logs
+
+### Verification
+
+- `npm.cmd run typecheck`
+- `npm.cmd run lint`
+- `npm.cmd run build`
+- teacher accounts can only see and submit their own requests
+- printing requests cannot submit without material type, print mode, paper size, and print quantity
+- users without matching approval responsibility cannot approve requests
+- configured repair, printing, and other request types route to matching approval responsibilities
 
 ## Session Prompt Template
 

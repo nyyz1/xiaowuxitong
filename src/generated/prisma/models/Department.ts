@@ -176,6 +176,8 @@ export type DepartmentWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Department"> | Date | string
   teachers?: Prisma.TeacherListRelationFilter
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }
 
 export type DepartmentOrderByWithRelationInput = {
@@ -185,6 +187,8 @@ export type DepartmentOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   teachers?: Prisma.TeacherOrderByRelationAggregateInput
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentOrderByRelationAggregateInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityOrderByRelationAggregateInput
+  approvalRequests?: Prisma.ApprovalRequestOrderByRelationAggregateInput
 }
 
 export type DepartmentWhereUniqueInput = Prisma.AtLeast<{
@@ -197,6 +201,8 @@ export type DepartmentWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Department"> | Date | string
   teachers?: Prisma.TeacherListRelationFilter
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }, "id" | "name">
 
 export type DepartmentOrderByWithAggregationInput = {
@@ -226,6 +232,8 @@ export type DepartmentCreateInput = {
   updatedAt?: Date | string
   teachers?: Prisma.TeacherCreateNestedManyWithoutDepartmentInput
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentUncheckedCreateInput = {
@@ -235,6 +243,8 @@ export type DepartmentUncheckedCreateInput = {
   updatedAt?: Date | string
   teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutDepartmentInput
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentUpdateInput = {
@@ -244,6 +254,8 @@ export type DepartmentUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUpdateManyWithoutDepartmentNestedInput
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutDepartmentNestedInput
 }
 
 export type DepartmentUncheckedUpdateInput = {
@@ -253,6 +265,8 @@ export type DepartmentUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUncheckedUpdateManyWithoutDepartmentNestedInput
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutDepartmentNestedInput
 }
 
 export type DepartmentCreateManyInput = {
@@ -337,12 +351,46 @@ export type DepartmentUpdateOneRequiredWithoutTeacherAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DepartmentUpdateToOneWithWhereWithoutTeacherAssignmentsInput, Prisma.DepartmentUpdateWithoutTeacherAssignmentsInput>, Prisma.DepartmentUncheckedUpdateWithoutTeacherAssignmentsInput>
 }
 
+export type DepartmentCreateNestedOneWithoutApprovalResponsibilitiesInput = {
+  create?: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.DepartmentCreateOrConnectWithoutApprovalResponsibilitiesInput
+  connect?: Prisma.DepartmentWhereUniqueInput
+}
+
+export type DepartmentUpdateOneWithoutApprovalResponsibilitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.DepartmentCreateOrConnectWithoutApprovalResponsibilitiesInput
+  upsert?: Prisma.DepartmentUpsertWithoutApprovalResponsibilitiesInput
+  disconnect?: Prisma.DepartmentWhereInput | boolean
+  delete?: Prisma.DepartmentWhereInput | boolean
+  connect?: Prisma.DepartmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepartmentUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUpdateWithoutApprovalResponsibilitiesInput>, Prisma.DepartmentUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type DepartmentCreateNestedOneWithoutApprovalRequestsInput = {
+  create?: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.DepartmentCreateOrConnectWithoutApprovalRequestsInput
+  connect?: Prisma.DepartmentWhereUniqueInput
+}
+
+export type DepartmentUpdateOneWithoutApprovalRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.DepartmentCreateOrConnectWithoutApprovalRequestsInput
+  upsert?: Prisma.DepartmentUpsertWithoutApprovalRequestsInput
+  disconnect?: Prisma.DepartmentWhereInput | boolean
+  delete?: Prisma.DepartmentWhereInput | boolean
+  connect?: Prisma.DepartmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DepartmentUpdateToOneWithWhereWithoutApprovalRequestsInput, Prisma.DepartmentUpdateWithoutApprovalRequestsInput>, Prisma.DepartmentUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
 export type DepartmentCreateWithoutTeachersInput = {
   id?: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentUncheckedCreateWithoutTeachersInput = {
@@ -351,6 +399,8 @@ export type DepartmentUncheckedCreateWithoutTeachersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentCreateOrConnectWithoutTeachersInput = {
@@ -375,6 +425,8 @@ export type DepartmentUpdateWithoutTeachersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutDepartmentNestedInput
 }
 
 export type DepartmentUncheckedUpdateWithoutTeachersInput = {
@@ -383,6 +435,8 @@ export type DepartmentUncheckedUpdateWithoutTeachersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutDepartmentNestedInput
 }
 
 export type DepartmentCreateWithoutTeacherAssignmentsInput = {
@@ -391,6 +445,8 @@ export type DepartmentCreateWithoutTeacherAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   teachers?: Prisma.TeacherCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentUncheckedCreateWithoutTeacherAssignmentsInput = {
@@ -399,6 +455,8 @@ export type DepartmentUncheckedCreateWithoutTeacherAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentCreateOrConnectWithoutTeacherAssignmentsInput = {
@@ -423,6 +481,8 @@ export type DepartmentUpdateWithoutTeacherAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutDepartmentNestedInput
 }
 
 export type DepartmentUncheckedUpdateWithoutTeacherAssignmentsInput = {
@@ -431,6 +491,120 @@ export type DepartmentUncheckedUpdateWithoutTeacherAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutDepartmentNestedInput
+}
+
+export type DepartmentCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherCreateNestedManyWithoutDepartmentInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutDepartmentInput
+}
+
+export type DepartmentUncheckedCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutDepartmentInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutDepartmentInput
+}
+
+export type DepartmentCreateOrConnectWithoutApprovalResponsibilitiesInput = {
+  where: Prisma.DepartmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedCreateWithoutApprovalResponsibilitiesInput>
+}
+
+export type DepartmentUpsertWithoutApprovalResponsibilitiesInput = {
+  update: Prisma.XOR<Prisma.DepartmentUpdateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+  create: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  where?: Prisma.DepartmentWhereInput
+}
+
+export type DepartmentUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput = {
+  where?: Prisma.DepartmentWhereInput
+  data: Prisma.XOR<Prisma.DepartmentUpdateWithoutApprovalResponsibilitiesInput, Prisma.DepartmentUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type DepartmentUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUpdateManyWithoutDepartmentNestedInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutDepartmentNestedInput
+}
+
+export type DepartmentUncheckedUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUncheckedUpdateManyWithoutDepartmentNestedInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutDepartmentNestedInput
+}
+
+export type DepartmentCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherCreateNestedManyWithoutDepartmentInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutDepartmentInput
+}
+
+export type DepartmentUncheckedCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutDepartmentInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedCreateNestedManyWithoutDepartmentInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutDepartmentInput
+}
+
+export type DepartmentCreateOrConnectWithoutApprovalRequestsInput = {
+  where: Prisma.DepartmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedCreateWithoutApprovalRequestsInput>
+}
+
+export type DepartmentUpsertWithoutApprovalRequestsInput = {
+  update: Prisma.XOR<Prisma.DepartmentUpdateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedUpdateWithoutApprovalRequestsInput>
+  create: Prisma.XOR<Prisma.DepartmentCreateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedCreateWithoutApprovalRequestsInput>
+  where?: Prisma.DepartmentWhereInput
+}
+
+export type DepartmentUpdateToOneWithWhereWithoutApprovalRequestsInput = {
+  where?: Prisma.DepartmentWhereInput
+  data: Prisma.XOR<Prisma.DepartmentUpdateWithoutApprovalRequestsInput, Prisma.DepartmentUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
+export type DepartmentUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUpdateManyWithoutDepartmentNestedInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutDepartmentNestedInput
+}
+
+export type DepartmentUncheckedUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUncheckedUpdateManyWithoutDepartmentNestedInput
+  teacherAssignments?: Prisma.TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutDepartmentNestedInput
 }
 
 
@@ -441,11 +615,15 @@ export type DepartmentUncheckedUpdateWithoutTeacherAssignmentsInput = {
 export type DepartmentCountOutputType = {
   teachers: number
   teacherAssignments: number
+  approvalResponsibilities: number
+  approvalRequests: number
 }
 
 export type DepartmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teachers?: boolean | DepartmentCountOutputTypeCountTeachersArgs
   teacherAssignments?: boolean | DepartmentCountOutputTypeCountTeacherAssignmentsArgs
+  approvalResponsibilities?: boolean | DepartmentCountOutputTypeCountApprovalResponsibilitiesArgs
+  approvalRequests?: boolean | DepartmentCountOutputTypeCountApprovalRequestsArgs
 }
 
 /**
@@ -472,6 +650,20 @@ export type DepartmentCountOutputTypeCountTeacherAssignmentsArgs<ExtArgs extends
   where?: Prisma.TeacherDepartmentAssignmentWhereInput
 }
 
+/**
+ * DepartmentCountOutputType without action
+ */
+export type DepartmentCountOutputTypeCountApprovalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalResponsibilityWhereInput
+}
+
+/**
+ * DepartmentCountOutputType without action
+ */
+export type DepartmentCountOutputTypeCountApprovalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalRequestWhereInput
+}
+
 
 export type DepartmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -480,6 +672,8 @@ export type DepartmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedAt?: boolean
   teachers?: boolean | Prisma.Department$teachersArgs<ExtArgs>
   teacherAssignments?: boolean | Prisma.Department$teacherAssignmentsArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Department$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Department$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.DepartmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["department"]>
 
@@ -508,6 +702,8 @@ export type DepartmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type DepartmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teachers?: boolean | Prisma.Department$teachersArgs<ExtArgs>
   teacherAssignments?: boolean | Prisma.Department$teacherAssignmentsArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Department$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Department$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.DepartmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DepartmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -518,6 +714,8 @@ export type $DepartmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     teachers: Prisma.$TeacherPayload<ExtArgs>[]
     teacherAssignments: Prisma.$TeacherDepartmentAssignmentPayload<ExtArgs>[]
+    approvalResponsibilities: Prisma.$ApprovalResponsibilityPayload<ExtArgs>[]
+    approvalRequests: Prisma.$ApprovalRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -920,6 +1118,8 @@ export interface Prisma__DepartmentClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   teachers<T extends Prisma.Department$teachersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Department$teachersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   teacherAssignments<T extends Prisma.Department$teacherAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Department$teacherAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherDepartmentAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalResponsibilities<T extends Prisma.Department$approvalResponsibilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Department$approvalResponsibilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalResponsibilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalRequests<T extends Prisma.Department$approvalRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Department$approvalRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1391,6 +1591,54 @@ export type Department$teacherAssignmentsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.TeacherDepartmentAssignmentScalarFieldEnum | Prisma.TeacherDepartmentAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Department.approvalResponsibilities
+ */
+export type Department$approvalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalResponsibility
+   */
+  select?: Prisma.ApprovalResponsibilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalResponsibility
+   */
+  omit?: Prisma.ApprovalResponsibilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalResponsibilityInclude<ExtArgs> | null
+  where?: Prisma.ApprovalResponsibilityWhereInput
+  orderBy?: Prisma.ApprovalResponsibilityOrderByWithRelationInput | Prisma.ApprovalResponsibilityOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalResponsibilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalResponsibilityScalarFieldEnum | Prisma.ApprovalResponsibilityScalarFieldEnum[]
+}
+
+/**
+ * Department.approvalRequests
+ */
+export type Department$approvalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalRequest
+   */
+  select?: Prisma.ApprovalRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalRequest
+   */
+  omit?: Prisma.ApprovalRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalRequestInclude<ExtArgs> | null
+  where?: Prisma.ApprovalRequestWhereInput
+  orderBy?: Prisma.ApprovalRequestOrderByWithRelationInput | Prisma.ApprovalRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalRequestScalarFieldEnum | Prisma.ApprovalRequestScalarFieldEnum[]
 }
 
 /**

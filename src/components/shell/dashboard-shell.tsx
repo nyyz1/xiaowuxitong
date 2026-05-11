@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Button, Drawer, Grid, Layout, Menu, Space, Typography } from "antd";
 import type { MenuProps } from "antd";
-import { UserRole } from "@/generated/prisma/enums";
+import { TeacherDepartmentIdentityType, UserRole } from "@/generated/prisma/enums";
 import { LogoutButton } from "@/components/shell/logout-button";
 import { appConfig } from "@/lib/app-config";
+import { userRoleLabels } from "@/lib/role-labels";
 
 const { Header, Content, Sider } = Layout;
 const { useBreakpoint } = Grid;
@@ -15,20 +16,21 @@ const { useBreakpoint } = Grid;
 type DashboardShellProps = PropsWithChildren<{
   userName: string;
   userRole: UserRole;
+  teacherIdentityTypes?: TeacherDepartmentIdentityType[];
 }>;
 
-const roleLabels: Record<UserRole, string> = {
-  SYSTEM_ADMIN: "系统管理员",
-  SCHOOL_LEADER: "校领导",
-  GRADE_MANAGER: "年级管理员",
-  DATA_MANAGER: "数据管理员",
-  INSPECTION_STAFF: "检查人员",
-};
+function hasIdentity(
+  teacherIdentityTypes: TeacherDepartmentIdentityType[],
+  identityType: TeacherDepartmentIdentityType,
+) {
+  return teacherIdentityTypes.includes(identityType);
+}
 
 function canSeeArchiveMenu(userRole: UserRole) {
   return (
     userRole === UserRole.SYSTEM_ADMIN ||
-    userRole === UserRole.DATA_MANAGER ||
+    userRole === UserRole.ACADEMIC_AFFAIRS_STAFF ||
+    userRole === UserRole.ADMIN_OFFICE_STAFF ||
     userRole === UserRole.SCHOOL_LEADER
   );
 }
@@ -37,25 +39,81 @@ function canSeeDataManagementMenu(userRole: UserRole) {
   return userRole === UserRole.SYSTEM_ADMIN;
 }
 
-function canSeeStudentQuickSearch(userRole: UserRole) {
+function canSeePeopleMenu(
+  userRole: UserRole,
+  teacherIdentityTypes: TeacherDepartmentIdentityType[],
+) {
+  if (
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.STUDENT_AFFAIRS_STAFF) ||
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.ACADEMIC_AFFAIRS_STAFF) ||
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.DEPARTMENT_LEADER)
+  ) {
+    return true;
+  }
+
+  return (
+    userRole !== UserRole.TEACHER &&
+    userRole !== UserRole.LOGISTICS_STAFF &&
+    userRole !== UserRole.DEPARTMENT_LEADER
+  );
+}
+
+function canSeeInspectionMenu(
+  userRole: UserRole,
+  teacherIdentityTypes: TeacherDepartmentIdentityType[],
+) {
+  if (
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.STUDENT_AFFAIRS_STAFF) ||
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.ACADEMIC_AFFAIRS_STAFF)
+  ) {
+    return true;
+  }
+
   return (
     userRole === UserRole.SYSTEM_ADMIN ||
-    userRole === UserRole.DATA_MANAGER ||
     userRole === UserRole.SCHOOL_LEADER ||
+    userRole === UserRole.STUDENT_AFFAIRS_STAFF ||
+    userRole === UserRole.ACADEMIC_AFFAIRS_STAFF ||
     userRole === UserRole.GRADE_MANAGER
   );
 }
 
-function canSeeInspectionQuickEntry(userRole: UserRole) {
+function canSeeReportMenu(userRole: UserRole) {
+  return userRole !== UserRole.TEACHER && userRole !== UserRole.LOGISTICS_STAFF;
+}
+
+function canSeeStudentQuickSearch(userRole: UserRole) {
   return (
     userRole === UserRole.SYSTEM_ADMIN ||
-    userRole === UserRole.INSPECTION_STAFF ||
+    userRole === UserRole.ACADEMIC_AFFAIRS_STAFF ||
+    userRole === UserRole.ADMIN_OFFICE_STAFF ||
+    userRole === UserRole.SCHOOL_LEADER ||
+    userRole === UserRole.DEPARTMENT_LEADER ||
+    userRole === UserRole.GRADE_MANAGER
+  );
+}
+
+function canSeeInspectionQuickEntry(
+  userRole: UserRole,
+  teacherIdentityTypes: TeacherDepartmentIdentityType[],
+) {
+  if (
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.STUDENT_AFFAIRS_STAFF) ||
+    hasIdentity(teacherIdentityTypes, TeacherDepartmentIdentityType.ACADEMIC_AFFAIRS_STAFF)
+  ) {
+    return true;
+  }
+
+  return (
+    userRole === UserRole.SYSTEM_ADMIN ||
+    userRole === UserRole.STUDENT_AFFAIRS_STAFF ||
     userRole === UserRole.GRADE_MANAGER
   );
 }
 
 function buildMenuItems(
   userRole: UserRole,
+  teacherIdentityTypes: TeacherDepartmentIdentityType[],
   onNavigate?: () => void,
 ): NonNullable<MenuProps["items"]> {
   const items: NonNullable<MenuProps["items"]> = [
@@ -67,23 +125,28 @@ function buildMenuItems(
         </Link>
       ),
     },
-    {
-      key: "structure",
-      label: (
-        <Link href="/dashboard/structure" onClick={onNavigate}>
-          学校结构
-        </Link>
-      ),
-    },
-    {
-      key: "users",
-      label: (
-        <Link href="/dashboard/users" onClick={onNavigate}>
-          用户权限
-        </Link>
-      ),
-    },
   ];
+
+  if (userRole === UserRole.SYSTEM_ADMIN) {
+    items.push(
+      {
+        key: "structure",
+        label: (
+          <Link href="/dashboard/structure" onClick={onNavigate}>
+            学校结构
+          </Link>
+        ),
+      },
+      {
+        key: "users",
+        label: (
+          <Link href="/dashboard/users" onClick={onNavigate}>
+            用户权限
+          </Link>
+        ),
+      },
+    );
+  }
 
   if (canSeeDataManagementMenu(userRole)) {
     items.push({
@@ -96,14 +159,16 @@ function buildMenuItems(
     });
   }
 
-  items.push({
-    key: "people",
-    label: (
-      <Link href="/dashboard/people" onClick={onNavigate}>
-        师生档案
-      </Link>
-    ),
-  });
+  if (canSeePeopleMenu(userRole, teacherIdentityTypes)) {
+    items.push({
+      key: "people",
+      label: (
+        <Link href="/dashboard/people" onClick={onNavigate}>
+          师生档案
+        </Link>
+      ),
+    });
+  }
 
   if (canSeeArchiveMenu(userRole)) {
     items.push({
@@ -116,24 +181,36 @@ function buildMenuItems(
     });
   }
 
-  items.push(
-    {
+  if (canSeeInspectionMenu(userRole, teacherIdentityTypes)) {
+    items.push({
       key: "inspection",
       label: (
         <Link href="/dashboard/inspection" onClick={onNavigate}>
           常规检查
         </Link>
       ),
-    },
-    {
+    });
+  }
+
+  items.push({
+    key: "approvals",
+    label: (
+      <Link href="/dashboard/approvals" onClick={onNavigate}>
+        申请审批
+      </Link>
+    ),
+  });
+
+  if (canSeeReportMenu(userRole)) {
+    items.push({
       key: "exports",
       label: (
         <Link href="/dashboard/exports" onClick={onNavigate}>
           统计导出
         </Link>
       ),
-    },
-  );
+    });
+  }
 
   return items;
 }
@@ -143,65 +220,26 @@ type SearchParamReader = {
 };
 
 function getSelectedKey(pathname: string) {
-  if (pathname.startsWith("/dashboard/structure")) {
-    return "structure";
-  }
-
-  if (pathname.startsWith("/dashboard/users")) {
-    return "users";
-  }
-
-  if (pathname.startsWith("/dashboard/data-management")) {
-    return "data-management";
-  }
-
-  if (pathname.startsWith("/dashboard/archive")) {
-    return "archive";
-  }
-
-  if (pathname.startsWith("/dashboard/people")) {
-    return "people";
-  }
-
-  if (pathname.startsWith("/dashboard/inspection")) {
-    return "inspection";
-  }
-
-  if (pathname.startsWith("/dashboard/exports")) {
-    return "exports";
-  }
-
+  if (pathname.startsWith("/dashboard/structure")) return "structure";
+  if (pathname.startsWith("/dashboard/users")) return "users";
+  if (pathname.startsWith("/dashboard/data-management")) return "data-management";
+  if (pathname.startsWith("/dashboard/archive")) return "archive";
+  if (pathname.startsWith("/dashboard/people")) return "people";
+  if (pathname.startsWith("/dashboard/inspection")) return "inspection";
+  if (pathname.startsWith("/dashboard/approvals")) return "approvals";
+  if (pathname.startsWith("/dashboard/exports")) return "exports";
   return "overview";
 }
 
 function getModuleLabel(pathname: string, searchParams: SearchParamReader) {
-  if (pathname.startsWith("/dashboard/quick/students")) {
-    return "学生快查";
-  }
-
-  if (pathname.startsWith("/dashboard/quick/inspection")) {
-    return "量化快录";
-  }
-
-  if (pathname.startsWith("/dashboard/users")) {
-    return "用户权限已启用";
-  }
-
-  if (pathname.startsWith("/dashboard/data-management")) {
-    return "数据管理已启用";
-  }
-
-  if (pathname.startsWith("/dashboard/archive")) {
-    return "往届存档已启用";
-  }
-
-  if (pathname.startsWith("/dashboard/exports")) {
-    return "统计导出已启用";
-  }
-
-  if (pathname.startsWith("/dashboard/inspection")) {
-    return "常规检查已就绪";
-  }
+  if (pathname.startsWith("/dashboard/quick/students")) return "学生快查";
+  if (pathname.startsWith("/dashboard/quick/inspection")) return "量化快录";
+  if (pathname.startsWith("/dashboard/users")) return "用户权限已启用";
+  if (pathname.startsWith("/dashboard/data-management")) return "数据管理已启用";
+  if (pathname.startsWith("/dashboard/archive")) return "往届存档已启用";
+  if (pathname.startsWith("/dashboard/exports")) return "统计导出已启用";
+  if (pathname.startsWith("/dashboard/approvals")) return "申请审批已启用";
+  if (pathname.startsWith("/dashboard/inspection")) return "常规检查已就绪";
 
   if (pathname.startsWith("/dashboard/people")) {
     return searchParams.get("view") === "teachers"
@@ -209,10 +247,7 @@ function getModuleLabel(pathname: string, searchParams: SearchParamReader) {
       : "学生档案已就绪";
   }
 
-  if (pathname.startsWith("/dashboard/structure")) {
-    return "学校结构已就绪";
-  }
-
+  if (pathname.startsWith("/dashboard/structure")) return "学校结构已就绪";
   return "校务后台";
 }
 
@@ -220,14 +255,17 @@ export function DashboardShell({
   children,
   userName,
   userRole,
+  teacherIdentityTypes = [],
 }: DashboardShellProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const screens = useBreakpoint();
   const isDesktop = screens.lg ?? false;
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const menuItems = buildMenuItems(userRole, () => setIsMobileNavOpen(false));
-  const roleLabel = roleLabels[userRole];
+  const menuItems = buildMenuItems(userRole, teacherIdentityTypes, () =>
+    setIsMobileNavOpen(false),
+  );
+  const roleLabel = userRoleLabels[userRole];
   const userSummary =
     userName.trim() && userName.trim() !== roleLabel
       ? `当前用户：${userName} · ${roleLabel}`
@@ -265,7 +303,7 @@ export function DashboardShell({
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-[var(--text-muted)]">
                 <span className="coral-dot" />
-                <span>档案与检查工作台</span>
+                <span>档案、检查与审批工作台</span>
               </div>
             </div>
 
@@ -357,7 +395,7 @@ export function DashboardShell({
                 学生快查
               </Link>
             ) : null}
-            {canSeeInspectionQuickEntry(userRole) ? (
+            {canSeeInspectionQuickEntry(userRole, teacherIdentityTypes) ? (
               <Link
                 href="/dashboard/quick/inspection"
                 className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
@@ -365,6 +403,12 @@ export function DashboardShell({
                 量化快录
               </Link>
             ) : null}
+            <Link
+              href="/dashboard/approvals"
+              className="elegant-secondary-link inline-flex h-9 items-center rounded-md border border-[var(--panel-border)] bg-white px-3 text-sm font-semibold text-[var(--accent-strong)]"
+            >
+              申请审批
+            </Link>
             <LogoutButton />
           </Space>
         </Header>

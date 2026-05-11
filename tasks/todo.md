@@ -1,5 +1,15 @@
 ﻿# Current Task Plan
 
+## V1.5 application approval documentation cleanup
+
+- [x] Reconcile main README and delivery docs from the old six-module wording to the current seven-module application.
+- [x] Update operator-facing role labels from data-manager / inspection-staff language to the current school job-role model.
+- [x] Add approval-module smoke coverage to deployment and acceptance docs, including print material type, print mode, paper size, and print quantity.
+- [x] Record the cleanup in `memory-bank/progress.md` and `tasks/lessons.md`.
+- [x] Create or bind a pilot teacher self-service account and standard approval responsibilities for the approval smoke path.
+- [x] Run authenticated `/dashboard/approvals` page access and approval-routing smoke after pilot teacher and approval responsibilities are configured.
+- [ ] Run screenshot-level in-app browser visual smoke for `/dashboard/approvals` when the browser plugin connection is stable.
+
 ## Step 7 knowledge cleanup and handoff consistency
 
 - [x] Reconcile the public-pilot launcher docs with the current `start-school-public-tunnel.ps1` behavior so reader-facing docs no longer claim the launcher runs raw `npm.cmd run start`.

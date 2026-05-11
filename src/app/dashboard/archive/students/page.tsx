@@ -1,6 +1,7 @@
 import {
   canEditPeople,
   canImportStudentData,
+  getTeacherPositionContext,
   requireAlumniArchiveAccess,
 } from "@/lib/authorization";
 import { AlumniArchivePage } from "@/modules/alumni-archive/page";
@@ -25,6 +26,7 @@ export default async function AlumniArchiveRoute({
   searchParams,
 }: AlumniArchiveRouteProps) {
   const session = await requireAlumniArchiveAccess();
+  const positions = await getTeacherPositionContext(session);
   const params = await searchParams;
   const filters = normalizePeopleFilters(params);
   const data = await getPeopleManagementData(filters, {
@@ -46,8 +48,8 @@ export default async function AlumniArchiveRoute({
       filters={filters}
       notice={notice}
       access={{
-        canImportStudentData: canImportStudentData(session.user.role),
-        canEditPeople: canEditPeople(session.user.role),
+        canImportStudentData: canImportStudentData(session.user.role, positions),
+        canEditPeople: canEditPeople(session.user.role, positions),
       }}
     />
   );

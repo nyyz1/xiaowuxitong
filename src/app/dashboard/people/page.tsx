@@ -1,9 +1,12 @@
 import {
+  canEditStudentData,
+  canEditTeacherData,
   canEditPeople,
   canViewAlumniArchive,
   canImportStudentData,
   canImportTeacherData,
   canViewTeacherData,
+  getDepartmentLeaderDepartmentIds,
   getManagedGradeId,
   isGradeManagerRole,
   requirePeopleManager,
@@ -33,16 +36,24 @@ export default async function PeopleManagementPage({
 
   const params = await searchParams;
   const filters = normalizePeopleFilters(params);
-  const canCurrentRoleViewTeacherData = canViewTeacherData(session.user.role);
+  const currentSession = session.session;
+  const positions = session.positions;
+  const departmentScopeIds = getDepartmentLeaderDepartmentIds(positions);
+  const canCurrentRoleViewTeacherData = canViewTeacherData(
+    currentSession.user.role,
+    positions,
+  );
   const requestedView = readMessageValue(params.view);
   const activeView: PeopleViewMode =
     requestedView === "teachers" && canCurrentRoleViewTeacherData
       ? "teachers"
       : "students";
   const data = await getPeopleManagementData(filters, {
-    gradeScopeId: getManagedGradeId(session),
+    gradeScopeId: getManagedGradeId(currentSession),
     includeTeacherData: canCurrentRoleViewTeacherData,
     studentViewMode: "active",
+    teacherDepartmentScopeIds: departmentScopeIds,
+    includeStudentData: departmentScopeIds.length === 0,
   });
   const message = readMessageValue(params.message);
   const toneValue = readMessageValue(params.tone);
@@ -61,11 +72,18 @@ export default async function PeopleManagementPage({
       notice={notice}
       access={{
         canViewTeacherData: canCurrentRoleViewTeacherData,
-        canImportTeacherData: canImportTeacherData(session.user.role),
-        canImportStudentData: canImportStudentData(session.user.role),
-        canEditPeople: canEditPeople(session.user.role),
-        canViewAlumniArchive: canViewAlumniArchive(session.user.role),
-        isGradeScoped: isGradeManagerRole(session.user.role),
+        canImportTeacherData: canImportTeacherData(currentSession.user.role, positions),
+        canImportStudentData:
+          departmentScopeIds.length === 0 &&
+          canImportStudentData(currentSession.user.role, positions),
+        canEditTeacherData: canEditTeacherData(currentSession.user.role, positions),
+        canEditStudentData:
+          departmentScopeIds.length === 0 &&
+          canEditStudentData(currentSession.user.role, positions),
+        canEditPeople: canEditPeople(currentSession.user.role, positions),
+        canViewAlumniArchive: canViewAlumniArchive(currentSession.user.role),
+        isGradeScoped: isGradeManagerRole(currentSession.user.role),
+        isDepartmentScoped: departmentScopeIds.length > 0,
       }}
     />
   );

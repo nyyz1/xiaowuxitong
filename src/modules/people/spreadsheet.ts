@@ -11,6 +11,7 @@ export const teacherBaseTemplateHeaders = [
   "身份证号*",
   "姓名*",
   "归属部门",
+  "部门身份",
   "学科",
   "任职状态",
 ] as const;
@@ -27,6 +28,7 @@ export const teacherImportColumnAliases = {
   idCardNumber: ["身份证号*", "身份证号", "idCardNumber"],
   name: ["姓名*", "姓名", "name"],
   departments: ["归属部门", "部门", "department"],
+  departmentIdentities: ["部门身份", "部门岗位", "departmentIdentities"],
   subject: ["学科", "subject"],
   employmentStatus: ["任职状态", "状态", "employmentStatus"],
 } as const;

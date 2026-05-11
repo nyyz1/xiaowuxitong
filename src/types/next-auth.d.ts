@@ -7,12 +7,14 @@ declare module "next-auth" {
       id: string;
       role: UserRole;
       managedGradeId?: string | null;
+      teacherId?: string | null;
     };
   }
 
   interface User {
     role?: UserRole;
     managedGradeId?: string | null;
+    teacherId?: string | null;
   }
 }
 
@@ -20,5 +22,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: UserRole;
     managedGradeId?: string | null;
+    teacherId?: string | null;
   }
 }

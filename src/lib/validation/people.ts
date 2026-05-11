@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TeacherDepartmentIdentityType } from "@/generated/prisma/enums";
 import {
   studentStatuses,
   teacherStatuses,
@@ -42,6 +43,21 @@ export const teacherMutationSchema = z.object({
   name: requiredTextSchema,
   gender: optionalTextSchema,
   departmentIds: z.array(idSchema).optional().default([]),
+  departmentIdentities: z
+    .record(
+      idSchema,
+      z.enum([
+        TeacherDepartmentIdentityType.FRONTLINE_TEACHER,
+        TeacherDepartmentIdentityType.DEPARTMENT_LEADER,
+        TeacherDepartmentIdentityType.GRADE_MANAGER,
+        TeacherDepartmentIdentityType.STUDENT_AFFAIRS_STAFF,
+        TeacherDepartmentIdentityType.ACADEMIC_AFFAIRS_STAFF,
+        TeacherDepartmentIdentityType.LOGISTICS_STAFF,
+        TeacherDepartmentIdentityType.GRADE_SUBJECT_LEADER,
+      ]),
+    )
+    .optional()
+    .default({}),
   subjectId: optionalIdSchema,
   duties: z.string().trim().max(200).optional().default(""),
   phone: optionalTextSchema,

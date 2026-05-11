@@ -36,6 +36,16 @@ function optionalManagedGradeId(role: UserRole, managedGradeId: string) {
   return normalized;
 }
 
+function optionalTeacherId(role: UserRole, teacherId: string) {
+  const normalized = teacherId.trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  return normalized;
+}
+
 function redirectWithNotice(message: string, tone: NoticeTone = "success"): never {
   const params = new URLSearchParams({
     message,
@@ -118,6 +128,7 @@ export async function createUser(formData: FormData) {
     displayName: getStringValue(formData, "displayName"),
     role: getStringValue(formData, "role"),
     managedGradeId: getStringValue(formData, "managedGradeId"),
+    teacherId: getStringValue(formData, "teacherId"),
     password: getStringValue(formData, "password"),
     isActive: getBooleanValue(formData, "isActive"),
   });
@@ -132,6 +143,7 @@ export async function createUser(formData: FormData) {
       parsed.data.role,
       parsed.data.managedGradeId,
     );
+    const teacherId = optionalTeacherId(parsed.data.role, parsed.data.teacherId);
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -141,6 +153,7 @@ export async function createUser(formData: FormData) {
           passwordHash,
           role: parsed.data.role,
           managedGradeId,
+          teacherId,
           isActive: parsed.data.isActive,
         },
         include: {
@@ -167,6 +180,7 @@ export async function createUser(formData: FormData) {
             managedGradeName: user.managedGrade
               ? user.managedGrade.name
               : null,
+            teacherId,
           },
         },
       });
@@ -186,6 +200,7 @@ export async function updateUser(formData: FormData) {
     displayName: getStringValue(formData, "displayName"),
     role: getStringValue(formData, "role"),
     managedGradeId: getStringValue(formData, "managedGradeId"),
+    teacherId: getStringValue(formData, "teacherId"),
   });
 
   if (!parsed.success) {
@@ -223,6 +238,7 @@ export async function updateUser(formData: FormData) {
       parsed.data.role,
       parsed.data.managedGradeId,
     );
+    const teacherId = optionalTeacherId(parsed.data.role, parsed.data.teacherId);
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.update({
@@ -233,6 +249,7 @@ export async function updateUser(formData: FormData) {
           displayName: parsed.data.displayName,
           role: parsed.data.role,
           managedGradeId,
+          teacherId,
         },
         include: {
           managedGrade: {
@@ -257,6 +274,7 @@ export async function updateUser(formData: FormData) {
             managedGradeName: user.managedGrade
               ? user.managedGrade.name
               : null,
+            teacherId,
           },
         },
       });

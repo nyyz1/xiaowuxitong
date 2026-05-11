@@ -31,6 +31,7 @@ async function authorizeDatabaseUser(username: string, password: string) {
         passwordHash: true,
         role: true,
         managedGradeId: true,
+        teacherId: true,
         isActive: true,
       },
     });
@@ -51,6 +52,7 @@ async function authorizeDatabaseUser(username: string, password: string) {
       email: `${user.username}@school.local`,
       role: user.role,
       managedGradeId: user.managedGradeId,
+      teacherId: user.teacherId,
     };
   } catch {
     // Keep the Bootstrap account usable while the database is not reachable.
@@ -110,6 +112,7 @@ export const authOptions: NextAuthOptions = {
           email: "admin@school.local",
           role: UserRole.SYSTEM_ADMIN,
           managedGradeId: null,
+          teacherId: null,
         };
       },
     }),
@@ -130,6 +133,11 @@ export const authOptions: NextAuthOptions = {
           (typeof user.managedGradeId === "string" || user.managedGradeId === null)
             ? user.managedGradeId
             : null;
+        token.teacherId =
+          "teacherId" in user &&
+          (typeof user.teacherId === "string" || user.teacherId === null)
+            ? user.teacherId
+            : null;
       }
 
       return token;
@@ -144,6 +152,10 @@ export const authOptions: NextAuthOptions = {
         session.user.managedGradeId =
           typeof token.managedGradeId === "string" || token.managedGradeId === null
             ? token.managedGradeId
+            : null;
+        session.user.teacherId =
+          typeof token.teacherId === "string" || token.teacherId === null
+            ? token.teacherId
             : null;
       }
 

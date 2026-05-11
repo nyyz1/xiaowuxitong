@@ -83,6 +83,26 @@ export type InspectionItem = Prisma.InspectionItemModel
  */
 export type InspectionRecord = Prisma.InspectionRecordModel
 /**
+ * Model ApprovalType
+ * 
+ */
+export type ApprovalType = Prisma.ApprovalTypeModel
+/**
+ * Model ApprovalResponsibility
+ * 
+ */
+export type ApprovalResponsibility = Prisma.ApprovalResponsibilityModel
+/**
+ * Model ApprovalRequest
+ * 
+ */
+export type ApprovalRequest = Prisma.ApprovalRequestModel
+/**
+ * Model ApprovalLog
+ * 
+ */
+export type ApprovalLog = Prisma.ApprovalLogModel
+/**
  * Model AuditLog
  * 
  */

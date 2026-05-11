@@ -1,5 +1,17 @@
 ﻿# Lessons
 
+## 2026-05-11 - Schema sync must cover admin and data-management pages too
+
+- Trigger: after the approval-role and approval-routing work, `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` all showed `This page couldn't load` while login and static chunks were still healthy.
+- Pattern: schema drift is not limited to obvious data-entry pages; role, approval, and audit schema changes can break administrator pages and data-management pages that join across many models.
+- Rule: after schema-affecting changes, run the live Prisma schema sync and smoke `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/approvals`, and the existing data-heavy pages before declaring the pilot recovered.
+
+## 2026-05-11 - Schema roles are not fully shipped until the operator docs speak the same language
+
+- Trigger: the V1.5 application approval module replaced the old demo-oriented `DATA_MANAGER` and `INSPECTION_STAFF` roles with school job roles, but some handoff docs still said 数据管理员 and 常规检查员 after the code and database had moved on.
+- Pattern: role-enum migrations can be technically correct while operator guides, smoke tests, and account tables still train people on the previous permission model.
+- Rule: after any role-model or workflow module change, search the public docs, acceptance runbooks, task lists, and memory-bank together; update role labels, seed commands, and smoke paths in the same cleanup pass.
+
 ## 2026-05-10 - Keep launcher docs anchored to the real entry script, not yesterday's inner command
 
 - Trigger: the public-pilot launcher had already been refactored to reuse `scripts/start-school-pilot.ps1`, but `README.md` and the deployment guide still told readers it directly ran `npm.cmd run start -- --hostname 0.0.0.0 --port 3000`.

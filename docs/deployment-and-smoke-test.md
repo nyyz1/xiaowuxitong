@@ -59,9 +59,13 @@ docker compose up -d postgres
 npm install
 npm run db:generate
 npm run db:push
+npm run db:seed:approval-defaults
+npm run db:seed:approval-pilot
 ```
 
 `db:push` 会把当前 Prisma schema 同步到 PostgreSQL。正式投产前建议切换到受控 migration 流程。
+`db:seed:approval-defaults` 会确保日常报修申请、日常材料打印申请和其他申请三个基础申请类型存在。
+`db:seed:approval-pilot` 会确保试点用的一线教师账号、后勤审批员、行政审批员和报修、三类打印、其他申请的标准审批职责存在。
 
 ## 4. 写入演示数据
 
@@ -98,8 +102,8 @@ npm run db:clear:demo
 - `admin`：系统管理员
 - `leader1`、`leader2`、`leader3`：校领导
 - `grade11.manager1`、`grade11.manager2`、`grade11.manager3`：高二年级管理员，均绑定高二
-- `data.manager`：数据管理员
-- `inspector`：常规检查员
+- `data.manager`：教务工作人员
+- `inspector`：政教工作人员
 
 种子脚本只会删除并重写固定演示编号对应的数据，仍建议只在空的试点库执行。
 
@@ -215,7 +219,7 @@ npm run pilot:school -- -PublicHost 192.168.x.x
 
 ### 登录页正常但业务页报 server error
 
-如果 `/login` 可以打开并且账号能登录，但进入 `/dashboard/people`、`/dashboard/archive/students`、`/dashboard/inspection` 或 `/dashboard/exports` 时出现：
+如果 `/login` 可以打开并且账号能登录，但进入 `/dashboard/users`、`/dashboard/data-management`、`/dashboard/people`、`/dashboard/archive/students`、`/dashboard/inspection` 或 `/dashboard/exports` 时出现：
 
 ```text
 This page couldn't load
@@ -233,12 +237,15 @@ npm run db:push
 ```
 3. 如果 Prisma 因新增唯一约束要求显式确认，先检查相关列是否已经存在以及是否有重复数据；确认无冲突后，再按 Prisma 提示执行带确认参数的同步。
 4. 重新登录并逐个检查：
+   - `/dashboard/users`
+   - `/dashboard/data-management`
    - `/dashboard/people`
    - `/dashboard/archive/students`
    - `/dashboard/inspection`
    - `/dashboard/exports`
 
 2026-05-01 的 live 恢复中，业务页 server error 的根因就是 PostgreSQL 表结构落后；schema 同步后无需重启现有 `0.0.0.0:3000` 进程，四个业务页即可恢复。
+2026-05-11 的 live 恢复中，用户权限、数据管理和师生档案三个页面同时报 server error；执行 `npx.cmd prisma db push` 后，三个受影响路由均恢复为 authenticated `200`。
 
 ## 6. 浏览器烟测清单
 
@@ -283,15 +290,26 @@ npm run db:push
    - 为某个班级新增一条临时检查记录
    - 按日期、项目、年级和班级筛选记录
 
-7. 统计导出
+7. 申请审批
+   - 用 `admin` 打开 `/dashboard/approvals`
+   - 确认能看到申请类型配置和审批职责配置
+   - 确认默认申请类型包含日常报修申请、日常材料打印申请、其他申请
+   - 如使用试点默认配置，确认 `teacher.wangming` 已绑定教师档案，`logistics.office`、`admin.office` 和各标准审批职责已存在
+   - 用已绑定教师档案的一线教师账号提交报修申请
+   - 提交材料打印申请时，确认必须填写材料类型、打印形式、纸张大小和打印数量
+   - 用匹配审批职责的账号登录，确认可以通过或驳回申请，并保存审批意见
+   - 用不匹配审批职责的账号登录，确认不能越权审批该申请
+
+8. 统计导出
    - 打开 `/dashboard/exports`
    - 按日期范围和年级筛选
    - 确认指标卡和汇总表更新
    - 下载 Excel 和 CSV 检查统计报表
 
-8. 审计检查
+9. 审计检查
    - 每次检查统计导出应新增一条 `AuditLog`，动作为 `EXPORT_INSPECTION_REPORT`
    - 用户新增、角色调整、停用启用和密码重置也应写入审计日志
+   - 申请提交、审批通过和审批驳回也应写入审计日志
 
 ## 7. 验证命令
 

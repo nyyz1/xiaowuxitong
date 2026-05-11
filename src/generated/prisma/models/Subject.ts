@@ -175,6 +175,8 @@ export type SubjectWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Subject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subject"> | Date | string
   teachers?: Prisma.TeacherListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }
 
 export type SubjectOrderByWithRelationInput = {
@@ -183,6 +185,8 @@ export type SubjectOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   teachers?: Prisma.TeacherOrderByRelationAggregateInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityOrderByRelationAggregateInput
+  approvalRequests?: Prisma.ApprovalRequestOrderByRelationAggregateInput
 }
 
 export type SubjectWhereUniqueInput = Prisma.AtLeast<{
@@ -194,6 +198,8 @@ export type SubjectWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Subject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subject"> | Date | string
   teachers?: Prisma.TeacherListRelationFilter
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityListRelationFilter
+  approvalRequests?: Prisma.ApprovalRequestListRelationFilter
 }, "id" | "name">
 
 export type SubjectOrderByWithAggregationInput = {
@@ -222,6 +228,8 @@ export type SubjectCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   teachers?: Prisma.TeacherCreateNestedManyWithoutSubjectInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutSubjectInput
 }
 
 export type SubjectUncheckedCreateInput = {
@@ -230,6 +238,8 @@ export type SubjectUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutSubjectInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutSubjectInput
 }
 
 export type SubjectUpdateInput = {
@@ -238,6 +248,8 @@ export type SubjectUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUpdateManyWithoutSubjectNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutSubjectNestedInput
 }
 
 export type SubjectUncheckedUpdateInput = {
@@ -246,6 +258,8 @@ export type SubjectUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherUncheckedUpdateManyWithoutSubjectNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutSubjectNestedInput
 }
 
 export type SubjectCreateManyInput = {
@@ -311,11 +325,45 @@ export type SubjectUpdateOneWithoutTeachersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectUpdateToOneWithWhereWithoutTeachersInput, Prisma.SubjectUpdateWithoutTeachersInput>, Prisma.SubjectUncheckedUpdateWithoutTeachersInput>
 }
 
+export type SubjectCreateNestedOneWithoutApprovalResponsibilitiesInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutApprovalResponsibilitiesInput
+  connect?: Prisma.SubjectWhereUniqueInput
+}
+
+export type SubjectUpdateOneWithoutApprovalResponsibilitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutApprovalResponsibilitiesInput
+  upsert?: Prisma.SubjectUpsertWithoutApprovalResponsibilitiesInput
+  disconnect?: Prisma.SubjectWhereInput | boolean
+  delete?: Prisma.SubjectWhereInput | boolean
+  connect?: Prisma.SubjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput, Prisma.SubjectUpdateWithoutApprovalResponsibilitiesInput>, Prisma.SubjectUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type SubjectCreateNestedOneWithoutApprovalRequestsInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutApprovalRequestsInput
+  connect?: Prisma.SubjectWhereUniqueInput
+}
+
+export type SubjectUpdateOneWithoutApprovalRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedCreateWithoutApprovalRequestsInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutApprovalRequestsInput
+  upsert?: Prisma.SubjectUpsertWithoutApprovalRequestsInput
+  disconnect?: Prisma.SubjectWhereInput | boolean
+  delete?: Prisma.SubjectWhereInput | boolean
+  connect?: Prisma.SubjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectUpdateToOneWithWhereWithoutApprovalRequestsInput, Prisma.SubjectUpdateWithoutApprovalRequestsInput>, Prisma.SubjectUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
 export type SubjectCreateWithoutTeachersInput = {
   id?: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutSubjectInput
 }
 
 export type SubjectUncheckedCreateWithoutTeachersInput = {
@@ -323,6 +371,8 @@ export type SubjectUncheckedCreateWithoutTeachersInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutSubjectInput
 }
 
 export type SubjectCreateOrConnectWithoutTeachersInput = {
@@ -346,6 +396,8 @@ export type SubjectUpdateWithoutTeachersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutSubjectNestedInput
 }
 
 export type SubjectUncheckedUpdateWithoutTeachersInput = {
@@ -353,6 +405,112 @@ export type SubjectUncheckedUpdateWithoutTeachersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutSubjectNestedInput
+}
+
+export type SubjectCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestCreateNestedManyWithoutSubjectInput
+}
+
+export type SubjectUncheckedCreateWithoutApprovalResponsibilitiesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutSubjectInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedCreateNestedManyWithoutSubjectInput
+}
+
+export type SubjectCreateOrConnectWithoutApprovalResponsibilitiesInput = {
+  where: Prisma.SubjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedCreateWithoutApprovalResponsibilitiesInput>
+}
+
+export type SubjectUpsertWithoutApprovalResponsibilitiesInput = {
+  update: Prisma.XOR<Prisma.SubjectUpdateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedCreateWithoutApprovalResponsibilitiesInput>
+  where?: Prisma.SubjectWhereInput
+}
+
+export type SubjectUpdateToOneWithWhereWithoutApprovalResponsibilitiesInput = {
+  where?: Prisma.SubjectWhereInput
+  data: Prisma.XOR<Prisma.SubjectUpdateWithoutApprovalResponsibilitiesInput, Prisma.SubjectUncheckedUpdateWithoutApprovalResponsibilitiesInput>
+}
+
+export type SubjectUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUpdateManyWithoutSubjectNestedInput
+}
+
+export type SubjectUncheckedUpdateWithoutApprovalResponsibilitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUncheckedUpdateManyWithoutSubjectNestedInput
+  approvalRequests?: Prisma.ApprovalRequestUncheckedUpdateManyWithoutSubjectNestedInput
+}
+
+export type SubjectCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherCreateNestedManyWithoutSubjectInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityCreateNestedManyWithoutSubjectInput
+}
+
+export type SubjectUncheckedCreateWithoutApprovalRequestsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  teachers?: Prisma.TeacherUncheckedCreateNestedManyWithoutSubjectInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedCreateNestedManyWithoutSubjectInput
+}
+
+export type SubjectCreateOrConnectWithoutApprovalRequestsInput = {
+  where: Prisma.SubjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedCreateWithoutApprovalRequestsInput>
+}
+
+export type SubjectUpsertWithoutApprovalRequestsInput = {
+  update: Prisma.XOR<Prisma.SubjectUpdateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedUpdateWithoutApprovalRequestsInput>
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedCreateWithoutApprovalRequestsInput>
+  where?: Prisma.SubjectWhereInput
+}
+
+export type SubjectUpdateToOneWithWhereWithoutApprovalRequestsInput = {
+  where?: Prisma.SubjectWhereInput
+  data: Prisma.XOR<Prisma.SubjectUpdateWithoutApprovalRequestsInput, Prisma.SubjectUncheckedUpdateWithoutApprovalRequestsInput>
+}
+
+export type SubjectUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUpdateManyWithoutSubjectNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUpdateManyWithoutSubjectNestedInput
+}
+
+export type SubjectUncheckedUpdateWithoutApprovalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  teachers?: Prisma.TeacherUncheckedUpdateManyWithoutSubjectNestedInput
+  approvalResponsibilities?: Prisma.ApprovalResponsibilityUncheckedUpdateManyWithoutSubjectNestedInput
 }
 
 
@@ -362,10 +520,14 @@ export type SubjectUncheckedUpdateWithoutTeachersInput = {
 
 export type SubjectCountOutputType = {
   teachers: number
+  approvalResponsibilities: number
+  approvalRequests: number
 }
 
 export type SubjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teachers?: boolean | SubjectCountOutputTypeCountTeachersArgs
+  approvalResponsibilities?: boolean | SubjectCountOutputTypeCountApprovalResponsibilitiesArgs
+  approvalRequests?: boolean | SubjectCountOutputTypeCountApprovalRequestsArgs
 }
 
 /**
@@ -385,6 +547,20 @@ export type SubjectCountOutputTypeCountTeachersArgs<ExtArgs extends runtime.Type
   where?: Prisma.TeacherWhereInput
 }
 
+/**
+ * SubjectCountOutputType without action
+ */
+export type SubjectCountOutputTypeCountApprovalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalResponsibilityWhereInput
+}
+
+/**
+ * SubjectCountOutputType without action
+ */
+export type SubjectCountOutputTypeCountApprovalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApprovalRequestWhereInput
+}
+
 
 export type SubjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -392,6 +568,8 @@ export type SubjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdAt?: boolean
   updatedAt?: boolean
   teachers?: boolean | Prisma.Subject$teachersArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Subject$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Subject$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.SubjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subject"]>
 
@@ -419,6 +597,8 @@ export type SubjectSelectScalar = {
 export type SubjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["subject"]>
 export type SubjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teachers?: boolean | Prisma.Subject$teachersArgs<ExtArgs>
+  approvalResponsibilities?: boolean | Prisma.Subject$approvalResponsibilitiesArgs<ExtArgs>
+  approvalRequests?: boolean | Prisma.Subject$approvalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.SubjectCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SubjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -428,6 +608,8 @@ export type $SubjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Subject"
   objects: {
     teachers: Prisma.$TeacherPayload<ExtArgs>[]
+    approvalResponsibilities: Prisma.$ApprovalResponsibilityPayload<ExtArgs>[]
+    approvalRequests: Prisma.$ApprovalRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -829,6 +1011,8 @@ readonly fields: SubjectFieldRefs;
 export interface Prisma__SubjectClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   teachers<T extends Prisma.Subject$teachersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Subject$teachersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalResponsibilities<T extends Prisma.Subject$approvalResponsibilitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Subject$approvalResponsibilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalResponsibilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvalRequests<T extends Prisma.Subject$approvalRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Subject$approvalRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApprovalRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1276,6 +1460,54 @@ export type Subject$teachersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.TeacherScalarFieldEnum | Prisma.TeacherScalarFieldEnum[]
+}
+
+/**
+ * Subject.approvalResponsibilities
+ */
+export type Subject$approvalResponsibilitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalResponsibility
+   */
+  select?: Prisma.ApprovalResponsibilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalResponsibility
+   */
+  omit?: Prisma.ApprovalResponsibilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalResponsibilityInclude<ExtArgs> | null
+  where?: Prisma.ApprovalResponsibilityWhereInput
+  orderBy?: Prisma.ApprovalResponsibilityOrderByWithRelationInput | Prisma.ApprovalResponsibilityOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalResponsibilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalResponsibilityScalarFieldEnum | Prisma.ApprovalResponsibilityScalarFieldEnum[]
+}
+
+/**
+ * Subject.approvalRequests
+ */
+export type Subject$approvalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApprovalRequest
+   */
+  select?: Prisma.ApprovalRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApprovalRequest
+   */
+  omit?: Prisma.ApprovalRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApprovalRequestInclude<ExtArgs> | null
+  where?: Prisma.ApprovalRequestWhereInput
+  orderBy?: Prisma.ApprovalRequestOrderByWithRelationInput | Prisma.ApprovalRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ApprovalRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApprovalRequestScalarFieldEnum | Prisma.ApprovalRequestScalarFieldEnum[]
 }
 
 /**
