@@ -414,7 +414,7 @@ function DepartmentCheckboxGroup({
 }: {
   departments: PeopleManagementData["departments"];
   selectedIds: string[];
-  selectedIdentities: Record<string, string>;
+  selectedIdentities: Record<string, string[]>;
 }) {
   return (
     <div className="lg:col-span-4 rounded-2xl border border-[var(--panel-border)] bg-white px-4 py-3">
@@ -442,20 +442,35 @@ function DepartmentCheckboxGroup({
                 />
                 <span>{department.name}</span>
               </label>
-              <select
-                name={`departmentIdentity__${department.id}`}
-                defaultValue={
-                  selectedIdentities[department.id] ??
-                  "FRONTLINE_TEACHER"
-                }
-                className="h-9 rounded-xl border border-[var(--panel-border)] bg-white px-3 text-xs text-[var(--text-primary)] outline-none transition focus:border-[var(--accent-strong)]"
-              >
-                {teacherDepartmentIdentityOptions.map((identityType) => (
-                  <option key={identityType} value={identityType}>
-                    {teacherDepartmentIdentityLabels[identityType]}
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-wrap gap-2">
+                {teacherDepartmentIdentityOptions.map((identityType) => {
+                  const hasExplicitIdentity = Boolean(
+                    selectedIdentities[department.id]?.length,
+                  );
+                  const checked =
+                    selectedIdentities[department.id]?.includes(identityType) ?? false;
+                  const fallbackFrontline =
+                    selectedIds.includes(department.id) && !hasExplicitIdentity;
+
+                  return (
+                    <label
+                      key={identityType}
+                      className="inline-flex items-center gap-2 rounded-full border border-[var(--panel-border)] bg-white px-3 py-1.5 text-xs text-[var(--text-primary)]"
+                    >
+                      <input
+                        type="checkbox"
+                        name={`departmentIdentity__${department.id}`}
+                        value={identityType}
+                        defaultChecked={
+                          checked || (identityType === "FRONTLINE_TEACHER" && fallbackFrontline)
+                        }
+                        className="h-3.5 w-3.5 rounded border-[var(--panel-border)] text-[var(--accent-strong)]"
+                      />
+                      <span>{teacherDepartmentIdentityLabels[identityType]}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>

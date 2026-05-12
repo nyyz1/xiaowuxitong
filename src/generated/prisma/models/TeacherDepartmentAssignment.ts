@@ -25,6 +25,7 @@ export type AggregateTeacherDepartmentAssignment = {
 }
 
 export type TeacherDepartmentAssignmentMinAggregateOutputType = {
+  id: string | null
   teacherId: string | null
   departmentId: string | null
   positionId: string | null
@@ -33,6 +34,7 @@ export type TeacherDepartmentAssignmentMinAggregateOutputType = {
 }
 
 export type TeacherDepartmentAssignmentMaxAggregateOutputType = {
+  id: string | null
   teacherId: string | null
   departmentId: string | null
   positionId: string | null
@@ -41,6 +43,7 @@ export type TeacherDepartmentAssignmentMaxAggregateOutputType = {
 }
 
 export type TeacherDepartmentAssignmentCountAggregateOutputType = {
+  id: number
   teacherId: number
   departmentId: number
   positionId: number
@@ -51,6 +54,7 @@ export type TeacherDepartmentAssignmentCountAggregateOutputType = {
 
 
 export type TeacherDepartmentAssignmentMinAggregateInputType = {
+  id?: true
   teacherId?: true
   departmentId?: true
   positionId?: true
@@ -59,6 +63,7 @@ export type TeacherDepartmentAssignmentMinAggregateInputType = {
 }
 
 export type TeacherDepartmentAssignmentMaxAggregateInputType = {
+  id?: true
   teacherId?: true
   departmentId?: true
   positionId?: true
@@ -67,6 +72,7 @@ export type TeacherDepartmentAssignmentMaxAggregateInputType = {
 }
 
 export type TeacherDepartmentAssignmentCountAggregateInputType = {
+  id?: true
   teacherId?: true
   departmentId?: true
   positionId?: true
@@ -148,6 +154,7 @@ export type TeacherDepartmentAssignmentGroupByArgs<ExtArgs extends runtime.Types
 }
 
 export type TeacherDepartmentAssignmentGroupByOutputType = {
+  id: string
   teacherId: string
   departmentId: string
   positionId: string | null
@@ -177,6 +184,7 @@ export type TeacherDepartmentAssignmentWhereInput = {
   AND?: Prisma.TeacherDepartmentAssignmentWhereInput | Prisma.TeacherDepartmentAssignmentWhereInput[]
   OR?: Prisma.TeacherDepartmentAssignmentWhereInput[]
   NOT?: Prisma.TeacherDepartmentAssignmentWhereInput | Prisma.TeacherDepartmentAssignmentWhereInput[]
+  id?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   teacherId?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   departmentId?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   positionId?: Prisma.StringNullableFilter<"TeacherDepartmentAssignment"> | string | null
@@ -188,6 +196,7 @@ export type TeacherDepartmentAssignmentWhereInput = {
 }
 
 export type TeacherDepartmentAssignmentOrderByWithRelationInput = {
+  id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   positionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -199,7 +208,8 @@ export type TeacherDepartmentAssignmentOrderByWithRelationInput = {
 }
 
 export type TeacherDepartmentAssignmentWhereUniqueInput = Prisma.AtLeast<{
-  teacherId_departmentId?: Prisma.TeacherDepartmentAssignmentTeacherIdDepartmentIdCompoundUniqueInput
+  id?: string
+  teacherId_departmentId_identityType_positionId?: Prisma.TeacherDepartmentAssignmentTeacherIdDepartmentIdIdentityTypePositionIdCompoundUniqueInput
   AND?: Prisma.TeacherDepartmentAssignmentWhereInput | Prisma.TeacherDepartmentAssignmentWhereInput[]
   OR?: Prisma.TeacherDepartmentAssignmentWhereInput[]
   NOT?: Prisma.TeacherDepartmentAssignmentWhereInput | Prisma.TeacherDepartmentAssignmentWhereInput[]
@@ -211,9 +221,10 @@ export type TeacherDepartmentAssignmentWhereUniqueInput = Prisma.AtLeast<{
   teacher?: Prisma.XOR<Prisma.TeacherScalarRelationFilter, Prisma.TeacherWhereInput>
   department?: Prisma.XOR<Prisma.DepartmentScalarRelationFilter, Prisma.DepartmentWhereInput>
   position?: Prisma.XOR<Prisma.DepartmentPositionNullableScalarRelationFilter, Prisma.DepartmentPositionWhereInput> | null
-}, "teacherId_departmentId">
+}, "id" | "teacherId_departmentId_identityType_positionId">
 
 export type TeacherDepartmentAssignmentOrderByWithAggregationInput = {
+  id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   positionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -228,6 +239,7 @@ export type TeacherDepartmentAssignmentScalarWhereWithAggregatesInput = {
   AND?: Prisma.TeacherDepartmentAssignmentScalarWhereWithAggregatesInput | Prisma.TeacherDepartmentAssignmentScalarWhereWithAggregatesInput[]
   OR?: Prisma.TeacherDepartmentAssignmentScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TeacherDepartmentAssignmentScalarWhereWithAggregatesInput | Prisma.TeacherDepartmentAssignmentScalarWhereWithAggregatesInput[]
+  id?: Prisma.StringWithAggregatesFilter<"TeacherDepartmentAssignment"> | string
   teacherId?: Prisma.StringWithAggregatesFilter<"TeacherDepartmentAssignment"> | string
   departmentId?: Prisma.StringWithAggregatesFilter<"TeacherDepartmentAssignment"> | string
   positionId?: Prisma.StringNullableWithAggregatesFilter<"TeacherDepartmentAssignment"> | string | null
@@ -236,6 +248,7 @@ export type TeacherDepartmentAssignmentScalarWhereWithAggregatesInput = {
 }
 
 export type TeacherDepartmentAssignmentCreateInput = {
+  id?: string
   identityType?: $Enums.TeacherDepartmentIdentityType
   createdAt?: Date | string
   teacher: Prisma.TeacherCreateNestedOneWithoutDepartmentAssignmentsInput
@@ -244,6 +257,7 @@ export type TeacherDepartmentAssignmentCreateInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedCreateInput = {
+  id?: string
   teacherId: string
   departmentId: string
   positionId?: string | null
@@ -252,6 +266,7 @@ export type TeacherDepartmentAssignmentUncheckedCreateInput = {
 }
 
 export type TeacherDepartmentAssignmentUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherUpdateOneRequiredWithoutDepartmentAssignmentsNestedInput
@@ -260,6 +275,7 @@ export type TeacherDepartmentAssignmentUpdateInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -268,6 +284,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateInput = {
 }
 
 export type TeacherDepartmentAssignmentCreateManyInput = {
+  id?: string
   teacherId: string
   departmentId: string
   positionId?: string | null
@@ -276,11 +293,13 @@ export type TeacherDepartmentAssignmentCreateManyInput = {
 }
 
 export type TeacherDepartmentAssignmentUpdateManyMutationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateManyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -298,12 +317,15 @@ export type TeacherDepartmentAssignmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type TeacherDepartmentAssignmentTeacherIdDepartmentIdCompoundUniqueInput = {
+export type TeacherDepartmentAssignmentTeacherIdDepartmentIdIdentityTypePositionIdCompoundUniqueInput = {
   teacherId: string
   departmentId: string
+  identityType: $Enums.TeacherDepartmentIdentityType
+  positionId: string
 }
 
 export type TeacherDepartmentAssignmentCountOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   positionId?: Prisma.SortOrder
@@ -312,6 +334,7 @@ export type TeacherDepartmentAssignmentCountOrderByAggregateInput = {
 }
 
 export type TeacherDepartmentAssignmentMaxOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   positionId?: Prisma.SortOrder
@@ -320,6 +343,7 @@ export type TeacherDepartmentAssignmentMaxOrderByAggregateInput = {
 }
 
 export type TeacherDepartmentAssignmentMinOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   teacherId?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   positionId?: Prisma.SortOrder
@@ -454,6 +478,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutTeacherNestedIn
 }
 
 export type TeacherDepartmentAssignmentCreateWithoutDepartmentInput = {
+  id?: string
   identityType?: $Enums.TeacherDepartmentIdentityType
   createdAt?: Date | string
   teacher: Prisma.TeacherCreateNestedOneWithoutDepartmentAssignmentsInput
@@ -461,6 +486,7 @@ export type TeacherDepartmentAssignmentCreateWithoutDepartmentInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedCreateWithoutDepartmentInput = {
+  id?: string
   teacherId: string
   positionId?: string | null
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -497,6 +523,7 @@ export type TeacherDepartmentAssignmentScalarWhereInput = {
   AND?: Prisma.TeacherDepartmentAssignmentScalarWhereInput | Prisma.TeacherDepartmentAssignmentScalarWhereInput[]
   OR?: Prisma.TeacherDepartmentAssignmentScalarWhereInput[]
   NOT?: Prisma.TeacherDepartmentAssignmentScalarWhereInput | Prisma.TeacherDepartmentAssignmentScalarWhereInput[]
+  id?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   teacherId?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   departmentId?: Prisma.StringFilter<"TeacherDepartmentAssignment"> | string
   positionId?: Prisma.StringNullableFilter<"TeacherDepartmentAssignment"> | string | null
@@ -505,6 +532,7 @@ export type TeacherDepartmentAssignmentScalarWhereInput = {
 }
 
 export type TeacherDepartmentAssignmentCreateWithoutPositionInput = {
+  id?: string
   identityType?: $Enums.TeacherDepartmentIdentityType
   createdAt?: Date | string
   teacher: Prisma.TeacherCreateNestedOneWithoutDepartmentAssignmentsInput
@@ -512,6 +540,7 @@ export type TeacherDepartmentAssignmentCreateWithoutPositionInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedCreateWithoutPositionInput = {
+  id?: string
   teacherId: string
   departmentId: string
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -545,6 +574,7 @@ export type TeacherDepartmentAssignmentUpdateManyWithWhereWithoutPositionInput =
 }
 
 export type TeacherDepartmentAssignmentCreateWithoutTeacherInput = {
+  id?: string
   identityType?: $Enums.TeacherDepartmentIdentityType
   createdAt?: Date | string
   department: Prisma.DepartmentCreateNestedOneWithoutTeacherAssignmentsInput
@@ -552,6 +582,7 @@ export type TeacherDepartmentAssignmentCreateWithoutTeacherInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedCreateWithoutTeacherInput = {
+  id?: string
   departmentId: string
   positionId?: string | null
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -585,6 +616,7 @@ export type TeacherDepartmentAssignmentUpdateManyWithWhereWithoutTeacherInput = 
 }
 
 export type TeacherDepartmentAssignmentCreateManyDepartmentInput = {
+  id?: string
   teacherId: string
   positionId?: string | null
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -592,6 +624,7 @@ export type TeacherDepartmentAssignmentCreateManyDepartmentInput = {
 }
 
 export type TeacherDepartmentAssignmentUpdateWithoutDepartmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherUpdateOneRequiredWithoutDepartmentAssignmentsNestedInput
@@ -599,6 +632,7 @@ export type TeacherDepartmentAssignmentUpdateWithoutDepartmentInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateWithoutDepartmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -606,6 +640,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateWithoutDepartmentInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -613,6 +648,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutDepartmentInput
 }
 
 export type TeacherDepartmentAssignmentCreateManyPositionInput = {
+  id?: string
   teacherId: string
   departmentId: string
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -620,6 +656,7 @@ export type TeacherDepartmentAssignmentCreateManyPositionInput = {
 }
 
 export type TeacherDepartmentAssignmentUpdateWithoutPositionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teacher?: Prisma.TeacherUpdateOneRequiredWithoutDepartmentAssignmentsNestedInput
@@ -627,6 +664,7 @@ export type TeacherDepartmentAssignmentUpdateWithoutPositionInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateWithoutPositionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -634,6 +672,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateWithoutPositionInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutPositionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   teacherId?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -641,6 +680,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutPositionInput =
 }
 
 export type TeacherDepartmentAssignmentCreateManyTeacherInput = {
+  id?: string
   departmentId: string
   positionId?: string | null
   identityType?: $Enums.TeacherDepartmentIdentityType
@@ -648,6 +688,7 @@ export type TeacherDepartmentAssignmentCreateManyTeacherInput = {
 }
 
 export type TeacherDepartmentAssignmentUpdateWithoutTeacherInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   department?: Prisma.DepartmentUpdateOneRequiredWithoutTeacherAssignmentsNestedInput
@@ -655,6 +696,7 @@ export type TeacherDepartmentAssignmentUpdateWithoutTeacherInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateWithoutTeacherInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -662,6 +704,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateWithoutTeacherInput = {
 }
 
 export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutTeacherInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   departmentId?: Prisma.StringFieldUpdateOperationsInput | string
   positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   identityType?: Prisma.EnumTeacherDepartmentIdentityTypeFieldUpdateOperationsInput | $Enums.TeacherDepartmentIdentityType
@@ -671,6 +714,7 @@ export type TeacherDepartmentAssignmentUncheckedUpdateManyWithoutTeacherInput = 
 
 
 export type TeacherDepartmentAssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   teacherId?: boolean
   departmentId?: boolean
   positionId?: boolean
@@ -682,6 +726,7 @@ export type TeacherDepartmentAssignmentSelect<ExtArgs extends runtime.Types.Exte
 }, ExtArgs["result"]["teacherDepartmentAssignment"]>
 
 export type TeacherDepartmentAssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   teacherId?: boolean
   departmentId?: boolean
   positionId?: boolean
@@ -693,6 +738,7 @@ export type TeacherDepartmentAssignmentSelectCreateManyAndReturn<ExtArgs extends
 }, ExtArgs["result"]["teacherDepartmentAssignment"]>
 
 export type TeacherDepartmentAssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   teacherId?: boolean
   departmentId?: boolean
   positionId?: boolean
@@ -704,6 +750,7 @@ export type TeacherDepartmentAssignmentSelectUpdateManyAndReturn<ExtArgs extends
 }, ExtArgs["result"]["teacherDepartmentAssignment"]>
 
 export type TeacherDepartmentAssignmentSelectScalar = {
+  id?: boolean
   teacherId?: boolean
   departmentId?: boolean
   positionId?: boolean
@@ -711,7 +758,7 @@ export type TeacherDepartmentAssignmentSelectScalar = {
   createdAt?: boolean
 }
 
-export type TeacherDepartmentAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"teacherId" | "departmentId" | "positionId" | "identityType" | "createdAt", ExtArgs["result"]["teacherDepartmentAssignment"]>
+export type TeacherDepartmentAssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teacherId" | "departmentId" | "positionId" | "identityType" | "createdAt", ExtArgs["result"]["teacherDepartmentAssignment"]>
 export type TeacherDepartmentAssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teacher?: boolean | Prisma.TeacherDefaultArgs<ExtArgs>
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
@@ -736,6 +783,7 @@ export type $TeacherDepartmentAssignmentPayload<ExtArgs extends runtime.Types.Ex
     position: Prisma.$DepartmentPositionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    id: string
     teacherId: string
     departmentId: string
     positionId: string | null
@@ -824,8 +872,8 @@ export interface TeacherDepartmentAssignmentDelegate<ExtArgs extends runtime.Typ
    * // Get first 10 TeacherDepartmentAssignments
    * const teacherDepartmentAssignments = await prisma.teacherDepartmentAssignment.findMany({ take: 10 })
    * 
-   * // Only select the `teacherId`
-   * const teacherDepartmentAssignmentWithTeacherIdOnly = await prisma.teacherDepartmentAssignment.findMany({ select: { teacherId: true } })
+   * // Only select the `id`
+   * const teacherDepartmentAssignmentWithIdOnly = await prisma.teacherDepartmentAssignment.findMany({ select: { id: true } })
    * 
    */
   findMany<T extends TeacherDepartmentAssignmentFindManyArgs>(args?: Prisma.SelectSubset<T, TeacherDepartmentAssignmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeacherDepartmentAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -869,9 +917,9 @@ export interface TeacherDepartmentAssignmentDelegate<ExtArgs extends runtime.Typ
    *   ]
    * })
    * 
-   * // Create many TeacherDepartmentAssignments and only return the `teacherId`
-   * const teacherDepartmentAssignmentWithTeacherIdOnly = await prisma.teacherDepartmentAssignment.createManyAndReturn({
-   *   select: { teacherId: true },
+   * // Create many TeacherDepartmentAssignments and only return the `id`
+   * const teacherDepartmentAssignmentWithIdOnly = await prisma.teacherDepartmentAssignment.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -960,9 +1008,9 @@ export interface TeacherDepartmentAssignmentDelegate<ExtArgs extends runtime.Typ
    *   ]
    * })
    * 
-   * // Update zero or more TeacherDepartmentAssignments and only return the `teacherId`
-   * const teacherDepartmentAssignmentWithTeacherIdOnly = await prisma.teacherDepartmentAssignment.updateManyAndReturn({
-   *   select: { teacherId: true },
+   * // Update zero or more TeacherDepartmentAssignments and only return the `id`
+   * const teacherDepartmentAssignmentWithIdOnly = await prisma.teacherDepartmentAssignment.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1167,6 +1215,7 @@ export interface Prisma__TeacherDepartmentAssignmentClient<T, Null = never, ExtA
  * Fields of the TeacherDepartmentAssignment model
  */
 export interface TeacherDepartmentAssignmentFieldRefs {
+  readonly id: Prisma.FieldRef<"TeacherDepartmentAssignment", 'String'>
   readonly teacherId: Prisma.FieldRef<"TeacherDepartmentAssignment", 'String'>
   readonly departmentId: Prisma.FieldRef<"TeacherDepartmentAssignment", 'String'>
   readonly positionId: Prisma.FieldRef<"TeacherDepartmentAssignment", 'String'>

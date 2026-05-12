@@ -104,7 +104,7 @@
   - the three broken pages are reachable again on the local pilot service
   - root cause was live database schema drift after recent Step 8 schema changes, not missing frontend chunks
 
-- User asked to resume the interrupted "学校日常岗位与审批权限配置方案" plan and continue from the current execution point.
+- User asked to resume the interrupted "学校日常岗位与审批权限配置方案 plan and continue from the current execution point.
 - Continued Step 8 application approval verification and pilot configuration:
   - added `scripts/seed-approval-pilot-config.mjs` plus `npm.cmd run db:seed:approval-pilot` and dry-run command
   - seeded the live PostgreSQL pilot database with `teacher.wangming` bound to teacher profile `王明`, plus `logistics.office` and `admin.office`
@@ -255,7 +255,7 @@
 - Risks or blockers:
   - this pass did not include a fresh browser smoke on `/dashboard/people` or `/dashboard/archive/students`; verification stayed at static checks and code-path consistency
 
-- User asked for a `neat-freak` cleanup pass focused on整理项目内容 rather than another feature slice.
+- User asked for a `neat-freak` cleanup pass focused on鏁寸悊椤圭洰鍐呭 rather than another feature slice.
 - Re-read the required memory-bank files and the named `neat-freak` skill, then treated the work as documentation, handoff, and project-memory cleanup only.
 - Changes made in the first cleanup pass:
   - updated `README.md` and `docs/deployment-and-smoke-test.md` so the public-pilot launcher now correctly points to `scripts/start-school-pilot.ps1` instead of claiming it directly runs raw `npm.cmd run start`
@@ -264,7 +264,7 @@
 - Changes made in the deeper cleanup pass:
   - added `docs/README.md` as a categorized document index for daily pilot use, deployment and acceptance, and migration or collaboration
   - linked that new doc index and the live pilot operator guide from the root `README.md`
-  - rewrote the reader-facing “current workstation” addenda in `docs/deployment-and-smoke-test.md`, `docs/school-transfer-one-click.md`, and `docs/postgresql-install-and-acceptance-runbook.md` so they no longer present the historical `C:\Program Files\PostgreSQL\17` migrated machine as the current live default
+  - rewrote the reader-facing 鈥渃urrent workstation鈥?addenda in `docs/deployment-and-smoke-test.md`, `docs/school-transfer-one-click.md`, and `docs/postgresql-install-and-acceptance-runbook.md` so they no longer present the historical `C:\Program Files\PostgreSQL\17` migrated machine as the current live default
   - clarified in those docs that `school_password` examples are initialization defaults, not the current live workstation password
   - compressed this file into an active log and moved older milestone history into `memory-bank/progress-archive.md`
 - Verification:
@@ -279,7 +279,7 @@
 - User provided a Step 7 operator-feedback pass across homepage, inspection entry, people maintenance, and mobile topbar behavior.
 - Changes made:
   - moved successful inspection-save feedback down into the record-entry section and anchored full-page inspection saves back to `#record-entry`
-  - removed the `检查人` wording from inspection remarks placeholders and later fixed the mobile quick-entry remarks placeholder to `备注，如有实际需要可以填写，如具体情况、整改要求等`
+  - removed the `检查人` wording from inspection remarks placeholders and later fixed the mobile quick-entry remarks placeholder to `澶囨敞锛屽鏈夊疄闄呴渶瑕佸彲浠ュ～鍐欙紝濡傚叿浣撴儏鍐点€佹暣鏀硅姹傜瓑`
   - added linked student grade/class selector behavior through `src/modules/people/student-scope-fields.tsx`
   - removed duplicate `系统管理员 · 系统管理员` wording from the topbar
   - made the mobile topbar non-sticky
@@ -293,3 +293,84 @@
   - authenticated route and role-boundary smoke for `admin`, `leader1`, `grade11.manager1`, `data.manager`, and `inspector`
 - Follow-up:
   - screenshot-level browser visual comparison is still a nice-to-have future pass when convenient, but the Step 7 operator-facing slice is already statically and behaviorally verified
+
+## 2026-05-12
+
+- User asked to implement the Tencent Cloud Lighthouse deployment plan for server-side app plus PostgreSQL hosting and future one-command updates.
+- Changes made:
+  - added Linux server scripts under `scripts/server/` for first-time Ubuntu bootstrap, one-command deployment updates, and PostgreSQL custom-format backups with retention
+  - added `scripts/deploy-tencent-lighthouse.ps1` as a local SSH entrypoint for triggering the server update script with the provided Lighthouse host and key path
+  - added `docs/tencent-lighthouse-deployment.md` and linked it from the README
+  - recorded the new Lighthouse deployment shape in `memory-bank/architecture.md`
+- Intended deployment shape:
+  - app path `/opt/xiaowuxitong/app`
+  - backup path `/opt/xiaowuxitong/backups`
+  - log path `/opt/xiaowuxitong/logs`
+  - local PostgreSQL database `school_affairs` owned by `school_admin`
+  - Caddy public `:80` proxy to `127.0.0.1:3000`
+  - `xiaowuxitong.service` managed by systemd
+- Verification pending:
+  - local `typecheck`, `lint`, and `build`
+  - remote SSH bootstrap and authenticated smoke on the new server
+
+- User asked to verify why many modules were showing "This page couldn't load" after syncing the latest code to this machine and to confirm whether the database matched the current code.
+- Findings:
+  - the local Git branch was already aligned with `origin/main`, so the checked-out source matched the latest remote commit on this machine
+  - the live PostgreSQL database was behind the current Prisma schema before repair, missing the newer account and department-position columns that the code expects
+  - authenticated smoke initially returned `500` for `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, and `/dashboard/exports`
+- Recovery:
+  - ran `npx.cmd prisma db push --accept-data-loss` against the local PostgreSQL database
+  - re-ran authenticated smoke and confirmed `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/archive/students`, `/dashboard/approvals`, and `/dashboard/exports` all returned `200`
+- Verification:
+  - `npm.cmd run db:validate`
+  - `npm.cmd run smoke:pages` before repair
+  - `npx.cmd prisma db push --accept-data-loss`
+  - `npm.cmd run smoke:pages` after repair
+  - `npm.cmd run typecheck`
+- Result:
+  - the page-load failures were caused by database/schema drift, not by stale source files or a bad code sync
+  - the local database is now aligned with the current Prisma schema again
+
+- User reported that each department should support adding and deleting department positions directly, and that teacher department ownership should allow multiple positions inside the same department.
+- Changes made:
+  - expanded `TeacherDepartmentAssignment` to use a generated `id` and a uniqueness constraint that allows the same teacher and department to carry multiple positions or identity variants
+  - updated people validation and save/import helpers so teacher department assignments now accept multiple identity values per department
+  - changed the teacher maintenance form so each department renders a multi-select position group instead of a single identity dropdown
+  - kept the school-structure department position controls in the same page surface so operators can still add, rename, enable/disable, and delete unreferenced positions
+- Verification:
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+- Result:
+  - teacher records can now retain multiple department positions inside the same department
+  - the department-position configuration UI and the teacher-归属部门 UI now line up with the requested multi-position behavior
+
+- 2026-05-12 project cleanup pass:
+  - reconciled the memory-bank notes with the current teacher multi-position department model
+  - removed stale or garbled wording from the project memory so the handoff text matches the live behavior more closely
+- Verification:
+  - reread `memory-bank/prd.md`, `memory-bank/tech-stack.md`, `memory-bank/implementation-plan.md`, `memory-bank/progress.md`, and `memory-bank/architecture.md`
+  - searched for stale single-select wording and corrected the remaining mismatch in the memory-bank notes
+- Result:
+  - the project memory now reflects the current department-position behavior without the old single-dropdown phrasing
+
+- User reported another batch of pages showing "This page couldn't load".
+- Findings:
+  - `npm.cmd run smoke:pages` initially returned `500` for `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/approvals`, and `/dashboard/exports`, while `/dashboard/archive/students` still returned `200`
+  - a separate dev server on `127.0.0.1:3002` reproduced the same failures, proving this was not just a stale production process on port `3000`
+  - the dev-server error log showed Prisma `P2022 ColumnNotFound` on `User`, `Teacher`, `TeacherDepartmentAssignment`, and `InspectionRecord` queries
+  - `prisma db push --accept-data-loss` first refused to run because `TeacherDepartmentAssignment.id` had been added as a required primary key while 16 existing assignment rows still lacked ids
+- Recovery:
+  - added `TeacherDepartmentAssignment.id` to the live PostgreSQL table in a transaction, backfilled ids for the 16 existing rows, changed the primary key from `(teacherId, departmentId)` to `id`, and added the new multi-position uniqueness constraint
+  - reran `npx.cmd prisma db push --accept-data-loss`, which then reported the database was in sync with the current Prisma schema
+- Verification:
+  - `npm.cmd run db:validate`
+  - `npm.cmd run smoke:pages` before repair
+  - manual PostgreSQL schema inspection for `TeacherDepartmentAssignment`
+  - transactional data-preserving backfill for `TeacherDepartmentAssignment.id`
+  - `npx.cmd prisma db push --accept-data-loss`
+  - `npm.cmd run smoke:pages` against `http://127.0.0.1:3000`
+  - `npm.cmd run smoke:pages -- --base-url=http://127.0.0.1:3002`
+- Result:
+  - all six authenticated smoke pages now return `200` on both the live local service and the temporary dev server
+  - the root cause was schema drift plus a required-column migration that needed a data-preserving prefill step, not a frontend route or chunk-loading issue

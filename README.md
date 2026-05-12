@@ -289,3 +289,7 @@ If PostgreSQL tools are not on `PATH`, use the full path:
 ```powershell
 & "D:\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U school_admin -d school_affairs
 ```
+
+## Tencent Cloud Lighthouse Deployment
+
+For the Tencent Cloud Lighthouse Ubuntu deployment and one-command server update flow, see `docs/tencent-lighthouse-deployment.md`.

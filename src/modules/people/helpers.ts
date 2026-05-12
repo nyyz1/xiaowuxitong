@@ -25,6 +25,7 @@ type DepartmentLike = {
 };
 
 type TeacherDepartmentAssignmentLike = {
+  id?: string;
   departmentId: string;
   identityType?: TeacherDepartmentIdentityType | null;
   department?: DepartmentLike | null;
@@ -278,14 +279,23 @@ export function getTeacherDepartmentNames(teacher: TeacherDepartmentLike) {
 }
 
 export function getTeacherDepartmentIdentityMap(teacher: TeacherDepartmentLike) {
-  return Object.fromEntries(
-    (teacher.departmentAssignments ?? [])
-      .map((assignment) => [
-        assignment.departmentId,
-        assignment.identityType ?? "FRONTLINE_TEACHER",
-      ])
-      .filter(([departmentId]) => Boolean(departmentId)),
-  ) as Record<string, TeacherDepartmentIdentityType>;
+  return (teacher.departmentAssignments ?? []).reduce(
+    (result, assignment) => {
+      if (!assignment.departmentId) {
+        return result;
+      }
+
+      const identityType = assignment.identityType ?? "FRONTLINE_TEACHER";
+      const existing = result[assignment.departmentId] ?? [];
+
+      result[assignment.departmentId] = Array.from(
+        new Set([...existing, identityType]),
+      );
+
+      return result;
+    },
+    {} as Record<string, TeacherDepartmentIdentityType[]>,
+  );
 }
 
 export function getTeacherDepartmentDisplayItems(teacher: TeacherDepartmentLike) {

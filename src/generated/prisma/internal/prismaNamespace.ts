@@ -2003,6 +2003,7 @@ export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeo
 
 
 export const TeacherDepartmentAssignmentScalarFieldEnum = {
+  id: 'id',
   teacherId: 'teacherId',
   departmentId: 'departmentId',
   positionId: 'positionId',

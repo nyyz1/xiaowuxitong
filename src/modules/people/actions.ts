@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { GradeStage } from "@/generated/prisma/enums";
@@ -66,7 +66,10 @@ type ImportStats = {
 type PeopleReferenceMaps = Awaited<ReturnType<typeof loadPeopleReferenceMaps>>;
 type ProfileFieldCollection = ReturnType<typeof collectProfileValuesFromFormData>;
 type ActiveProfileField = Awaited<ReturnType<typeof getProfileFieldDefinitions>>[number];
-type TeacherDepartmentIdentityMap = Record<string, ReturnType<typeof normalizeTeacherDepartmentIdentity>>;
+type TeacherDepartmentIdentityMap = Record<
+  string,
+  ReturnType<typeof normalizeTeacherDepartmentIdentity>[]
+>;
 
 function getStringValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -84,18 +87,21 @@ function getStringValues(formData: FormData, key: string) {
   );
 }
 
-function getTeacherDepartmentIdentitiesFromFormData(
-  formData: FormData,
-  departmentIds: string[],
-) {
+function getTeacherDepartmentIdentitiesFromFormData(formData: FormData) {
+  const departmentIds = getStringValues(formData, "departmentIds");
+
   return Object.fromEntries(
     departmentIds.map((departmentId) => [
       departmentId,
-      normalizeTeacherDepartmentIdentity(
-        getStringValue(formData, `departmentIdentity__${departmentId}`),
+      Array.from(
+        new Set(
+          getStringValues(formData, `departmentIdentity__${departmentId}`).map(
+            (value) => normalizeTeacherDepartmentIdentity(value),
+          ),
+        ),
       ),
     ]),
-  );
+  ) as TeacherDepartmentIdentityMap;
 }
 
 function getWorkbookFile(formData: FormData, key: string) {
@@ -225,30 +231,35 @@ async function buildTeacherDepartmentAssignments(
   const assignments = [];
 
   for (const departmentId of departmentIds) {
-    const identityType =
-      departmentIdentities[departmentId] ?? normalizeTeacherDepartmentIdentity("");
-    const position = await findPositionForDepartmentIdentity(prisma, {
-      departmentId,
-      identityType,
-    });
+    const identityTypes =
+      departmentIdentities[departmentId]?.length > 0
+        ? departmentIdentities[departmentId]
+        : [normalizeTeacherDepartmentIdentity("")];
 
-    assignments.push({
-      identityType: position?.identityType ?? identityType,
-      ...(position
-        ? {
-            position: {
-              connect: {
-                id: position.id,
+    for (const identityType of identityTypes) {
+      const position = await findPositionForDepartmentIdentity(prisma, {
+        departmentId,
+        identityType,
+      });
+
+      assignments.push({
+        identityType: position?.identityType ?? identityType,
+        ...(position
+          ? {
+              position: {
+                connect: {
+                  id: position.id,
+                },
               },
-            },
-          }
-        : {}),
-      department: {
-        connect: {
-          id: departmentId,
+            }
+          : {}),
+        department: {
+          connect: {
+            id: departmentId,
+          },
         },
-      },
-    });
+      });
+    }
   }
 
   return assignments;
@@ -491,9 +502,12 @@ function resolveTeacherDepartmentIdentityAssignments(
   const departmentIdentities: TeacherDepartmentIdentityMap = {};
 
   for (const item of splitMultiValueText(identityText)) {
-    const [rawDepartmentName, rawIdentityName] = item
+    const parts = item
       .split(/[\/|｜]/u)
-      .map((part) => part.trim());
+      .map((part) => part.trim())
+      .filter(Boolean);
+    const rawDepartmentName = parts[0] ?? "";
+    const rawIdentityText = parts.slice(1).join("、");
 
     if (!rawDepartmentName) {
       continue;
@@ -506,8 +520,15 @@ function resolveTeacherDepartmentIdentityAssignments(
     }
 
     departmentIds.push(departmentId);
-    departmentIdentities[departmentId] =
-      normalizeTeacherDepartmentIdentity(rawIdentityName ?? "");
+    const identities = rawIdentityText
+      ? splitMultiValueText(rawIdentityText).map((name) =>
+          normalizeTeacherDepartmentIdentity(name),
+        )
+      : [normalizeTeacherDepartmentIdentity("")];
+
+    departmentIdentities[departmentId] = Array.from(
+      new Set([...(departmentIdentities[departmentId] ?? []), ...identities]),
+    );
   }
 
   return {
@@ -515,7 +536,6 @@ function resolveTeacherDepartmentIdentityAssignments(
     departmentIdentities,
   };
 }
-
 async function assertProfileFieldDefinitionNameIsAllowed(
   targetType: "TEACHER" | "STUDENT",
   name: string,
@@ -842,10 +862,7 @@ export async function createTeacher(formData: FormData) {
     idCardNumber: getStringValue(formData, "idCardNumber"),
     name: getStringValue(formData, "name"),
     departmentIds,
-    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(
-      formData,
-      departmentIds,
-    ),
+    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(formData),
     subjectId: getStringValue(formData, "subjectId"),
     employmentStatus: getStringValue(formData, "employmentStatus") || "ACTIVE",
   });
@@ -921,10 +938,7 @@ export async function updateTeacher(formData: FormData) {
     idCardNumber: getStringValue(formData, "idCardNumber"),
     name: getStringValue(formData, "name"),
     departmentIds,
-    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(
-      formData,
-      departmentIds,
-    ),
+    departmentIdentities: getTeacherDepartmentIdentitiesFromFormData(formData),
     subjectId: getStringValue(formData, "subjectId"),
     employmentStatus: getStringValue(formData, "employmentStatus") || "ACTIVE",
   });
@@ -1457,7 +1471,7 @@ export async function importTeachers(formData: FormData) {
           Object.fromEntries(
             departmentIds.map((departmentId) => [
               departmentId,
-              normalizeTeacherDepartmentIdentity(""),
+              [normalizeTeacherDepartmentIdentity("")],
             ]),
           );
         const subjectName = getCellText(row, teacherImportColumnAliases.subject);

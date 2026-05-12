@@ -272,6 +272,7 @@ model Student {
 }
 
 model TeacherDepartmentAssignment {
+  id           String   @id @default(cuid())
   teacherId    String
   departmentId String
   positionId   String?
@@ -281,8 +282,9 @@ model TeacherDepartmentAssignment {
   position     DepartmentPosition? @relation(fields: [positionId], references: [id], onDelete: SetNull)
   createdAt    DateTime   @default(now())
 
-  @@id([teacherId, departmentId])
+  @@unique([teacherId, departmentId, identityType, positionId])
   @@index([departmentId])
+  @@index([teacherId])
   @@index([positionId])
   @@index([identityType])
 }
