@@ -50,7 +50,9 @@ install_postgres_from_ubuntu_repo() {
 echo "== Installing PostgreSQL =="
 if ! command -v psql >/dev/null 2>&1; then
   sudo install -d -m 0755 /etc/apt/keyrings
-  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg
+  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /tmp/postgresql.asc
+  sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/postgresql.gpg /tmp/postgresql.asc
+  rm -f /tmp/postgresql.asc
   echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
   sudo apt-get update
 
