@@ -18,6 +18,7 @@ BOOTSTRAP_ADMIN_USERNAME="${BOOTSTRAP_ADMIN_USERNAME:-admin}"
 BOOTSTRAP_ADMIN_PASSWORD="${BOOTSTRAP_ADMIN_PASSWORD:-}"
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-}"
 SERVICE_NAME="${SERVICE_NAME:-xiaowuxitong}"
+APT_TIMEOUT_SECONDS="${APT_TIMEOUT_SECONDS:-300}"
 
 if [[ -z "$DB_PASSWORD" ]]; then
   DB_PASSWORD="$(openssl rand -hex 24)"
@@ -33,7 +34,7 @@ fi
 
 echo "== Installing system packages =="
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg git openssl ufw
+sudo apt-get install -y ca-certificates curl gnupg git openssl ufw nginx
 
 echo "== Installing Node.js $NODE_MAJOR =="
 if ! command -v node >/dev/null 2>&1 || [[ "$(node -v | sed -E 's/^v([0-9]+).*/\1/')" != "$NODE_MAJOR" ]]; then
@@ -41,13 +42,23 @@ if ! command -v node >/dev/null 2>&1 || [[ "$(node -v | sed -E 's/^v([0-9]+).*/\
   sudo apt-get install -y nodejs
 fi
 
-echo "== Installing PostgreSQL $POSTGRES_VERSION =="
-if ! command -v psql >/dev/null 2>&1 || ! pg_config --version | grep -q " $POSTGRES_VERSION"; then
+install_postgres_from_ubuntu_repo() {
+  sudo apt-get update
+  sudo apt-get install -y postgresql postgresql-client
+}
+
+echo "== Installing PostgreSQL =="
+if ! command -v psql >/dev/null 2>&1; then
   sudo install -d -m 0755 /etc/apt/keyrings
   curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg
   echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
   sudo apt-get update
-  sudo apt-get install -y "postgresql-$POSTGRES_VERSION" "postgresql-client-$POSTGRES_VERSION"
+
+  if ! timeout "$APT_TIMEOUT_SECONDS" sudo apt-get install -y "postgresql-$POSTGRES_VERSION" "postgresql-client-$POSTGRES_VERSION"; then
+    echo "PostgreSQL $POSTGRES_VERSION install timed out or failed. Falling back to Ubuntu's default PostgreSQL packages." >&2
+    sudo rm -f /etc/apt/sources.list.d/pgdg.list
+    install_postgres_from_ubuntu_repo
+  fi
 fi
 
 sudo systemctl enable --now postgresql
@@ -143,25 +154,34 @@ SERVICE
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_NAME"
 
-echo "== Installing Caddy reverse proxy =="
-if ! command -v caddy >/dev/null 2>&1; then
-  sudo apt-get install -y debian-keyring debian-archive-keyring apt-transport-https
-  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list >/dev/null
-  sudo apt-get update
-  sudo apt-get install -y caddy
-fi
+echo "== Installing Nginx reverse proxy =="
+sudo tee /etc/nginx/sites-available/xiaowuxitong >/dev/null <<NGINX
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name _;
 
-sudo tee /etc/caddy/Caddyfile >/dev/null <<CADDY
-:80 {
-  encode gzip
-  reverse_proxy 127.0.0.1:3000
+  client_max_body_size 25m;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
 }
-CADDY
+NGINX
 
-sudo systemctl enable caddy
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo ln -sfn /etc/nginx/sites-available/xiaowuxitong /etc/nginx/sites-enabled/xiaowuxitong
+sudo nginx -t
+sudo systemctl enable nginx
 sudo systemctl restart "$SERVICE_NAME"
-sudo systemctl restart caddy
+sudo systemctl restart nginx
 
 echo "== Configuring firewall =="
 sudo ufw allow OpenSSH

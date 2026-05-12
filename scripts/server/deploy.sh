@@ -56,6 +56,10 @@ npm run build
 
 echo "== Restarting service =="
 sudo systemctl restart "$SERVICE_NAME"
+if systemctl list-unit-files | grep -q '^nginx.service'; then
+  sudo nginx -t
+  sudo systemctl reload nginx
+fi
 sudo systemctl --no-pager --full status "$SERVICE_NAME"
 
 echo "== Smoke testing authenticated pages =="

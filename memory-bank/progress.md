@@ -307,7 +307,7 @@
   - backup path `/opt/xiaowuxitong/backups`
   - log path `/opt/xiaowuxitong/logs`
   - local PostgreSQL database `school_affairs` owned by `school_admin`
-  - Caddy public `:80` proxy to `127.0.0.1:3000`
+  - Nginx public `:80` proxy to `127.0.0.1:3000`
   - `xiaowuxitong.service` managed by systemd
 - Verification pending:
   - local `typecheck`, `lint`, and `build`
