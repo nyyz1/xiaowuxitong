@@ -309,6 +309,8 @@
   - local PostgreSQL database `school_affairs` owned by `school_admin`
   - Nginx public `:80` proxy to `127.0.0.1:3000`
   - `xiaowuxitong.service` managed by systemd
+- Deployment refinement:
+  - the Ubuntu bootstrap now defaults to the Ubuntu repository PostgreSQL packages because the external PostgreSQL 17 apt repository repeatedly hung during Tencent Cloud first-run installation; PostgreSQL 17 can still be requested later by setting `POSTGRES_VERSION=17`
 - Verification pending:
   - local `typecheck`, `lint`, and `build`
   - remote SSH bootstrap and authenticated smoke on the new server

@@ -10,7 +10,7 @@ REPO_URL="${REPO_URL:-https://github.com/nyyz1/xiaowuxitong.git}"
 BRANCH="${BRANCH:-main}"
 PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-http://124.222.136.121}"
 NODE_MAJOR="${NODE_MAJOR:-22}"
-POSTGRES_VERSION="${POSTGRES_VERSION:-17}"
+POSTGRES_VERSION="${POSTGRES_VERSION:-}"
 DB_NAME="${DB_NAME:-school_affairs}"
 DB_USER="${DB_USER:-school_admin}"
 DB_PASSWORD="${DB_PASSWORD:-}"
@@ -19,6 +19,8 @@ BOOTSTRAP_ADMIN_PASSWORD="${BOOTSTRAP_ADMIN_PASSWORD:-}"
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-}"
 SERVICE_NAME="${SERVICE_NAME:-xiaowuxitong}"
 APT_TIMEOUT_SECONDS="${APT_TIMEOUT_SECONDS:-300}"
+
+export DEBIAN_FRONTEND=noninteractive
 
 if [[ -z "$DB_PASSWORD" ]]; then
   DB_PASSWORD="$(openssl rand -hex 24)"
@@ -49,16 +51,20 @@ install_postgres_from_ubuntu_repo() {
 
 echo "== Installing PostgreSQL =="
 if ! command -v psql >/dev/null 2>&1; then
-  sudo install -d -m 0755 /etc/apt/keyrings
-  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /tmp/postgresql.asc
-  sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/postgresql.gpg /tmp/postgresql.asc
-  rm -f /tmp/postgresql.asc
-  echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
-  sudo apt-get update
+  if [[ -n "$POSTGRES_VERSION" ]]; then
+    sudo install -d -m 0755 /etc/apt/keyrings
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /tmp/postgresql.asc
+    sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/postgresql.gpg /tmp/postgresql.asc
+    rm -f /tmp/postgresql.asc
+    echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+    sudo apt-get update
 
-  if ! timeout "$APT_TIMEOUT_SECONDS" sudo apt-get install -y "postgresql-$POSTGRES_VERSION" "postgresql-client-$POSTGRES_VERSION"; then
-    echo "PostgreSQL $POSTGRES_VERSION install timed out or failed. Falling back to Ubuntu's default PostgreSQL packages." >&2
-    sudo rm -f /etc/apt/sources.list.d/pgdg.list
+    if ! timeout "$APT_TIMEOUT_SECONDS" sudo apt-get install -y "postgresql-$POSTGRES_VERSION" "postgresql-client-$POSTGRES_VERSION"; then
+      echo "PostgreSQL $POSTGRES_VERSION install timed out or failed. Falling back to Ubuntu's default PostgreSQL packages." >&2
+      sudo rm -f /etc/apt/sources.list.d/pgdg.list
+      install_postgres_from_ubuntu_repo
+    fi
+  else
     install_postgres_from_ubuntu_repo
   fi
 fi

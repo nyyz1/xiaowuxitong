@@ -496,5 +496,6 @@ Current implementation note:
 ## 2026-05-12 Tencent Cloud Lighthouse Deployment Update
 
 - `scripts/server/bootstrap-ubuntu.sh` defines the first-time Ubuntu bootstrap path for Tencent Cloud Lighthouse: install Node.js, PostgreSQL, Git, and Nginx; create `/opt/xiaowuxitong`; clone GitHub; generate production `.env.local`; create the local PostgreSQL app database; run Prisma schema sync and baseline seeds; install `xiaowuxitong.service`; and proxy public `:80` to `127.0.0.1:3000`.
+- On Tencent Cloud Lighthouse, the bootstrap defaults to Ubuntu repository PostgreSQL packages for reliability; setting `POSTGRES_VERSION=17` opts into the external PostgreSQL apt repository when that network path is healthy.
 - `scripts/server/deploy.sh` is the server-side one-command update path: back up PostgreSQL, pull GitHub, install dependencies, generate and validate Prisma, sync the live database schema, rebuild, restart systemd, and smoke-test data-heavy pages.
 - `scripts/server/backup-postgres.sh` creates custom-format PostgreSQL backups with bounded retention under `/opt/xiaowuxitong/backups`, and `scripts/deploy-tencent-lighthouse.ps1` is the local SSH entrypoint for triggering the server update.
