@@ -9,6 +9,10 @@
 
 ## Current Status
 
+- Current authoritative deployment path as of 2026-05-12: Tencent Cloud Lighthouse `124.222.136.121` runs the app and PostgreSQL on the same Ubuntu server, with Nginx proxying public `:80` to `127.0.0.1:3000`.
+- Current authoritative update path: local development, push to GitHub, then run `scripts/deploy-tencent-lighthouse.ps1`; the server deploy script backs up PostgreSQL, pulls code, syncs Prisma schema, builds, restarts `xiaowuxitong.service`, and runs authenticated page smoke.
+- Current authoritative data state: the cloud PostgreSQL database does not carry old demo/test data; demo seeding and PGlite simulation are local development helpers only.
+- Earlier Windows workstation, LAN URL, and public tunnel items below are historical pilot milestones, not the current deployment plan.
 - Completed: Step 0, Step 1
 - Completed in code/environment: Step 2 application shell, Bootstrap login, protected dashboard shell, Prisma schema, Prisma client generation, and a verified real PostgreSQL connection on the pilot workstation
 - Completed in code: Step 3 school structure management page, system-admin checks, validation, and server actions
@@ -50,7 +54,7 @@
 - Completed in code/schema/local database/docs: V1.5 Step 8 application and approval module for teacher repair, material printing, and other configured daily requests, including print quantity tracking and default approval type seeding
 - Completed in environment/verification: Step 8 pilot approval configuration now has a bound teacher account, standard approval accounts, and approval responsibilities covering repair, teaching-print, grade-admin-print, school-admin-print, and other requests; authenticated `/dashboard/approvals` access plus database-backed routing and permission assertions pass
 - Completed in code/schema/environment/verification: the Step 3/4/7 teacher-student account and department-position refactor now limits login account type to teacher/student, adds highest-administrator capability, student-account binding, identity-card-based import account creation, self-service password changes, department-configured positions, and default department-position seeding
-- Next recommended action: if another office PC on the same network still cannot open the current `SameNetworkLoginUrl` from `logs/current-school-pilot-url.txt` while the workstation itself returns `200`, check the Windows Firewall profile and inbound TCP `3000` rule on that network.
+- Next recommended action: complete final cloud handoff by creating real operator accounts, confirming backup retention, and deciding the final HTTPS/domain plan after备案.
 
 ## Step 0: Freeze Version 1 Scope
 

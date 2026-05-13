@@ -3,6 +3,7 @@ import "server-only";
 import { hash } from "bcryptjs";
 import type { Prisma } from "@/generated/prisma/client";
 import { AccountType, UserRole } from "@/generated/prisma/enums";
+import { syncTeacherUserRole } from "@/modules/people/teacher-role";
 
 type AccountTx = Prisma.TransactionClient;
 
@@ -77,6 +78,8 @@ export async function ensureTeacherLoginAccount(
       },
     });
 
+    await syncTeacherUserRole(tx, input.teacherId);
+
     return {
       created: false,
       userId: existing.id,
@@ -98,6 +101,8 @@ export async function ensureTeacherLoginAccount(
       id: true,
     },
   });
+
+  await syncTeacherUserRole(tx, input.teacherId);
 
   return {
     created: true,

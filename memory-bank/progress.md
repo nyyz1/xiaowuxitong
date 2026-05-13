@@ -4,18 +4,20 @@
 
 - This file now keeps a short active log plus the current verified project state.
 - Older milestone history has been compressed into `memory-bank/progress-archive.md`.
-- For the live pilot's current operator passwords, login URLs, and daily usage rules, use `docs/pilot-accounts-and-usage-guide.md` as the source of truth.
+- For the cloud deployment, account operating guidance, login URL, and daily usage rules, use `docs/pilot-accounts-and-usage-guide.md` and `docs/tencent-lighthouse-deployment.md` as the source of truth.
 
 ## Current Verified State
 
 - The app is scoped to seven live business modules: school structure, user permissions, people records, alumni archive, routine inspection, application approval, and statistics export.
-- The live pilot workstation currently uses native PostgreSQL 17 under `D:\PostgreSQL\17` with data under `D:\PostgreSQL\data` and service `postgresql-xiaowuxitong`.
-- The current live pilot's operator passwords, database passwords, and login URLs are maintained in `docs/pilot-accounts-and-usage-guide.md`, not duplicated across every handoff document.
+- The current live environment is Tencent Cloud Lighthouse `124.222.136.121`, with the app and PostgreSQL hosted on the same Ubuntu server.
+- The cloud app runs from `/opt/xiaowuxitong/app`, stores PostgreSQL backups under `/opt/xiaowuxitong/backups`, and is managed by systemd service `xiaowuxitong` behind Nginx.
+- The cloud PostgreSQL database currently has no old demo/test dataset; demo seeding and PGlite simulation are local development tools only.
+- Cloud operator guidance and the public login URL are maintained in `docs/pilot-accounts-and-usage-guide.md`, while server deployment and update details are maintained in `docs/tencent-lighthouse-deployment.md`.
 - The main README now stays compact and points readers to the operator doc index plus the live pilot guide instead of repeating long handoff detail in one place.
 - The dashboard shell now uses a desktop sidebar, mobile drawer navigation, and a mobile-non-sticky topbar so narrow screens keep more usable height.
 - Homepage cleanup has removed process-facing status clutter such as the old RBAC explainer, the `私有部署` badge, and the `下一阶段任务` card.
 - Inspection save feedback now returns to the record-entry area, and student grade/class selectors now use linked dependent selection in people maintenance.
-- The school-pilot and public-pilot launchers are both hardened around real workstation use: duplicate-start protection, current-LAN-IP refresh, relative callback safety, and public-tunnel startup through `scripts/start-school-pilot.ps1`.
+- Windows school-pilot and public-pilot launchers remain historical/backup tooling and are not the current deployment path.
 - Historical milestone detail before 2026-05-09 is summarized in `memory-bank/progress-archive.md`.
 
 ## 2026-05-11
@@ -264,11 +266,11 @@
 - Changes made in the deeper cleanup pass:
   - added `docs/README.md` as a categorized document index for daily pilot use, deployment and acceptance, and migration or collaboration
   - linked that new doc index and the live pilot operator guide from the root `README.md`
-  - rewrote the reader-facing 鈥渃urrent workstation鈥?addenda in `docs/deployment-and-smoke-test.md`, `docs/school-transfer-one-click.md`, and `docs/postgresql-install-and-acceptance-runbook.md` so they no longer present the historical `C:\Program Files\PostgreSQL\17` migrated machine as the current live default
+  - rewrote the reader-facing current-workstation addenda in the deployment guide, the historical Windows transfer notes, and the PostgreSQL acceptance runbook so they no longer presented the historical `C:\Program Files\PostgreSQL\17` migrated machine as the current live default
   - clarified in those docs that `school_password` examples are initialization defaults, not the current live workstation password
   - compressed this file into an active log and moved older milestone history into `memory-bank/progress-archive.md`
 - Verification:
-  - re-read `README.md`, `docs/README.md`, `docs/deployment-and-smoke-test.md`, `docs/school-transfer-one-click.md`, `docs/postgresql-install-and-acceptance-runbook.md`, `memory-bank/architecture.md`, `tasks/todo.md`, and `tasks/lessons.md`
+  - re-read `README.md`, `docs/README.md`, `docs/deployment-and-smoke-test.md`, the historical Windows transfer notes, `docs/postgresql-install-and-acceptance-runbook.md`, `memory-bank/architecture.md`, `tasks/todo.md`, and `tasks/lessons.md`
   - confirmed the main reader-facing docs no longer claim the public launcher runs raw `npm.cmd run start`
   - confirmed the current-workstation notes now point back to `docs/pilot-accounts-and-usage-guide.md` instead of repeating stale live-password assumptions
 - Risks or blockers:
@@ -296,6 +298,20 @@
 
 ## 2026-05-12
 
+- User asked for a `$neat-freak` documentation cleanup after the project deployment and development workflow changed substantially.
+- Documentation cleanup:
+  - rewrote `README.md` around the current Tencent Cloud Lighthouse deployment, local development -> GitHub -> server deploy workflow, and cloud PostgreSQL data boundary
+  - rewrote `docs/README.md`, `docs/deployment-and-smoke-test.md`, `docs/pilot-accounts-and-usage-guide.md`, `docs/final-delivery-checklist.md`, `docs/security-and-deployment-plan.md`, and `docs/postgresql-install-and-acceptance-runbook.md` so the cloud deployment is the main path
+  - deleted obsolete Windows workstation approval, transfer, and server-pilot checklist docs from the active docs set
+  - removed old Windows workstation, LAN URL, public tunnel, local PostgreSQL password, and default demo-account guidance from the active handoff surface
+  - updated `memory-bank/prd.md`, `memory-bank/tech-stack.md`, and `memory-bank/implementation-plan.md` so the product, stack, and plan agree that Tencent Cloud server-local PostgreSQL is the current deployment shape
+  - clarified that the cloud PostgreSQL database does not carry old demo/test data and that demo seeding/PGlite simulation are local development helpers only
+- Verification:
+  - reread the required memory-bank files and the named `neat-freak` skill before editing
+  - inspected the server bootstrap/deploy/backup scripts to anchor docs to the real update sequence
+  - searched active docs and memory records for stale workstation, tunnel, LAN, demo-data, and cloud-deployment terms
+  - docs-only change; no runtime build or typecheck was needed
+
 - User asked to implement the Tencent Cloud Lighthouse deployment plan for server-side app plus PostgreSQL hosting and future one-command updates.
 - Changes made:
   - added Linux server scripts under `scripts/server/` for first-time Ubuntu bootstrap, one-command deployment updates, and PostgreSQL custom-format backups with retention
@@ -311,6 +327,11 @@
   - `xiaowuxitong.service` managed by systemd
 - Deployment refinement:
   - the Ubuntu bootstrap now defaults to the Ubuntu repository PostgreSQL packages because the external PostgreSQL 17 apt repository repeatedly hung during Tencent Cloud first-run installation; PostgreSQL 17 can still be requested later by setting `POSTGRES_VERSION=17`
+- Deployment result:
+  - Tencent Cloud Lighthouse `124.222.136.121` is now running the app on Ubuntu 22.04 with local PostgreSQL, Nginx reverse proxy, and systemd service `xiaowuxitong`
+  - first-time bootstrap completed successfully, the live server passed the built-in authenticated smoke test, and `http://124.222.136.121/login` now returns `200`
+  - the stable update path is now `scripts/deploy-tencent-lighthouse.ps1` from the Windows workstation, which SSHes into the server and runs `scripts/server/deploy.sh`
+  - the server-side deployment script now backs up PostgreSQL before pulling GitHub code, syncing Prisma schema, rebuilding, restarting, and smoking the data-heavy pages
 - Verification pending:
   - local `typecheck`, `lint`, and `build`
   - remote SSH bootstrap and authenticated smoke on the new server
@@ -376,3 +397,27 @@
 - Result:
   - all six authenticated smoke pages now return `200` on both the live local service and the temporary dev server
   - the root cause was schema drift plus a required-column migration that needed a data-preserving prefill step, not a frontend route or chunk-loading issue
+
+## 2026-05-12 Local Commit Push Helper
+
+- User asked for a one-click local file to commit and push GitHub changes before running the Tencent Cloud deployment update.
+- Changes made:
+  - added `commit-and-push.cmd` at the project root
+  - added `scripts/commit-and-push.ps1`, which checks for changes, runs `typecheck`, `lint`, and `build` by default, asks for a commit message, stages all changes, commits, rebases on the upstream branch, and pushes to GitHub
+  - the script prints the next deployment command for `scripts/deploy-tencent-lighthouse.ps1` after a successful push
+
+## 2026-05-13
+
+- User asked to implement automatic login-account creation for newly imported teacher and student records, and to make teacher compatibility roles derive from department plus position assignments.
+- Changes made:
+  - kept the identity-card-number account rule in the people import helpers so new teacher and active-student rows still auto-create login accounts with the last 8 characters of the identity card as the initial password
+  - added teacher-role derivation helpers that treat department positions as the source of truth for compatibility role display and permission grouping
+  - made teacher save flows re-sync the matching login account role after teacher profile updates, and re-sync all teachers attached to a department position after that position changes
+  - changed the user-management page so teacher compatibility roles are shown as automatically derived rather than manually editable
+- Verification:
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+- Result:
+  - new teacher and active-student imports continue to auto-create identity-card-number login accounts
+  - teacher compatibility roles now stay aligned with the teacher's current department and position assignments instead of relying on a manually edited user role field

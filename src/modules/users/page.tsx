@@ -3,7 +3,6 @@ import { SubmitButton } from "@/components/form/submit-button";
 import {
   userRoleDescriptions,
   userRoleLabels,
-  userRoleOptions,
 } from "@/lib/role-labels";
 import { teacherDepartmentIdentityLabels } from "@/modules/people/department-identities";
 import {
@@ -87,18 +86,6 @@ function SelectBox({
     >
       {children}
     </select>
-  );
-}
-
-function RoleOptions() {
-  return (
-    <>
-      {userRoleOptions.map((role) => (
-        <option key={role} value={role}>
-          {userRoleLabels[role]}
-        </option>
-      ))}
-    </>
   );
 }
 
@@ -210,6 +197,52 @@ function getScopeLabel(user: UserManagementData["users"][number]) {
   return "全校范围";
 }
 
+function getTeacherDerivedRole(user: UserManagementData["users"][number]) {
+  if (!user.teacher) {
+    return user.role;
+  }
+
+  const roles = new Set<UserRole>();
+
+  for (const assignment of user.teacher.departmentAssignments) {
+    const identityType = assignment.position?.identityType ?? assignment.identityType;
+
+    if (identityType === "DEPARTMENT_LEADER") {
+      roles.add(UserRole.DEPARTMENT_LEADER);
+    } else if (identityType === "GRADE_MANAGER") {
+      roles.add(UserRole.GRADE_MANAGER);
+    } else if (identityType === "STUDENT_AFFAIRS_STAFF") {
+      roles.add(UserRole.STUDENT_AFFAIRS_STAFF);
+    } else if (identityType === "ACADEMIC_AFFAIRS_STAFF") {
+      roles.add(UserRole.ACADEMIC_AFFAIRS_STAFF);
+    } else if (identityType === "LOGISTICS_STAFF") {
+      roles.add(UserRole.LOGISTICS_STAFF);
+    }
+  }
+
+  if (roles.has(UserRole.STUDENT_AFFAIRS_STAFF)) {
+    return UserRole.STUDENT_AFFAIRS_STAFF;
+  }
+
+  if (roles.has(UserRole.ACADEMIC_AFFAIRS_STAFF)) {
+    return UserRole.ACADEMIC_AFFAIRS_STAFF;
+  }
+
+  if (roles.has(UserRole.GRADE_MANAGER)) {
+    return UserRole.GRADE_MANAGER;
+  }
+
+  if (roles.has(UserRole.DEPARTMENT_LEADER)) {
+    return UserRole.DEPARTMENT_LEADER;
+  }
+
+  if (roles.has(UserRole.LOGISTICS_STAFF)) {
+    return UserRole.LOGISTICS_STAFF;
+  }
+
+  return UserRole.TEACHER;
+}
+
 function UserCard({
   user,
   data,
@@ -243,7 +276,7 @@ function UserCard({
               </span>
             ) : null}
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              兼容角色：{userRoleLabels[user.role]}
+              兼容角色：{userRoleLabels[getTeacherDerivedRole(user)]}
             </span>
           </div>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -276,9 +309,13 @@ function UserCard({
             <option value="false">普通能力</option>
             <option value="true">最高管理员</option>
           </SelectBox>
-          <SelectBox name="role" defaultValue={user.role}>
-            <RoleOptions />
-          </SelectBox>
+          <div className="rounded-2xl border border-[var(--panel-border)] bg-slate-50 px-4 py-3 text-sm text-[var(--text-secondary)]">
+            教师兼容角色由部门和职务自动推导，当前为
+            <span className="font-semibold text-[var(--text-primary)]">
+              {userRoleLabels[getTeacherDerivedRole(user)]}
+            </span>
+            。
+          </div>
           <SelectBox name="managedGradeId" defaultValue={user.managedGradeId ?? ""}>
             <GradeScopeOptions gradeOptions={data.gradeOptions} />
           </SelectBox>
@@ -389,9 +426,9 @@ export function UsersPage({ data, notice }: UsersPageProps) {
             <option value="false">普通能力</option>
             <option value="true">最高管理员</option>
           </SelectBox>
-          <SelectBox name="role" defaultValue={UserRole.TEACHER}>
-            <RoleOptions />
-          </SelectBox>
+          <div className="rounded-2xl border border-[var(--panel-border)] bg-slate-50 px-4 py-3 text-sm text-[var(--text-secondary)] lg:col-span-1">
+            新建教师账号后，系统会根据部门和职务自动推导兼容角色。
+          </div>
           <SelectBox name="managedGradeId" defaultValue="">
             <GradeScopeOptions gradeOptions={data.gradeOptions} />
           </SelectBox>
@@ -421,16 +458,16 @@ export function UsersPage({ data, notice }: UsersPageProps) {
         description="角色决定基础模块访问权；审批范围由申请审批模块中的职责配置决定。"
       >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {userRoleOptions.map((role) => (
+          {Object.entries(userRoleLabels).map(([role, label]) => (
             <div
               key={role}
               className="rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-soft)] p-4"
             >
               <div className="font-semibold text-[var(--text-primary)]">
-                {userRoleLabels[role]}
+                {label}
               </div>
               <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                {userRoleDescriptions[role]}
+                {userRoleDescriptions[role as UserRole]}
               </p>
             </div>
           ))}

@@ -1,5 +1,11 @@
 ﻿# Lessons
 
+## 2026-05-12 - Deployment docs must name one current path and demote old paths explicitly
+
+- Trigger: after moving the project and PostgreSQL fully onto Tencent Cloud, active docs still described Windows workstation deployment, LAN access, public tunnel forwarding, demo accounts, and local test data as if they were still the main route.
+- Pattern: when deployment changes substantially, old instructions are not harmless history; they become competing runbooks that can make an operator seed test data, expose the wrong host, or debug the wrong machine.
+- Rule: after a deployment architecture change, rewrite the README, docs index, deployment guide, account guide, security plan, and memory-bank current-state sections around the single current path. Keep retired routes only as clearly marked historical or backup material.
+
 ## 2026-05-11 - GitHub sync recovery needs an executable authenticated page smoke
 
 - Trigger: after pulling the latest code, the same family of data-heavy pages again showed `This page couldn't load`, and the live database was missing the newer `User.teacherId` column expected by the synced code.

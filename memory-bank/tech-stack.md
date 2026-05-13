@@ -2,7 +2,7 @@
 
 ## Status
 
-Selected for version 1 and aligned to the approved school trial setup on 2026-04-24.
+Selected for version 1 and updated for the Tencent Cloud server deployment on 2026-05-12.
 
 ## Selection Rule
 
@@ -29,7 +29,7 @@ Use `Profile A: Web App`, but deploy it privately instead of using a public mana
 | Runtime version | `Node.js LTS` | Stable, mainstream, works well with the selected stack | Selected |
 | Frontend | `Next.js` + `React` + `Ant Design` | Fast full-stack setup plus strong admin forms and tables | Selected |
 | Backend | `Next.js` route handlers and server actions | Avoid a second backend service until scale requires it | Selected |
-| Database | `PostgreSQL` | Reliable relational model for people, classes, and inspection data; the approved trial assumes a school-controlled local PostgreSQL instance | Selected |
+| Database | `PostgreSQL` | Reliable relational model for people, classes, inspection, approvals, and audit data; the current deployment keeps PostgreSQL local to the Tencent Cloud server | Selected |
 | ORM | `Prisma` + `@prisma/adapter-pg` | Clear schema management and productive CRUD development with Prisma 7 PostgreSQL adapter support | Selected |
 | Authentication | `Auth.js` with credentials login | Enough for internal role-based login in version 1 | Selected |
 | Authorization | Database-backed RBAC | Export and data maintenance permissions must be explicit | Selected |
@@ -37,8 +37,8 @@ Use `Profile A: Web App`, but deploy it privately instead of using a public mana
 | Import and export | `xlsx` | Covers spreadsheet import templates, spreadsheet parsing, filtered Excel export, and report workbooks | Implemented for Step 4 and Step 6 |
 | Package manager | `npm` | The scaffold currently uses `package-lock.json`; keep one package manager to avoid lockfile drift | Selected |
 | Testing | `Vitest` + `Playwright` | Fast unit tests plus browser smoke coverage for critical flows | Selected |
-| Local database simulation | `@electric-sql/pglite` | Allows a Postgres-compatible fake database run when Docker or local PostgreSQL is unavailable | Added for demo/smoke simulation |
-| Deployment | Native `Node.js` app plus local `PostgreSQL` on the current school pilot workstation; the current Grade 11 pilot keeps PostgreSQL on the workstation `D` drive and exposes only the web app URL to the school LAN; `Docker Compose` remains optional when the school allows it | Matches the approved pilot environment while keeping operations simple and the database private to the workstation | Selected |
+| Local database simulation | `@electric-sql/pglite` | Allows a Postgres-compatible fake database run for local development-only simulation when PostgreSQL is unavailable | Development helper only |
+| Deployment | Tencent Cloud Lighthouse Ubuntu server running native `Node.js`, local `PostgreSQL`, Nginx reverse proxy, and systemd service `xiaowuxitong` | Gives the school one stable private server path while keeping PostgreSQL off the public internet; updates are handled by backup, Git pull, schema sync, build, restart, and smoke scripts | Selected |
 
 ## Why This Stack
 
@@ -61,8 +61,8 @@ Use `Profile A: Web App`, but deploy it privately instead of using a public mana
 ### Why Private Deployment
 
 - teacher and student data is sensitive
-- a school affairs system is usually safer as an intranet or private deployment than a public internet-first app
-- the approved trial now explicitly assumes the database stays on school-controlled infrastructure
+- a school affairs system is safer as a private deployment than a public internet-first app
+- the current deployment keeps the database on the same Tencent Cloud server as the app and exposes only the web entry point
 
 ## Initial Module Strategy
 
@@ -75,7 +75,7 @@ Use `Profile A: Web App`, but deploy it privately instead of using a public mana
 - role-based login is required in version 1
 - one highest-privilege system administrator account is the baseline for the initial trial
 - grade-scoped manager permissions must be enforced server-side through database-backed role context
-- the pilot workstation should expose the web app to the school LAN while keeping PostgreSQL local to the workstation when possible
+- PostgreSQL should stay local to the Tencent Cloud server and should not expose port `5432` publicly
 - academic-year rollover and alumni visibility rules should be stored as explicit database state, not inferred only from page labels
 - graduated cohorts should stay in the same relational system of record so archive-center edit, import, and export flows can reuse the existing people pipeline
 - teacher multiple duties can be stored as structured multi-value data on the teacher record instead of a separate permission system
@@ -102,6 +102,6 @@ These can wait until after the first working slice:
 
 ## Open Questions
 
-- After the Grade 11 workstation pilot, should deployment stay on a Windows workstation or move to a dedicated school server?
+- When the domain is approved and备案完成, what final HTTPS host should replace the current IP entry?
 - Does the school need import templates for existing Excel sheets, or can we define fresh standard templates?
-- Do we need password reset by admin only, or user self-service reset after the trial phase?
+- Do we need password reset by admin only, or broader user self-service reset after the trial phase?

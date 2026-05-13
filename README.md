@@ -1,6 +1,6 @@
 # 校务系统
 
-面向高中学校内部使用的校务数据管理系统，当前按七个业务模块组织：
+面向高中学校内部使用的校务数据管理系统。当前代码按七个业务模块组织：
 
 - 用户权限
 - 学校结构
@@ -10,23 +10,97 @@
 - 申请审批
 - 统计导出
 
-## 当前状态
+## 当前部署形态
 
-- 已完成 `Next.js + TypeScript + Prisma + PostgreSQL` 主体应用骨架。
-- 已完成数据库账号登录、兜底管理员登录、用户与权限管理。
-- 已完成学校结构、用户权限、师生档案、往届存档、常规检查、申请审批、统计导出七个业务模块。
-- 已完成前台与业务流程去学年化，结构、档案、检查和统计都按年级 / 班级工作，`AcademicYear` 仅保留为内部兼容层。
-- 已完成学校试点角色模型，并扩展到 V1.5 岗位体系：系统管理员、校领导、部门领导、年级管理员、政教工作人员、教务工作人员、行政办公人员、后勤办公人员、一线教师。
+当前正式运行口径已经切换为腾讯云轻量应用服务器，不再使用 Windows 试点电脑、本地 PostgreSQL、局域网访问或本地加公网隧道作为主方案。
 
-## 当前已批准试点
+- 服务器：腾讯云轻量应用服务器 `124.222.136.121`
+- 入口：`http://124.222.136.121/login`
+- 系统：Ubuntu Server 22.04
+- 应用目录：`/opt/xiaowuxitong/app`
+- 数据库：服务器本机 PostgreSQL，库名 `school_affairs`，应用用户 `school_admin`
+- 服务：`xiaowuxitong.service`
+- 反向代理：Nginx `:80` -> `127.0.0.1:3000`
+- 备份目录：`/opt/xiaowuxitong/backups`
+- 当前云端 PostgreSQL 不保留旧演示数据或本地测试数据
 
-- 先在高二年级试用，不直接切全校真实数据。
-- PostgreSQL 安装在当前试点电脑的 `D` 盘，本项目应用也运行在这台电脑上。
-- 其他办公电脑通过这台试点电脑的校内网 IP 访问 Web 系统，不直接连接 PostgreSQL。
-- 系统只保留 `1` 个最高权限系统管理员账号。
-- `3` 个校领导账号具有全校数据查看、导入、导出权限。
-- `3` 个高二年级管理员账号具有高二范围内的查看、导入、导出权限。
-- 教务工作人员和行政办公人员负责师生档案维护、误录修改与删除；政教工作人员负责检查项目维护、检查录入、误录修改与删除；后勤办公人员和其他管理岗位可通过申请审批职责处理对应申请。
+PostgreSQL 只应监听服务器本机，不开放公网 `5432`。公网只开放 Web 入口和 SSH 管理入口。
+
+## 开发与发布流程
+
+日常开发在本机完成，代码通过 GitHub 进入服务器：
+
+1. 本机修改代码。
+2. 本机运行验证。
+3. 提交并推送 GitHub。
+4. 运行腾讯云部署脚本。
+5. 服务器自动备份数据库、拉取代码、同步 schema、构建、重启、烟测。
+
+本机一键提交推送：
+
+```text
+commit-and-push.cmd
+```
+
+手动验证命令：
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+```
+
+推送后部署到腾讯云：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\deploy-tencent-lighthouse.ps1
+```
+
+远端部署脚本会依次执行：
+
+1. `pg_dump` 备份当前 PostgreSQL。
+2. `git pull --ff-only` 拉取 GitHub 最新代码。
+3. `npm ci` 安装依赖。
+4. 生成并校验 Prisma Client/schema。
+5. `prisma db push` 同步云端 PostgreSQL schema。
+6. 补齐基础配置种子：申请类型、部门岗位。
+7. `npm run build`。
+8. 重启 `xiaowuxitong.service`。
+9. 运行 authenticated smoke，检查数据重页面。
+
+## 本地开发
+
+本机用于开发和静态验证，不再承担正式试点运行。
+
+首次准备：
+
+```powershell
+cp .env.example .env.local
+npm install
+npm.cmd run db:generate
+```
+
+启动开发环境：
+
+```powershell
+npm.cmd run dev
+```
+
+如果本机需要临时 PostgreSQL 用于开发验证，可以让 `.env.local` 指向本机数据库后执行：
+
+```powershell
+npm.cmd run db:push
+```
+
+不要把本机数据库当作正式环境，也不要把本机测试数据迁移到腾讯云。
+
+## 数据与账号原则
+
+- 云端数据库当前不含演示测试数据。
+- `db:seed:demo`、`db:clear:demo`、PGlite 模拟命令只用于本地开发或一次性验证，不属于正式云端部署流程。
+- 云端的 Bootstrap 管理员、数据库密码、`NEXTAUTH_SECRET` 只保存在服务器 `.env.local` 或受控交付材料中，不写入 Git 文档。
+- 首次空库上线后，使用 Bootstrap 管理员进入系统，再在 `/dashboard/users` 创建正式业务账号。
+- 正式账号密码由系统管理员在后台设置和重置。
 
 ## 目录说明
 
@@ -42,217 +116,41 @@
 - `src/modules/approvals/`：申请审批模块
 - `src/modules/reporting/`：统计导出模块
 - `prisma/`：数据库 schema
-- `scripts/`：数据库种子、PGlite 模拟、试点启动脚本
-- `docs/`：部署、验收、试点交付文档
+- `scripts/server/`：腾讯云服务器 bootstrap、备份、部署脚本
+- `docs/`：部署、运维、验收、规划文档
 
-文档入口建议先看：
+## 文档入口
 
-- `docs/README.md`：按“日常试点使用 / 部署验收 / 迁移协作”分类的文档导航
-- `docs/pilot-accounts-and-usage-guide.md`：当前 live 试点环境的账号、密码、地址、启动与日常使用说明
-
-## 只搬项目到学校电脑的一键方式
-
-如果不需要带走当前电脑里的数据库数据，可以在家里电脑双击：
-
-```text
-package-for-school.cmd
-```
-
-把生成的 `artifacts\school-transfer\*.zip` 复制到学校电脑，解压到 `D:\xiaowuxitong` 后双击：
-
-```text
-setup-school-workstation.cmd
-```
-
-学校电脑初始化脚本会检查 Node.js/npm 和 PostgreSQL/`psql.exe`，缺失时尝试用 `winget` 安装，并用 PostgreSQL 管理员密码创建 `school_admin` 用户和 `school_affairs` 数据库。
-
-详细说明见 `docs/school-transfer-one-click.md`。
-
-## 多电脑 Codex 开发
-
-如果你本人要在不同工作地点继续开发，推荐用 GitHub 加三个一键脚本：
-
-```text
-setup-dev-workstation.cmd
-start-work.cmd
-save-work.cmd
-```
-
-- 新电脑第一次克隆仓库后，双击 `setup-dev-workstation.cmd`。
-- 每次准备让 Codex 开发前，双击 `start-work.cmd` 拉取 GitHub 最新代码。
-- 每次离开电脑前，双击 `save-work.cmd`，它会检查、提交并推送当前改动。
-
-详细说明见 `docs/codex-multi-workstation.md`。
-
-## 本地启动
-
-1. 复制环境变量模板
-
-```bash
-cp .env.example .env.local
-```
-
-2. 安装依赖
-
-```bash
-npm install
-```
-
-3. 生成 Prisma Client
-
-```bash
-npm run db:generate
-```
-
-4. 如有 PostgreSQL，可同步 schema
-
-```bash
-npm run db:push
-```
-
-5. 启动开发环境
-
-```bash
-npm run dev
-```
-
-如果已经在这台电脑上装好 PostgreSQL，准备让同一校内网的办公电脑访问试点环境，建议用：
-
-```text
-start-school-pilot.cmd
-```
-
-或命令行：
-
-```bash
-npm run pilot:school
-```
-
-启动后，其他办公电脑访问这台试点电脑显示出来的 `http://校内IP:3000` 即可。
-
-如果自动识别到的是 `localhost`，请改用：
-
-```bash
-npm run pilot:school -- -PublicHost 192.168.x.x
-```
-
-`logs/current-school-pilot-url.txt` 会记录当前访问地址。本机始终可以使用 `http://127.0.0.1:3000/login`，同一网络内的其他设备应读取其中最新的 `SameNetworkLoginUrl`，不要依赖旧书签或记住某个固定 IP。
-
-如果校内网限制了同一 Wi-Fi 下设备互访，但允许这台电脑通过 SSH 访问腾讯云服务器，可以改用公网一键启动：
-
-```text
-start-school-public-pilot.cmd
-```
-
-它会做三件事：
-
-- 把 `NEXTAUTH_URL` 准备成 `http://119.45.252.190:62000`
-- 打开一个本地应用窗口，复用 `scripts/start-school-pilot.ps1` 完成本地依赖检查、构建和生产启动
-- 打开一个公网隧道窗口，通过 `plink` 把腾讯云 `62000` 反向映射到本机 `3000`
-
-这条路径当前验证通过的公网登录地址是：
-
-```text
-http://119.45.252.190:62000/login
-```
-
-注意：公网访问依赖两个可见窗口同时保持开启：
-
-- `XiaoWu Local App`
-- `XiaoWu Public Tunnel`
-
-如果要一键停止这两个窗口对应的服务，可以双击：
-
-```text
-stop-school-public-pilot.cmd
-```
-
-执行届别滚动后，教师档案里会用到的年级部门名称也会一起和当前在校届别对齐。例如当前在校届别变成 `2024级 / 2025级 / 2027级` 时，年级部门名称也会保持为 `2024级年级 / 2025级年级 / 2027级年级`。
-
-如果你刚执行过 `npm run build` 或刚更新过代码，而浏览器打开 `/login` 时出现 `This page couldn’t load`，通常不是登录页路由坏了，而是旧的 `next start` 进程还在提供旧版本页面、前端 chunk 对不上。此时请重新运行 `start-school-pilot.cmd` 或重新执行一次 `npm run pilot:school`。
-
-如果 `/login` 能正常打开，但登录后进入 `用户权限`、`数据管理`、`师生档案`、`往届存档`、`常规检查` 或 `统计导出` 时出现 `This page couldn’t load / A server error occurred`，优先检查 live PostgreSQL schema 是否落后于当前代码。典型服务端错误是 Prisma `P2022 ColumnNotFound`；2026-05-11 的 live 恢复中，`/dashboard/users`、`/dashboard/data-management` 和 `/dashboard/people` 同时报错就是 schema drift。处理顺序：
-
-```bash
-npm run db:push
-```
-
-如果 Prisma 提示新增唯一约束需要确认，先检查目标表是否已有冲突数据；确认没有冲突后再按提示执行带确认参数的 schema 同步。同步后重新打开上述受影响业务页，确认都能返回正常页面。
-
-## 登录账号
-
-系统优先使用数据库 `User` 表中的账号登录，密码以哈希形式保存。首次部署或数据库暂不可用时，仍可使用兜底管理员进入后台。
-
-兜底管理员通过环境变量控制：
-
-- `BOOTSTRAP_ADMIN_USERNAME`
-- `BOOTSTRAP_ADMIN_PASSWORD`
-
-执行 `npm run db:seed:demo` 后，可使用以下数据库账号登录，默认演示密码均为 `ChangeMe123!`：
-
-- `admin`：系统管理员
-- `leader1`、`leader2`、`leader3`：校领导
-- `grade11.manager1`、`grade11.manager2`、`grade11.manager3`：高二年级管理员，均绑定高二
-- `data.manager`：教务工作人员
-- `inspector`：政教工作人员
-
-申请审批模块的默认申请类型可通过以下命令写入或修复：
-
-```bash
-npm run db:seed:approval-defaults
-```
-
-试点用的教师自助账号和标准审批职责可通过以下命令写入或修复：
-
-```bash
-npm run db:seed:approval-pilot
-```
+- `docs/README.md`：文档导航
+- `docs/tencent-lighthouse-deployment.md`：腾讯云部署与一键更新手册
+- `docs/deployment-and-smoke-test.md`：云端发布和烟测流程
+- `docs/pilot-accounts-and-usage-guide.md`：云端账号与日常使用说明
+- `docs/final-delivery-checklist.md`：交付前检查单
 
 ## 常用命令
 
-```bash
-npm run dev
-npm run lint
-npm run typecheck
-npm run build
-npm run db:generate
-npm run db:validate
-npm run db:migrate
-npm run db:push
-npm run db:migrate:approval-roles
-npm run db:seed:approval-defaults
-npm run db:seed:approval-pilot
-npm run db:seed:approval-pilot:dry-run
-npm run db:seed:demo
-npm run db:seed:demo:dry-run
-npm run db:clear:demo
-npm run db:clear:demo:dry-run
-npm run test:demo-db
-npm run db:studio
+```powershell
+npm.cmd run dev
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run build
+npm.cmd run db:generate
+npm.cmd run db:validate
+npm.cmd run db:push
+npm.cmd run db:seed:approval-defaults
+npm.cmd run db:seed:department-positions
+npm.cmd run smoke:pages
 ```
 
-## 无 PostgreSQL 时的模拟验证
+本地演示或模拟命令只在明确需要测试数据时使用：
 
-当前机器如果没有 Docker 或 PostgreSQL，可运行：
-
-```bash
-npm run test:demo-db
+```powershell
+npm.cmd run db:seed:demo
+npm.cmd run db:clear:demo
+npm.cmd run test:demo-db
 ```
 
-该命令会使用 PGlite 创建临时 Postgres 兼容数据库，写入高中模拟数据，并生成统计导出文件到 `outputs/simulation`。
-
-## 部署和烟测
-
-详见：
-
-- `docs/deployment-and-smoke-test.md`
-- `docs/final-delivery-checklist.md`
-- `docs/security-and-deployment-plan.md`
-- `docs/school-server-pilot-checklist.md`
-- `docs/postgresql-install-and-acceptance-runbook.md`
-- `docs/pilot-accounts-and-usage-guide.md`
-
-## 工作流
+## 维护规则
 
 开始任何新任务前，先按顺序阅读：
 
@@ -262,34 +160,4 @@ npm run test:demo-db
 4. `memory-bank/progress.md`
 5. `memory-bank/architecture.md`
 
-## 2026-05-09 Migration Acceptance Note
-
-This migrated workstation has been verified as runnable with the following local state:
-
-- PostgreSQL service: `postgresql-xiaowuxitong`
-- PostgreSQL install path: `D:\PostgreSQL\17`
-- PostgreSQL data path: `D:\PostgreSQL\data`
-- PostgreSQL tools path: `D:\PostgreSQL\17\bin`
-- Application database: `school_affairs`
-- Application database user: `school_admin`
-- Current `DATABASE_URL`: use the current `school_admin` password recorded in `docs/pilot-accounts-and-usage-guide.md`
-- Current same-network login URL source: `logs/current-school-pilot-url.txt`
-
-On this workstation, PowerShell may block direct `npm` because of execution policy. Use `npm.cmd run ...` when that happens:
-
-```powershell
-npm.cmd run typecheck
-npm.cmd run lint
-npm.cmd run build
-npm.cmd run db:push
-```
-
-If PostgreSQL tools are not on `PATH`, use the full path:
-
-```powershell
-& "D:\PostgreSQL\17\bin\psql.exe" -h 127.0.0.1 -U school_admin -d school_affairs
-```
-
-## Tencent Cloud Lighthouse Deployment
-
-For the Tencent Cloud Lighthouse Ubuntu deployment and one-command server update flow, see `docs/tencent-lighthouse-deployment.md`.
+如果部署、数据库、账号或脚本发生变化，同步更新 `docs/` 和 `memory-bank/`，不要让旧的本地工作站或隧道说明重新成为主路径。

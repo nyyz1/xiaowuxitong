@@ -10,25 +10,24 @@ The repository now contains a runnable Next.js application scaffold with:
 - protected dashboard shell
 - NextAuth credentials flow
 - Prisma schema and generated client
-- one-click Windows school-pilot launcher for LAN workstation deployment
-- one-click project-only transfer helpers for moving the codebase to a school office computer without carrying the current local database data, including school-workstation prerequisite checks and app database bootstrap
+- Tencent Cloud Lighthouse deployment scripts for Ubuntu bootstrap, PostgreSQL backup, GitHub pull, Prisma schema sync, production build, systemd restart, Nginx proxying, and authenticated smoke verification
+- one-click Windows school-pilot launcher and project transfer helpers remain in the repository as historical/backup tooling, but they are no longer the current deployment architecture
 - one-click multi-workstation Codex development helpers for first-time developer setup, pre-work GitHub sync, and end-of-session verify/commit/push
 - pre-work GitHub sync now self-prepares `.env.local` from `.env.example`, and Prisma config loads `.env.local` before `.env` so fresh clones can regenerate Prisma Client without a separate manual environment step
-- the public-tunnel runtime launcher `start-public-tunnel.cmd` is generated on demand by `scripts/start-school-public-tunnel.ps1` and is intentionally ignored by Git because it can contain workstation-specific paths and tunnel credentials
-- the public-tunnel launcher can now self-download PuTTY `plink.exe` into ignored local `artifacts\plink.exe` when the tool is missing from both the project artifact path and PATH
-- duplicate-start protection and existing-port detection in the Windows school-pilot launcher
+- the old public-tunnel runtime launcher remains historical/backup tooling for the earlier local-plus-tunnel pilot path
 - user and permission management module for system administrators, now including the V1.5 role model and teacher-account to teacher-profile binding
 - login account type is now separated from permission capability: `User.accountType` is limited to teacher or student accounts, `User.isSuperAdmin` carries highest-administrator capability, `User.teacherId` and `User.studentId` bind accounts to teacher or active-student profiles, and `UserRole` remains as a compatibility layer
 - self-service password maintenance now lives at `/dashboard/account/password`; student accounts are limited to this route in the current phase and are redirected away from management workflows
 - approved school trial role model with school leaders, grade-scoped managers, and an optional managed-grade relation on database users; V1.5 additionally supports department leaders, student affairs staff, academic affairs staff, admin office staff, logistics staff, and teacher accounts
 - Grade-scoped pilot account pack and school-leader read-only inspection access
-- verified native PostgreSQL 17 workstation installation with a real `school_affairs` database and a localhost-only live instance
+- verified Tencent Cloud server-local PostgreSQL database `school_affairs`; the cloud database currently does not carry old demo/test data
 - school structure management module for visible grade, class, department, and subject maintenance, with `AcademicYear` retained only as an internal compatibility layer
 - grade lifecycle helper for enrollment-year cohort naming, academic-year rollover, alumni cohort rules, and grade-department name synchronization
 - department-position configuration under each department through `DepartmentPosition`, with default positions for `XXXX级年级`, `校领导`, and ordinary departments; teacher department assignments bind to positions while preserving old `identityType` compatibility metadata
 - people management module for active teacher and student manual maintenance, mistaken-entry deletion with audit logging, configurable information statistics category add/disable/delete flows, identity-card-number-based import updates, Excel import templates, Excel import, filtered export, teacher multi-duty support, and teacher multi-department support
 - teacher department assignments are now stored as explicit rows that can accumulate multiple positions or identity variants per department, so the teacher maintenance form exposes a multi-select department-position chooser and the structure page keeps department-position CRUD on the same surface
 - people imports create bound login accounts only when a new teacher profile or new active student profile is created by identity card number; repeated imports update the profile without resetting passwords, archived-student imports do not create student accounts, and conflicting existing account bindings fail at row level
+- teacher compatibility roles are derived from the teacher's active department-position assignments, and the stored user role is treated as a compatibility field that gets re-synced when the teacher profile or a referenced department position changes
 - people status configuration is now role-aware inside the people module: teachers use `正常 / 备孕 / 产假 / 长病假`, while students use `正常 / 休学 / 长期请假`, and the same shared definitions drive forms, filters, import normalization, and export labels
 - the active people module is exposed as a single `师生档案` sidebar entry, while the people page can still internally focus student or teacher records through query state
 - alumni archive module for archived student query, edit, import, and export flows
@@ -44,19 +43,18 @@ The repository now contains a runnable Next.js application scaffold with:
 - the Step 7 UI-delivery surface currently centers on `src/components/auth/login-form.tsx`, `src/components/shell/dashboard-shell.tsx`, `src/app/dashboard/page.tsx`, `src/components/form/submit-button.tsx`, and `docs/final-delivery-checklist.md`; the current shape removes the global RBAC explainer, the top `私有部署` badge, and the homepage `下一阶段任务` card so the dashboard reads as an operator work surface instead of a delivery checklist, and this slice has current static verification coverage through `typecheck`, `lint`, and `build`
 - the latest Step 7 feedback refinement also moves inspection save notices down into the record-entry section, anchors full-page inspection saves back to `#record-entry` for continuous data entry, links student grade/class selectors on the people page through a dedicated client component, removes duplicate topbar user-role wording, simplifies the homepage quick-task cards, and makes the mobile topbar non-sticky so it does not dominate narrow screens during scroll
 - the mobile quick inspection route now also carries an explicit Chinese remarks placeholder instead of fallback/question-mark text, so the compact entry form stays usable on narrow screens
-- local PGlite simulation script for demo data and report smoke verification when PostgreSQL is not available
-- PostgreSQL demo seed script and deployment smoke-test guide for handoff preparation
-- updated README and trial handoff documents that match the approved school PostgreSQL pilot and account model, with the final delivery checklist now linked directly from the main README handoff-doc section
+- local PGlite simulation and demo seed scripts remain local development helpers only; they are not part of the current cloud deployment path
+- updated README and handoff documents now match the Tencent Cloud server deployment, cloud PostgreSQL boundary, and GitHub-driven update flow
 - V1.5 planning materials now live under `docs/product-roadmap-v1-5-v2.md` and `docs/v1-5-executable-plan.md`, with a leadership decision deck at `docs/roadmap-leadership-brief-v1-5-v2.pptx`; these are recommendation and reporting artifacts only, not approved V1 scope changes
 - GitHub remote collaboration is now prepared around the public repository `https://github.com/nyyz1/xiaowuxitong.git`; source, docs, scripts, schema, and generated Prisma client are versioned, while local environment files, installed dependencies, build output, logs, artifacts, tunnel material, and workstation runtime data stay outside Git.
 
-Migration acceptance note for the current workstation as of 2026-05-09:
+Historical migration acceptance note for the earlier workstation pilot as of 2026-05-09:
 
-- The current verified workstation PostgreSQL service is `postgresql-xiaowuxitong`, installed under `D:\PostgreSQL\17`, with the data directory at `D:\PostgreSQL\data`.
+- The verified workstation PostgreSQL service was `postgresql-xiaowuxitong`, installed under `D:\PostgreSQL\17`, with the data directory at `D:\PostgreSQL\data`.
 - The application database is `school_affairs`, owned by `school_admin`, and `.env.local` must match the current `school_admin` password recorded in `docs/pilot-accounts-and-usage-guide.md`.
 - PostgreSQL command-line tools are available at `D:\PostgreSQL\17\bin`; they are not guaranteed to be on PATH in the current PowerShell session.
 - Direct `npm` invocation in PowerShell can be blocked by execution policy on this workstation, while `npm.cmd` works and is the safer command form for manual verification.
-- The local production app has been verified listening on `0.0.0.0:3000`, and the current same-network login URL is tracked in `logs/current-school-pilot-url.txt`.
+- The local production app was verified listening on `0.0.0.0:3000`, with same-network URL tracking in `logs/current-school-pilot-url.txt`.
 - The Chinese handoff markdown docs in `README.md`, `docs/`, and `tasks/` are stored as UTF-8 text; earlier mojibake reports were mostly caused by Windows PowerShell default decoding rather than widespread content corruption.
 
 ## System Shape
@@ -76,8 +74,9 @@ The planned version 1 architecture is:
 - `implementation-plan.md` defines execution order
 - `progress.md` keeps the short active change log, while `progress-archive.md` keeps compressed older milestone history
 - `docs/README.md` is the operator-facing document index
-- `docs/pilot-accounts-and-usage-guide.md` is the live pilot source of truth for current workstation passwords, URLs, daily operator guidance, and the current quick-task usage rules
-- `README.md` is now kept intentionally short and mainly points readers toward `docs/README.md` plus the live pilot guide instead of repeating every operator detail inline
+- `docs/tencent-lighthouse-deployment.md` is the source of truth for the Tencent Cloud server deployment and one-command update flow
+- `docs/pilot-accounts-and-usage-guide.md` is the cloud operator guide for login URL, account setup, daily use, and common maintenance checks
+- `README.md` is now kept intentionally short and mainly points readers toward `docs/README.md`, the cloud deployment guide, and the cloud operator guide instead of repeating every operator detail inline
 - `docs/product-roadmap-v1-5-v2.md`, `docs/v1-5-executable-plan.md`, and `docs/roadmap-leadership-brief-v1-5-v2.pptx` are post-V1 planning and leadership-reporting artifacts; they should guide scope discussion but do not change the implemented architecture until explicitly approved
 - this file defines module boundaries, data flow, and architectural constraints
 
@@ -99,19 +98,18 @@ The planned version 1 architecture is:
 | `src/app/dashboard/page.tsx` | operator overview page | authenticated request | quick-task-first dashboard with module entry cards, admin data-management entry, and lighter module responsibility summary | implemented |
 | `src/app/dashboard/quick/students/page.tsx` | mobile-first active student quick search route | authenticated people session, student keyword or grade/class filters | compact student result cards with full authorized active-student details, including case-insensitive dormitory-number keyword search through student profile data and grade-first class filter linkage | implemented for Step 7 task-entry optimization |
 | `src/app/dashboard/quick/inspection/page.tsx` | mobile-first inspection quick entry route | inspection-recorder session, target type/date/item parameters | focused student or teacher quantification entry form that stays in quick-entry flow after save | implemented for Step 7 task-entry optimization |
-| `start-school-pilot.cmd` | Windows double-click workstation pilot launcher | user double-click | calls the school-pilot PowerShell helper from the project root | implemented for Step 7 pilot hardening |
-| `package-for-school.cmd` | home-computer transfer packager | project files | creates a zip under `artifacts\school-transfer` while excluding local data, dependencies, build output, logs, backups, and `.env.local` | implemented for Step 7 transfer convenience |
-| `setup-school-workstation.cmd` | school-computer first-run setup launcher | extracted project, local PostgreSQL, Node.js or winget install path | checks or installs prerequisites, prepares PostgreSQL user/database, prepares `.env.local`, installs dependencies, syncs schema, optionally seeds demo data, builds, and starts the pilot site | implemented for Step 7 transfer convenience |
 | `setup-dev-workstation.cmd` | multi-computer development setup launcher | a cloned GitHub repository on a developer computer | prepares Git/Node/npm, Git identity, local `.env.local`, dependencies, and Prisma Client for Codex-assisted development | implemented for Step 7 collaboration convenience |
 | `start-work.cmd` | pre-Codex work sync launcher | clean local Git worktree | pulls the latest GitHub code, refreshes generated Prisma Client, and copies the standard Codex memory-bank prompt to the clipboard | implemented for Step 7 collaboration convenience |
 | `save-work.cmd` | end-of-session save launcher | local code changes | runs typecheck and lint, commits with an operator-provided message, rebases on the remote branch, and pushes to GitHub | implemented for Step 7 collaboration convenience |
-| `scripts/package-for-school.ps1` | transfer package builder | project files and optional output path | zip file suitable for copying to the school office computer | implemented for Step 7 transfer convenience |
-| `scripts/setup-school-workstation.ps1` | first-run school workstation setup | project files, optional winget, PostgreSQL admin password, environment options | prerequisite checks, optional Node.js/PostgreSQL install attempts, app PostgreSQL role/database bootstrap, initialized app environment, schema sync, optional demo data, production build, and pilot startup | implemented for Step 7 transfer convenience |
 | `scripts/setup-dev-workstation.ps1` | developer-computer setup helper | cloned repository, optional Git identity, optional winget | checks or installs Git and Node.js, configures repository safety and commit identity, creates `.env.local` from `.env.example`, installs dependencies, and generates Prisma Client | implemented for Step 7 collaboration convenience |
 | `scripts/start-work.ps1` | GitHub sync helper before Codex work | clean Git branch, `.env.example` when `.env.local` is missing | fast-forward pulls from GitHub, installs missing dependencies when needed, prepares `.env.local`, regenerates Prisma Client, and copies the standard Codex startup prompt | implemented for Step 7 collaboration convenience |
 | `scripts/save-work.ps1` | GitHub save helper after Codex work | modified Git branch and commit message | optionally verifies with typecheck/lint, stages, commits, rebases, and pushes the current branch | implemented for Step 7 collaboration convenience |
-| `scripts/start-school-pilot.ps1` | workstation pilot startup helper | project files, optional missing dependencies, optional public host override | prepares `NEXTAUTH_URL`, prints LAN access guidance, builds the app, and starts Next.js in production mode | implemented for Step 7 pilot hardening |
-| `scripts/autostart-school-pilot.cmd` | current-user logon auto-start helper | current Windows user logon, existing build, current `.env.local` | launches the school-pilot site in the background after this Windows account signs in | implemented for Step 7 hardening |
+| `commit-and-push.cmd` | local GitHub save launcher | local code changes | verifies, commits, rebases, pushes, and prints the Tencent Cloud deployment command | implemented for cloud update workflow |
+| `scripts/commit-and-push.ps1` | local GitHub save helper | modified Git branch and commit message | optional typecheck/lint/build, stage, commit, rebase, push | implemented for cloud update workflow |
+| `scripts/deploy-tencent-lighthouse.ps1` | local Tencent Cloud deployment entrypoint | SSH key, server host, optional accept-data-loss flag | triggers the server-side deployment script over SSH | implemented for cloud update workflow |
+| `scripts/server/bootstrap-ubuntu.sh` | first-time Tencent Cloud bootstrap | Ubuntu server, GitHub repo, generated secrets | installs Node/PostgreSQL/Nginx, prepares `.env.local`, syncs schema, builds, installs systemd service, and smoke-tests | implemented for current deployment |
+| `scripts/server/deploy.sh` | server-side one-command update | current server checkout and PostgreSQL | backup, Git pull, dependency install, Prisma sync, baseline seeds, build, restart, smoke | implemented for current deployment |
+| `scripts/server/backup-postgres.sh` | server-side PostgreSQL backup | `DATABASE_URL`, backup retention | custom-format `.dump` backups under `/opt/xiaowuxitong/backups` | implemented for current deployment |
 | `src/app/dashboard/structure/page.tsx` | school structure route entry | authenticated request, query status | structure management screen | implemented |
 | `src/app/dashboard/users/page.tsx` | user management route entry | system-admin session, query status | user and permission management screen | implemented for Step 7 |
 | `src/app/dashboard/account/password/page.tsx` | self-service password route | authenticated account session | current-password verification and password update form; student accounts are limited to this route in the current phase | implemented for Step 7 account hardening |
@@ -165,11 +163,10 @@ The planned version 1 architecture is:
 | `scripts/seed-demo-postgres.mjs` | real PostgreSQL demo data seed | `DATABASE_URL`, Prisma-synced DB | deterministic demo rows for browser smoke testing with explicit timestamps and foreign-key-safe insertion order | implemented for Step 7 prep |
 | `scripts/clear-demo-postgres.mjs` | real PostgreSQL seeded demo data cleanup | `DATABASE_URL`, fixed demo IDs from `scripts/demo-data.mjs` | deletes only the fixed seeded demo rows without rewriting them, with dry-run support | implemented for Step 7 operations |
 | `scripts/backfill-inspection-target-types.mjs` | post-schema helper for live inspection-category target-type backfill | reachable PostgreSQL plus the new inspection schema | upgrades obvious legacy teacher categories to teacher quantification and lists orphan teacher records that still need manual rebinding | implemented for the 2026-04-28 inspection rollout follow-up |
-| `docs/deployment-and-smoke-test.md` | deployment and verification guide | target environment details | setup steps and smoke checklist | implemented for Step 7 prep |
-| `docs/school-server-pilot-checklist.md` | school-side trial coordination checklist | school approval status, server and role constraints | deployment readiness checklist for leadership, IT, and trial operators | implemented for Step 7 prep |
-| `docs/postgresql-install-and-acceptance-runbook.md` | PostgreSQL install and trial acceptance runbook | approved server access, project files, database credentials | step-by-step setup, app connection, and acceptance flow | implemented for Step 7 prep |
-| `docs/approval-brief.md` | trial approval brief | current gaps and PostgreSQL need | concise approval request | implemented for Step 7 prep |
-| `docs/security-and-deployment-plan.md` | security and deployment explanation | private deployment assumptions | answers for data safety and trial risk | implemented for Step 7 prep |
+| `docs/tencent-lighthouse-deployment.md` | Tencent Cloud deployment guide | server details and scripts | first-time bootstrap and one-command update runbook | implemented for current deployment |
+| `docs/deployment-and-smoke-test.md` | cloud deployment and verification guide | target environment details | GitHub-to-server deployment steps and smoke checklist | implemented for current deployment |
+| `docs/postgresql-install-and-acceptance-runbook.md` | cloud PostgreSQL operations runbook | server-local PostgreSQL and backups | schema sync, backup, restore, and troubleshooting steps | implemented for current deployment |
+| `docs/security-and-deployment-plan.md` | security and deployment explanation | private cloud deployment assumptions | data safety, role boundary, backup, and rollout guidance | implemented for current deployment |
 | `prisma/schema.prisma` | database schema and relations | model changes | migrations and DB structure | implemented |
 | `src/generated/prisma` | generated Prisma client code | Prisma schema | type-safe DB client for future modules | implemented |
 
@@ -342,66 +339,21 @@ Current implementation note:
 - The current simulation now emits separate student-quantification and teacher-quantification report artifacts so both flows stay covered by smoke verification.
 - `npm run test:data-management` starts a separate PGlite database under `.tmp/pglite-data-management` and verifies data-management cleanup behavior without touching PostgreSQL.
 
-### School Pilot Workstation Flow
+### Tencent Cloud Deployment Flow
 
-1. Operator runs `start-school-pilot.cmd` or `npm run pilot:school`.
-2. `scripts/start-school-pilot.ps1` detects or accepts the public school-network IP, then rewrites `NEXTAUTH_URL` in `.env.local` for that address.
-3. The script keeps `DATABASE_URL` on local PostgreSQL, prints LAN access guidance, optionally warns when manual `-PublicHost` input is needed, and starts the app in production mode on `0.0.0.0`.
-4. Office PCs on the same school network access only the web application URL; PostgreSQL remains local to the workstation for the first pilot when possible.
-
-### Project-Only School Transfer Flow
-
-1. On the home computer, the operator runs `package-for-school.cmd` or `npm run package:school`.
-2. `scripts/package-for-school.ps1` creates a timestamped zip under `artifacts\school-transfer` and excludes local runtime state: `.env.local`, `node_modules`, `.next`, `.tmp`, `logs`, `outputs`, `artifacts`, `.git`, dump files, zip files, and log files.
-3. The zip is copied to the school office computer and extracted, preferably to `D:\xiaowuxitong`.
-4. On the school computer, the operator runs `setup-school-workstation.cmd` or `npm run setup:school`.
-5. `scripts/setup-school-workstation.ps1` checks Node.js/npm and PostgreSQL/`psql.exe`; when missing and not skipped, it attempts `winget` installation for `OpenJS.NodeJS.LTS` and `PostgreSQL.PostgreSQL.17`.
-6. The setup script starts the local PostgreSQL service when possible, prompts for the `postgres` administrator password, and ensures the application role and database exist, defaulting to `school_admin` and `school_affairs`.
-7. The setup script creates or updates `.env.local`, generates a fresh `NEXTAUTH_SECRET` when needed, installs npm dependencies, runs Prisma generation and schema push against the local empty PostgreSQL database, writes demo data unless `-SkipDemoSeed` is passed, builds the app, and then starts the normal school-pilot launcher.
-8. This transfer path intentionally does not copy the home computer's PostgreSQL data; real school data should be entered or imported after the school workstation is initialized.
+1. Developer changes code locally and verifies with `typecheck`, `lint`, and `build`.
+2. Developer pushes to GitHub, usually through `commit-and-push.cmd`.
+3. Developer runs `scripts/deploy-tencent-lighthouse.ps1`.
+4. The local deployment entrypoint SSHes into Tencent Cloud Lighthouse `124.222.136.121`.
+5. `scripts/server/deploy.sh` creates a PostgreSQL backup, pulls GitHub, installs dependencies, generates Prisma Client, validates schema, syncs PostgreSQL, seeds baseline configuration, builds, restarts `xiaowuxitong.service`, reloads Nginx, and runs authenticated page smoke.
+6. The cloud PostgreSQL database remains server-local and does not include old local demo/test data.
 
 Current implementation note:
 
-- The current live pilot workstation is again tracked on native PostgreSQL 17 under `D:\PostgreSQL\17`, with data under `D:\PostgreSQL\data`, service `postgresql-xiaowuxitong`, and the verified application database `school_affairs` owned by `school_admin`.
-- A separate migrated workstation was historically accepted with the installer-default `C:\Program Files\PostgreSQL\17` layout and service `postgresql-x64-17`; that path remains a valid migration outcome, but it is no longer the current live-pilot default.
-- The consolidated source of truth for the live pilot's current passwords, login URLs, and operator-side usage steps is now `docs/pilot-accounts-and-usage-guide.md`; if `.env.local` is reverted to the older `school_password`, login can still appear to work through the Bootstrap fallback while data-backed pages such as people, structure, inspection, and exports fail at runtime.
-- After a real reboot check, `postgresql-xiaowuxitong` is verified to auto-start cleanly as an Automatic Windows service and still listens only on `127.0.0.1:5432` and `[::1]:5432`.
-- The production pilot launcher has been verified on the workstation LAN path: `.env.local` currently points `NEXTAUTH_URL` at the chosen school-network address, the app listens on `0.0.0.0:3000`, and office PCs should access only the web application URL while PostgreSQL remains local-only.
-- A separate office PC on the same school network has now confirmed it can open the pilot site, so the current workstation-to-LAN access model is verified beyond localhost.
-- In-app browser smoke is now verified again too, and credentials login now routes to a safe relative callback path after sign-in, so the browser stays on the host it used to open `/login` instead of being pulled to a stale `NEXTAUTH_URL`.
-- The live workstation PostgreSQL database now also contains active `ProfileFieldDefinition` rows for teacher `办公室 / 职称` and student `宿舍信息 / 生源地`, so the current live people templates expose dynamic profile columns instead of only fixed columns.
-- `docs/pilot-accounts-and-usage-guide.md` is now the consolidated operator handoff document for the current live pilot's account list, passwords, role usage guidance, startup steps, and basic backup or restore notes.
-- The operator-facing README, deployment guide, PostgreSQL acceptance runbook, and pilot usage guide now all explicitly mention that cohort rollover also synchronizes teacher-facing grade-department names to the final active cohort set.
-- The operator-facing README, deployment guide, and PostgreSQL acceptance runbook now all point to `logs/current-school-pilot-url.txt` as the source of truth for the current same-network login URL after DHCP or network changes.
-- The inspection split rollout is now applied in the real local PostgreSQL database too: the schema is pushed, obvious teacher-like legacy categories can be backfilled by script, and role-based page plus export verification has been completed against a live `next start` session.
-- One operational caveat is now verified: rebuilding `.next` on the workstation does not update the already running production `next start` process; the school-pilot service must be restarted after feature builds, or office PCs will continue seeing the older live process.
-- A concrete failure mode of that caveat is now verified too: `/login` can still return HTML `200` while the browser shows `This page couldn’t load` because a referenced `/_next/static/chunks/*.js` file returns `404` and triggers `ChunkLoadError`; the recovery is to restart the live site process so it matches the current `.next` output.
-- The lifecycle-extension browser smoke is now verified on the live workstation deployment: the system administrator can reach rollover and archive pages, school leaders can reach the archive center but not structure controls, and Grade 11 managers remain limited to their scoped active-data pages.
-- The later browser-use visual smoke is now verified too: on loopback the admin can open the live teacher multi-department form, category-create UI, import picker UI, and click the student/teacher quantification switchers, while `leader1` and `grade11.manager1` still respect the expected structure and scope boundaries.
-- The current Grade 11 pilot smoke also depends on `grade11.manager1~3` remaining bound to the active `2024级` cohort through `User.managedGradeId`; if those bindings are lost, grade-scoped routes redirect away even though the account role still says `GRADE_MANAGER`.
-- Browser-close login persistence is now hardened for the live pilot: besides the normal `Auth.js` session token, the app now requires a dedicated browser-session cookie that has no explicit expiry and therefore disappears when the browser session ends.
-- Another operational caveat is now explicit: PostgreSQL is a real Windows service and survives reboot automatically, but the web application currently does not; it is started by `scripts/start-school-pilot.ps1`, so a machine reboot requires either rerunning that launcher or adding a future Windows auto-start registration.
-- The pilot launcher now validates private IPv4 candidates and falls back to parsing `ipconfig`, which prevents accidental `NEXTAUTH_URL=http://1:3000` corruption when only one LAN IP is present.
-- Under the current account permissions, system-level Task Scheduler registration is blocked, so the live fallback is a Startup-folder launcher for the current Windows user rather than a machine-wide service.
-- The current verified auto-start path is therefore: machine boots, this Windows account signs in, the Startup-folder `autostart-school-pilot.cmd` runs, detects the current LAN IPv4 address, and relaunches the site in the background on that current address.
-- `scripts/start-school-pilot.ps1` now uses a named startup mutex for startup preparation, releases it before entering the long-running `next start` process, and checks whether port `3000` is already accepting connections, so duplicate manual or Startup-folder launches no longer race over `.env.local` while later check-only runs can still refresh the current URL.
-- The launcher writes `logs/current-school-pilot-url.txt` with `LocalLoginUrl`, `SameNetworkLoginUrl`, `ComputerNameLoginUrl`, and all detected private IPv4 URL candidates so operators can recover after DHCP or network-location changes without relying on stale bookmarks such as the old `192.168.1.3`.
-- A public-relay deployment path now exists for school networks that block workstation-to-device LAN access: `scripts/start-school-public-tunnel.ps1` can pair the local Next.js app with a reverse tunnel to the Tencent Cloud server `119.45.252.190`, while `start-school-public-pilot.cmd` provides the matching launcher entry point.
-- The current relay design sends workstation traffic to server-local `127.0.0.1:63000` through an SSH reverse tunnel, and a dedicated `Caddy` site can proxy that relay port to a public entry point.
-- The remaining deployment decision for that relay path is the final public entry shape: bare IP root replacement, dedicated IP plus port, or a more invasive path-prefix deployment.
-- The current working public-access path is now the dedicated Tencent Cloud IP-plus-port entry `http://119.45.252.190:62000`, with the workstation app still running locally on port `3000` and a visible `plink` reverse-SSH session keeping the remote `62000` port forwarded over SSH `22`.
-- `start-school-public-pilot.cmd` is now the one-click public startup entry: it prepares the app environment for the external base URL, ensures PuTTY `plink.exe` exists locally by downloading it to ignored `artifacts\plink.exe` when needed, ensures the visible `plink` tunnel launcher exists, opens or reuses the tunnel window, and opens a local app window through `scripts/start-school-pilot.ps1` so fresh clones get the normal dependency, build, duplicate-start, and production-start handling instead of assuming `.next` already exists.
-- A 2026-05-01 live recovery confirmed that data-heavy pages can fail with Prisma `P2022 ColumnNotFound` when the running app expects schema columns that have not yet been pushed to the live PostgreSQL database; the operational recovery is to run the Prisma schema sync against the local PostgreSQL database and then re-smoke the affected pages.
-- Operator-facing docs now separate the two common `This page couldn't load` recovery paths: stale Next.js static chunks require restarting the live site process, while Prisma schema drift requires syncing the live PostgreSQL schema and rechecking the data-heavy pages.
-- A 2026-05-11 recovery confirmed `/dashboard/users`, `/dashboard/data-management`, and `/dashboard/people` can all fail together with server-side `500` when the live PostgreSQL schema lags behind the current Prisma schema after role or approval-model changes; the successful recovery was `npx.cmd prisma db push`, followed by authenticated route checks returning `200`.
-- A later 2026-05-11 synced-code recovery confirmed the same schema-drift class can break the broader data-heavy page set after pulling from GitHub, specifically `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/archive/students`, `/dashboard/approvals`, and `/dashboard/exports`; the live database was missing `User.teacherId`, and recovery required the approval-role migration plus `npx.cmd prisma db push --accept-data-loss`.
-- A 2026-05-12 multi-position follow-up confirmed another schema-drift variant: after `TeacherDepartmentAssignment` gained a required `id` primary key, `prisma db push` could not apply the change while existing rows lacked ids. The safe recovery was to add the column, backfill ids for the existing rows, switch the primary key to `id`, add the multi-position uniqueness constraint, then rerun `npx.cmd prisma db push --accept-data-loss`.
-- `npm.cmd run smoke:pages` now performs an authenticated admin HTTP smoke against those six data-heavy pages, including the extra browser-session cookie required by the live auth hardening, and fails if a page returns non-`200` or contains a Next.js server-error marker.
-- When several authenticated dashboard modules all show "This page couldn't load" at once, the first operational check should be database/schema drift against the current Prisma schema, not stale frontend chunks, because the most recent failures on this workstation were resolved by synchronizing PostgreSQL with `prisma db push`.
-- The approval pilot seed is now more self-repairing for transferred or partially seeded databases: it creates the standard bound teacher profile for `teacher.wangming` and the standard `校务办公室` department if they are missing before binding accounts and responsibilities.
-- The handoff docs now treat `/dashboard/users`, `/dashboard/data-management`, `/dashboard/people`, `/dashboard/approvals`, and the existing data-heavy pages as the minimum smoke surface after schema-affecting approval or role changes.
-- Operator-facing docs now also describe row-level correction and mistaken-entry deletion for people records, archived students, and routine inspection records, including the teacher deletion guard when inspection history already references that teacher.
-- The remaining rollout follow-ups are now operational rather than structural: keep the current detached-process story stable when needed, manually rebind the one legacy teacher-quantification record, decide when to use cohort rollover in practice, and only later upgrade to machine-wide pre-login auto-start if the school asks for it.
+- Active deployment docs now describe only the Tencent Cloud path.
+- Windows workstation, LAN, and public-tunnel flows were removed from active handoff docs and remain historical context only in archived progress or git history.
+- If several authenticated dashboard pages show "This page couldn't load" at once, first check Prisma schema drift against the cloud PostgreSQL database and rerun authenticated smoke after schema sync.
+- `npm run smoke:pages` checks the protected data-heavy route set with the browser-session cookie behavior required by the app.
 
 ### Current Auth Flow
 
@@ -426,10 +378,11 @@ Current implementation note:
 3. User form input is validated by `src/lib/validation/users.ts`.
 4. The visible account model supports teacher and student account types, while highest-administrator capability is stored on `User.isSuperAdmin`; the compatibility role model still supports `SYSTEM_ADMIN`, `SCHOOL_LEADER`, `DEPARTMENT_LEADER`, `GRADE_MANAGER`, `STUDENT_AFFAIRS_STAFF`, `ACADEMIC_AFFAIRS_STAFF`, `ADMIN_OFFICE_STAFF`, `LOGISTICS_STAFF`, and `TEACHER`.
 5. Teacher accounts can bind to `Teacher` through `User.teacherId`, student accounts can bind to active `Student` rows through `User.studentId`, and grade managers must be bound to exactly one `Grade` through `User.managedGradeId`.
-6. New or reset passwords are hashed with `bcryptjs` before being stored in `User.passwordHash`.
-7. User records are not hard-deleted; administrators can enable or disable accounts.
-8. The action layer prevents the current database admin from disabling itself and prevents removing the last active highest-administrator account.
-9. User creation, role updates, status changes, and password resets write `AuditLog` entries.
+6. Teacher-role compatibility is derived from the teacher's department-position assignments and re-synced when the teacher profile or a referenced department position changes.
+7. New or reset passwords are hashed with `bcryptjs` before being stored in `User.passwordHash`.
+8. User records are not hard-deleted; administrators can enable or disable accounts.
+9. The action layer prevents the current database admin from disabling itself and prevents removing the last active highest-administrator account.
+10. User creation, role updates, status changes, and password resets write `AuditLog` entries.
 
 ### Application Approval Data Flow
 
@@ -497,5 +450,12 @@ Current implementation note:
 
 - `scripts/server/bootstrap-ubuntu.sh` defines the first-time Ubuntu bootstrap path for Tencent Cloud Lighthouse: install Node.js, PostgreSQL, Git, and Nginx; create `/opt/xiaowuxitong`; clone GitHub; generate production `.env.local`; create the local PostgreSQL app database; run Prisma schema sync and baseline seeds; install `xiaowuxitong.service`; and proxy public `:80` to `127.0.0.1:3000`.
 - On Tencent Cloud Lighthouse, the bootstrap defaults to Ubuntu repository PostgreSQL packages for reliability; setting `POSTGRES_VERSION=17` opts into the external PostgreSQL apt repository when that network path is healthy.
+- The live Tencent Cloud Lighthouse deployment is now running at `124.222.136.121` with Nginx on `:80`, PostgreSQL local to the instance, and `xiaowuxitong.service` under systemd; the published login page responds with HTTP `200`.
 - `scripts/server/deploy.sh` is the server-side one-command update path: back up PostgreSQL, pull GitHub, install dependencies, generate and validate Prisma, sync the live database schema, rebuild, restart systemd, and smoke-test data-heavy pages.
 - `scripts/server/backup-postgres.sh` creates custom-format PostgreSQL backups with bounded retention under `/opt/xiaowuxitong/backups`, and `scripts/deploy-tencent-lighthouse.ps1` is the local SSH entrypoint for triggering the server update.
+- The current cloud PostgreSQL database is treated as a clean production/pilot database, not a continuation of old local demo data; `db:seed:demo`, `db:clear:demo`, and PGlite simulation remain local-only helpers.
+- Active handoff docs now promote the cloud path and demote Windows workstation, LAN, and public-tunnel paths to historical or backup references.
+
+## 2026-05-12 Local Commit Push Helper
+
+- `commit-and-push.cmd` and `scripts/commit-and-push.ps1` provide the local one-click GitHub save path before deployment: verify, prompt for a commit message, stage, commit, rebase, push, then remind the operator to run the Tencent Cloud deployment script.

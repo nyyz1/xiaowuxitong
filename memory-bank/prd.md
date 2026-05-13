@@ -2,14 +2,14 @@
 
 ## Status
 
-Draft v1 updated through the approved school trial setup, the rollover or archive expansion on 2026-04-24, and the approved enrollment-year cohort redesign on 2026-04-26.
+Draft v1 updated through the approved school trial setup, the rollover or archive expansion on 2026-04-24, the approved enrollment-year cohort redesign on 2026-04-26, and the Tencent Cloud deployment shift on 2026-05-12.
 
 Current assumptions:
 
 - the system serves one high school as an internal tool
 - the primary usage environment is desktop browsers on a school intranet or private deployment
 - the first release focuses on teacher and student information, routine inspection records, statistics, and exports
-- the first live trial will use a school-controlled PostgreSQL deployment on the current school pilot workstation inside the school network
+- the current live deployment uses a Tencent Cloud Lighthouse server with the web app and PostgreSQL on the same server
 - the approved trial starts with Grade 11 only while still keeping the system data model school-wide
 - the approved trial role model includes one system administrator, three school leader accounts, three Grade 11-scoped manager accounts, one data manager, and one inspection staff account
 - the school now requires explicit year-transition rollover rules, an alumni archive center, batch class-count maintenance, support for multiple teacher duties, support for teachers belonging to multiple departments, configurable teacher or student information statistics categories, an enrollment-year cohort model that keeps only the latest three cohorts active, identity-card-number-based import updates or unique identification for teacher and student records, and a lightweight teacher-facing application and approval workflow for repair, printing, and other daily requests
@@ -73,9 +73,10 @@ The system should give school staff one place to maintain master data, enter rou
 
 ## Approved Trial Assumptions
 
-- the initial live trial is not a public SaaS release; it is a school-internal pilot on school-controlled infrastructure
-- the school-approved database shape is a local PostgreSQL deployment on the current pilot workstation, with the PostgreSQL data directory on that machine's `D` drive
-- office computers on the same school network should access the web application over the pilot workstation's LAN address rather than connecting directly to PostgreSQL
+- the initial live trial is not a public SaaS release; it is a single-school private deployment
+- the current deployment target is Tencent Cloud Lighthouse at `124.222.136.121`, with the app and PostgreSQL hosted together on the server
+- PostgreSQL should remain local to the server and should not expose port `5432` publicly
+- operators access the web application through the HTTP web entry while database access stays limited to server maintenance
 - the school-approved account model starts with:
   - one `System Admin`
   - three `School Leader` accounts
@@ -273,7 +274,7 @@ V1.5 adds a lightweight application and approval workflow:
 
 - Time limit: not fixed yet, but version 1 should be scoped for rapid delivery
 - Budget limit: prefer a low-ops, single-codebase solution
-- Deployment environment: school intranet, private cloud, or private server; the current trial assumes a school-controlled PostgreSQL deployment inside the school network
+- Deployment environment: private server; the current trial uses Tencent Cloud Lighthouse with server-local PostgreSQL
 - Required integrations: spreadsheet import and export in `xlsx` and `csv`
 - Security constraints: teacher and student data is sensitive and requires role-based access and auditability
 - Preferred ecosystem: simple full-stack web application with low maintenance cost

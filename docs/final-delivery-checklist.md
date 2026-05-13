@@ -1,96 +1,88 @@
 # 最终交付清单
 
-本清单用于把试点系统交给学校现场使用前做最后确认。
+本清单用于当前腾讯云部署正式交付或阶段验收前确认。
 
 ## 访问入口
 
-- 当前同网络访问地址以 `logs/current-school-pilot-url.txt` 为准。
-- 本机兜底访问地址：`http://127.0.0.1:3000/login`
-- 如果使用公网临时通道，当前验证过的入口为：`http://119.45.252.190:62000/login`
+- [ ] `http://124.222.136.121/login` 能打开。
+- [ ] Nginx 正在监听公网 `80` 并代理到 `127.0.0.1:3000`。
+- [ ] `xiaowuxitong.service` 正常运行。
+- [ ] PostgreSQL 只在服务器本机使用，不开放公网 `5432`。
 
-不要依赖旧书签里的固定 IP。网络切换或 DHCP 变化后，先重新运行启动脚本，再读取 `logs/current-school-pilot-url.txt`。
+## 部署链路
 
-## 首次使用前必须确认
+- [ ] 本机代码已推送 GitHub。
+- [ ] 已运行 `scripts/deploy-tencent-lighthouse.ps1`。
+- [ ] 部署日志显示已完成更新前 PostgreSQL 备份。
+- [ ] 部署日志显示 `git pull --ff-only` 成功。
+- [ ] 部署日志显示 Prisma schema 已校验并同步。
+- [ ] 部署日志显示生产构建成功。
+- [ ] 部署日志显示 `xiaowuxitong.service` 已重启。
+- [ ] 部署日志显示 `npm run smoke:pages` 通过。
 
-- 已能打开 `/login`。
-- 已用 `admin` 登录并进入后台总览。
-- 已确认当前 PostgreSQL 服务正在运行，应用数据库为 `school_affairs`。
-- 已确认真实数据录入前会更换默认演示密码、兜底管理员密码和 `NEXTAUTH_SECRET`。
-- 已确认备份责任人知道数据管理中心会在硬删除前执行 PostgreSQL 备份。
-- 已执行 `npm run db:seed:approval-defaults`，确保默认申请类型存在。
-- 已执行 `npm run db:seed:approval-pilot`，确保试点审批账号、教师账号和标准审批职责存在。
+## 数据状态
 
-## 账号与角色
+- [ ] 云端 PostgreSQL 当前不含旧演示测试数据。
+- [ ] 正式数据导入前已确认备份位置：`/opt/xiaowuxitong/backups`。
+- [ ] 服务器 `.env.local` 已安全保存，不提交 Git。
+- [ ] Bootstrap 管理员、数据库密码、`NEXTAUTH_SECRET` 已记录在受控位置。
 
-演示种子账号的默认密码为 `ChangeMe123!`，只适合试点和演示。
+## 首次账号
 
-- `admin`：系统管理员
-- `leader1`、`leader2`、`leader3`：校领导
-- `grade11.manager1`、`grade11.manager2`、`grade11.manager3`：年级管理员
-- `data.manager`：教务工作人员
-- `inspector`：政教工作人员
-- `logistics.office`：后勤办公人员，默认处理日常报修
-- `admin.office`：行政办公人员，默认处理学校行政用打印申请
-- `teacher.wangming`：已绑定教师档案的试点教师账号，可提交本人申请
+- [ ] Bootstrap 管理员可登录。
+- [ ] 已创建正式系统管理员。
+- [ ] 已创建所需校领导、年级管理员、教务、政教、后勤、行政和教师账号。
+- [ ] 教师自助账号已绑定教师档案。
+- [ ] 年级管理员已绑定负责年级。
+- [ ] 不再使用演示默认密码作为正式口径。
 
-正式录入真实师生数据前，请由系统管理员进入“用户权限”页面重置各账号密码。`db:seed:approval-pilot` 已准备一个试点教师账号；后续新增真实教师自助申请账号时，仍需要先创建用户并绑定教师档案。
+## 业务验收
 
-## 交付验收路径
+- [ ] `/dashboard/users` 可维护账号、角色、绑定关系和密码。
+- [ ] `/dashboard/structure` 可维护年级、班级、部门、部门岗位和学科。
+- [ ] `/dashboard/people` 可维护教师和学生档案，支持模板、导入、导出。
+- [ ] `/dashboard/archive/students` 可维护往届学生。
+- [ ] `/dashboard/inspection` 可录入、查询、修改和删除误录检查记录。
+- [ ] `/dashboard/approvals` 可配置申请类型、审批职责，并完成教师提交和审批处理。
+- [ ] `/dashboard/exports` 可导出检查统计 Excel/CSV。
+- [ ] `/dashboard/data-management` 可显示数据量、审计日志和备份保护提示。
 
-1. 登录页：能打开，关闭浏览器重新打开后需要重新输入账号密码。
-2. 系统总览：能看到七个业务模块和系统管理员专用的数据管理入口。
-3. 学校结构：能看到年级、班级、部门、学科维护入口。
-4. 师生档案：能筛选、查看、下载模板、导入和导出。
-5. 往届存档：能查看归档学生，且不混入当前在校学生页面。
-6. 常规检查：能在学生量化和教师量化之间切换，能录入和查询记录。
-7. 申请审批：能查看默认申请类型；配置审批职责后，教师能提交报修、打印和其他申请；打印申请必须填写材料类型、打印形式、纸张大小和打印数量；审批人能通过或驳回并填写意见。
-8. 统计导出：能按目标类型筛选，并能下载 Excel 或 CSV。
-9. 数据管理：系统管理员可查看数据量、审计日志和删除保护提示。
-10. 学生快查、量化快录：手机宽度下不挤压、不重叠。
-11. 权限边界：年级管理员不能看到全校结构管理、往届存档和教师量化全量数据；无匹配审批职责的账号不能审批申请。
+## 权限验收
 
-## 常见故障
+- [ ] 系统管理员能进入全部管理页面。
+- [ ] 校领导不能进入系统管理员专用配置页，除非被授予相应能力。
+- [ ] 年级管理员只能访问绑定年级的数据范围。
+- [ ] 无匹配审批职责的账号不能审批申请。
+- [ ] 学生账号只能进入自助密码维护范围。
 
-### `/login` 打开后页面加载失败
+## 故障预案
 
-通常是旧的 `next start` 进程还在服务旧静态资源。重新运行：
+- [ ] 维护人员知道如何查看服务状态：
 
-```powershell
-npm.cmd run pilot:school
+```bash
+sudo systemctl status xiaowuxitong
+sudo systemctl status nginx
+sudo systemctl status postgresql
 ```
 
-或双击：
+- [ ] 维护人员知道如何查看日志：
 
-```text
-start-school-pilot.cmd
+```bash
+tail -n 100 /opt/xiaowuxitong/logs/app.err.log
 ```
 
-### 登录后业务页报服务器错误
+- [ ] 维护人员知道业务页 server error 时先检查 schema drift：
 
-如果错误类似 Prisma `P2022 ColumnNotFound`，说明数据库 schema 落后于当前代码。处理：
-
-```powershell
-npm.cmd run db:push
+```bash
+cd /opt/xiaowuxitong/app
+npx prisma db push
+sudo systemctl restart xiaowuxitong
+npm run smoke:pages -- --base-url=http://127.0.0.1:3000
 ```
 
-如果刚从旧角色模型升级到申请审批角色模型，先运行：
+## 安全提醒
 
-```powershell
-npm.cmd run db:migrate:approval-roles
-npm.cmd run db:push
-npm.cmd run db:seed:approval-defaults
-npm.cmd run db:seed:approval-pilot
-```
-
-之后重新打开用户权限、数据管理、师生档案、往届存档、常规检查、申请审批和统计导出页面。
-
-### 同网络电脑打不开
-
-先确认本机能打开 `http://127.0.0.1:3000/login`，再读取 `logs/current-school-pilot-url.txt` 中的 `SameNetworkLoginUrl`。如果本机正常而其他电脑打不开，检查当前网络的 Windows 防火墙和 TCP `3000` 入站规则。
-
-## 交付前安全提醒
-
-- 默认演示密码不能用于正式数据录入。
-- `.env.local` 不应提交到 Git。
-- 数据库账号密码和公网隧道材料只保存在现场机器或受控交付材料中。
-- 数据清理前必须确认备份成功，不应绕过数据管理中心直接删除真实数据。
+- [ ] 不把数据库账号、SSH key、Bootstrap 密码发给普通老师。
+- [ ] 不在正式云端库执行演示数据种子。
+- [ ] 大批量导入真实数据前先手动备份。
+- [ ] 每次发布使用部署脚本，不手工跳过备份、schema 同步或 smoke。

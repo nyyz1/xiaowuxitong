@@ -53,6 +53,7 @@ import {
   ensureTeacherLoginAccount,
 } from "@/modules/accounts/helpers";
 import { findPositionForDepartmentIdentity } from "@/modules/school-structure/department-positions";
+import { syncTeacherUserRole } from "@/modules/people/teacher-role";
 
 type NoticeTone = "success" | "error";
 type ImportStats = {
@@ -895,7 +896,7 @@ export async function createTeacher(formData: FormData) {
       "duties",
     );
 
-    await prisma.teacher.create({
+    const teacher = await prisma.teacher.create({
       data: {
         idCardNumber: parsed.data.idCardNumber,
         employeeNumber,
@@ -920,7 +921,12 @@ export async function createTeacher(formData: FormData) {
           parsed.data.departmentIdentities,
         )),
       },
+      select: {
+        id: true,
+      },
     });
+
+    await syncTeacherUserRole(prisma, teacher.id);
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error", redirectPath);
   }
@@ -1024,6 +1030,8 @@ export async function updateTeacher(formData: FormData) {
         )),
       },
     });
+
+    await syncTeacherUserRole(prisma, parsed.data.id);
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error", redirectPath);
   }

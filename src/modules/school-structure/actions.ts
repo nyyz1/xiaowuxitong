@@ -38,6 +38,7 @@ import {
   ensureDefaultDepartmentPositions,
   getPermissionTagsForIdentityType,
 } from "@/modules/school-structure/department-positions";
+import { syncTeacherUserRolesForPosition } from "@/modules/people/teacher-role";
 
 type NoticeTone = "success" | "error";
 type AdminSession = Awaited<ReturnType<typeof requireSystemAdmin>>;
@@ -1261,6 +1262,8 @@ export async function updateDepartmentPosition(formData: FormData) {
         isActive: parsed.data.isActive,
       },
     });
+
+    await syncTeacherUserRolesForPosition(prisma, parsed.data.id);
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error");
   }
