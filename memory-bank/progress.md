@@ -408,6 +408,28 @@
 
 ## 2026-05-13
 
+- User asked to make manual teacher and student creation create accounts like imports, add a repair path for missing identity-card accounts, and provide a one-click local-to-GitHub-to-server publish flow.
+- Changes made:
+  - updated manual teacher creation so it creates the teacher profile and identity-card-number login account in one transaction
+  - updated manual active-student creation so it creates the student profile and identity-card-number login account in one transaction, while archived-student creation still does not create a login account
+  - added `scripts/repair-missing-identity-accounts.mjs` plus `npm.cmd run db:repair:identity-accounts:dry-run` and `npm.cmd run db:repair:identity-accounts` to preview and repair existing teacher or active-student profiles that are missing bound login accounts
+  - added `publish-and-deploy.cmd` and `scripts/publish-and-deploy.ps1` so local verification, commit, push, Tencent Cloud deployment, and local/GitHub/server commit comparison can run from one launcher
+  - enhanced `scripts/server/deploy.sh` to print deployment commit information, confirm schema sync, and run the missing identity-account dry-run during deployment
+  - updated README, deployment docs, pilot account guidance, implementation plan, and architecture notes for the new account and publishing workflow
+- Verification:
+  - `npm.cmd run db:generate`
+  - `npm.cmd run db:validate`
+  - `npm.cmd run db:repair:identity-accounts:dry-run`
+  - `node --check scripts/repair-missing-identity-accounts.mjs`
+  - PowerShell parser checks for `scripts/publish-and-deploy.ps1` and `scripts/deploy-tencent-lighthouse.ps1`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+- Result:
+  - future manual teacher and active-student creation now follows the same identity-card account rule as imports
+  - the local repair dry-run found 11 teacher profiles and 96 active student profiles in the local database that could receive accounts, with 18 archived students skipped and no conflicts reported
+  - the preferred update path is now `publish-and-deploy.cmd`; `commit-and-push.cmd` and `scripts/deploy-tencent-lighthouse.ps1` remain available as separate lower-level steps
+
 - User asked to implement automatic login-account creation for newly imported teacher and student records, and to make teacher compatibility roles derive from department plus position assignments.
 - Changes made:
   - kept the identity-card-number account rule in the people import helpers so new teacher and active-student rows still auto-create login accounts with the last 8 characters of the identity card as the initial password

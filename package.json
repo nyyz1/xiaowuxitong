@@ -21,6 +21,8 @@
     "db:seed:approval-pilot": "node scripts/seed-approval-pilot-config.mjs",
     "db:seed:approval-pilot:dry-run": "node scripts/seed-approval-pilot-config.mjs --dry-run",
     "db:seed:department-positions": "node scripts/seed-department-positions.mjs",
+    "db:repair:identity-accounts:dry-run": "node scripts/repair-missing-identity-accounts.mjs",
+    "db:repair:identity-accounts": "node scripts/repair-missing-identity-accounts.mjs --apply",
     "db:studio": "prisma studio",
     "smoke:pages": "node scripts/smoke-authenticated-pages.mjs",
     "smoke:positions": "node scripts/assert-position-permissions.mjs",

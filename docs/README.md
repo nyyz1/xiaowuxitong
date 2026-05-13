@@ -8,10 +8,10 @@
   - 腾讯云轻量应用服务器的首次部署、目录结构、Nginx/systemd/PostgreSQL 口径，以及一键更新流程。
 
 - `deployment-and-smoke-test.md`
-  - 日常从 GitHub 发布到腾讯云、自动备份、schema 同步、构建、重启和烟测的操作手册。
+  - 日常通过 `publish-and-deploy.cmd` 从本机发布到 GitHub 和腾讯云、自动备份、schema 同步、构建、重启、烟测和三端 commit 校验的操作手册。
 
 - `pilot-accounts-and-usage-guide.md`
-  - 云端空库上线后的账号创建、角色使用、页面操作、备份恢复和常见问题说明。
+  - 云端空库上线后的账号创建、师生档案自动账号规则、角色使用、页面操作、备份恢复和常见问题说明。
 
 - `final-delivery-checklist.md`
   - 交付前最终检查单，适合正式启用或阶段验收前逐项确认。

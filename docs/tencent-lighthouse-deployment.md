@@ -41,9 +41,15 @@ scripts/server/bootstrap-ubuntu.sh
 日常流程：
 
 1. 在本机用 Codex 修改代码。
-2. 本机验证 `typecheck`、`lint`、`build`。
-3. 提交并推送到 GitHub。
-4. 在本机运行：
+2. 在本机运行一键发布脚本：
+
+```text
+publish-and-deploy.cmd
+```
+
+这个脚本会先执行本机 `db:validate`、`typecheck`、`lint`、`build`，再提交、推送 GitHub，随后 SSH 到腾讯云执行服务器部署。部署完成后，它会对比本地 HEAD、GitHub `origin/main` 和服务器 `/opt/xiaowuxitong/app` HEAD，确认三端一致。
+
+如果只需要部署已经推送到 GitHub 的代码，也可以单独运行：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-tencent-lighthouse.ps1
@@ -58,9 +64,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-tencent-light
 5. `npm run db:validate` 校验 Prisma schema。
 6. `npx prisma db push` 同步 live PostgreSQL schema。
 7. `npm run db:seed:approval-defaults` 和 `npm run db:seed:department-positions` 补齐基础配置。
-8. `npm run build` 构建生产版本。
-9. 重启 `xiaowuxitong.service`。
-10. `npm run smoke:pages -- --base-url=http://127.0.0.1:3000` 检查数据重页面。
+8. `npm run db:repair:identity-accounts:dry-run` 预览是否存在缺失的身份证号登录账号。
+9. `npm run build` 构建生产版本。
+10. 重启 `xiaowuxitong.service`。
+11. `npm run smoke:pages -- --base-url=http://127.0.0.1:3000` 检查数据重页面。
+
+如果 dry-run 显示确实有历史档案缺失账号，先确认已经有部署前数据库备份，再在服务器上执行：
+
+```bash
+cd /opt/xiaowuxitong/app
+npm run db:repair:identity-accounts
+```
 
 如果 Prisma 明确要求 `--accept-data-loss`，先确认不是误删字段或错误 schema。确认可以接受后再运行：
 

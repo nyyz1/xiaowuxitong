@@ -16,6 +16,11 @@ fi
 
 cd "$APP_ROOT"
 
+echo "== Deployment target =="
+echo "App root: $APP_ROOT"
+echo "Branch: $BRANCH"
+echo "Current commit before update: $(git rev-parse HEAD)"
+
 if [[ -f ".env.local" ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -30,6 +35,7 @@ echo "== Updating source =="
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"
+echo "Current commit after update: $(git rev-parse HEAD)"
 
 echo "== Installing dependencies =="
 npm ci
@@ -46,10 +52,14 @@ if [[ "$ALLOW_ACCEPT_DATA_LOSS" == "1" ]]; then
 else
   npx prisma db push
 fi
+echo "PostgreSQL schema sync completed for commit $(git rev-parse HEAD)."
 
 echo "== Ensuring baseline configuration data =="
 npm run db:seed:approval-defaults
 npm run db:seed:department-positions
+
+echo "== Previewing missing identity-card login accounts =="
+npm run db:repair:identity-accounts:dry-run
 
 echo "== Building application =="
 npm run build

@@ -12,7 +12,7 @@ The repository now contains a runnable Next.js application scaffold with:
 - Prisma schema and generated client
 - Tencent Cloud Lighthouse deployment scripts for Ubuntu bootstrap, PostgreSQL backup, GitHub pull, Prisma schema sync, production build, systemd restart, Nginx proxying, and authenticated smoke verification
 - one-click Windows school-pilot launcher and project transfer helpers remain in the repository as historical/backup tooling, but they are no longer the current deployment architecture
-- one-click multi-workstation Codex development helpers for first-time developer setup, pre-work GitHub sync, and end-of-session verify/commit/push
+- one-click multi-workstation Codex development helpers for first-time developer setup, pre-work GitHub sync, end-of-session verify/commit/push, and cloud publish/deploy
 - pre-work GitHub sync now self-prepares `.env.local` from `.env.example`, and Prisma config loads `.env.local` before `.env` so fresh clones can regenerate Prisma Client without a separate manual environment step
 - the old public-tunnel runtime launcher remains historical/backup tooling for the earlier local-plus-tunnel pilot path
 - user and permission management module for system administrators, now including the V1.5 role model and teacher-account to teacher-profile binding
@@ -26,7 +26,7 @@ The repository now contains a runnable Next.js application scaffold with:
 - department-position configuration under each department through `DepartmentPosition`, with default positions for `XXXX级年级`, `校领导`, and ordinary departments; teacher department assignments bind to positions while preserving old `identityType` compatibility metadata
 - people management module for active teacher and student manual maintenance, mistaken-entry deletion with audit logging, configurable information statistics category add/disable/delete flows, identity-card-number-based import updates, Excel import templates, Excel import, filtered export, teacher multi-duty support, and teacher multi-department support
 - teacher department assignments are now stored as explicit rows that can accumulate multiple positions or identity variants per department, so the teacher maintenance form exposes a multi-select department-position chooser and the structure page keeps department-position CRUD on the same surface
-- people imports create bound login accounts only when a new teacher profile or new active student profile is created by identity card number; repeated imports update the profile without resetting passwords, archived-student imports do not create student accounts, and conflicting existing account bindings fail at row level
+- people imports and manual active people creation create bound login accounts when a new teacher profile or new active student profile is created by identity card number; repeated imports update the profile without resetting passwords, archived-student imports and manual archived-student creation do not create student accounts, and conflicting existing account bindings fail before leaving partial data
 - teacher compatibility roles are derived from the teacher's active department-position assignments, and the stored user role is treated as a compatibility field that gets re-synced when the teacher profile or a referenced department position changes
 - people status configuration is now role-aware inside the people module: teachers use `正常 / 备孕 / 产假 / 长病假`, while students use `正常 / 休学 / 长期请假`, and the same shared definitions drive forms, filters, import normalization, and export labels
 - the active people module is exposed as a single `师生档案` sidebar entry, while the people page can still internally focus student or teacher records through query state
@@ -106,6 +106,8 @@ The planned version 1 architecture is:
 | `scripts/save-work.ps1` | GitHub save helper after Codex work | modified Git branch and commit message | optionally verifies with typecheck/lint, stages, commits, rebases, and pushes the current branch | implemented for Step 7 collaboration convenience |
 | `commit-and-push.cmd` | local GitHub save launcher | local code changes | verifies, commits, rebases, pushes, and prints the Tencent Cloud deployment command | implemented for cloud update workflow |
 | `scripts/commit-and-push.ps1` | local GitHub save helper | modified Git branch and commit message | optional typecheck/lint/build, stage, commit, rebase, push | implemented for cloud update workflow |
+| `publish-and-deploy.cmd` | one-click cloud publish launcher | local code changes and SSH access | verifies, commits, pushes, deploys to Tencent Cloud, and checks local/GitHub/server commit alignment | implemented for cloud update workflow |
+| `scripts/publish-and-deploy.ps1` | one-click cloud publish helper | commit message, SSH key, Tencent Cloud host | runs local validation, Git push, server deployment, and three-way commit verification | implemented for cloud update workflow |
 | `scripts/deploy-tencent-lighthouse.ps1` | local Tencent Cloud deployment entrypoint | SSH key, server host, optional accept-data-loss flag | triggers the server-side deployment script over SSH | implemented for cloud update workflow |
 | `scripts/server/bootstrap-ubuntu.sh` | first-time Tencent Cloud bootstrap | Ubuntu server, GitHub repo, generated secrets | installs Node/PostgreSQL/Nginx, prepares `.env.local`, syncs schema, builds, installs systemd service, and smoke-tests | implemented for current deployment |
 | `scripts/server/deploy.sh` | server-side one-command update | current server checkout and PostgreSQL | backup, Git pull, dependency install, Prisma sync, baseline seeds, build, restart, smoke | implemented for current deployment |
@@ -341,12 +343,13 @@ Current implementation note:
 
 ### Tencent Cloud Deployment Flow
 
-1. Developer changes code locally and verifies with `typecheck`, `lint`, and `build`.
-2. Developer pushes to GitHub, usually through `commit-and-push.cmd`.
-3. Developer runs `scripts/deploy-tencent-lighthouse.ps1`.
-4. The local deployment entrypoint SSHes into Tencent Cloud Lighthouse `124.222.136.121`.
-5. `scripts/server/deploy.sh` creates a PostgreSQL backup, pulls GitHub, installs dependencies, generates Prisma Client, validates schema, syncs PostgreSQL, seeds baseline configuration, builds, restarts `xiaowuxitong.service`, reloads Nginx, and runs authenticated page smoke.
-6. The cloud PostgreSQL database remains server-local and does not include old local demo/test data.
+1. Developer changes code locally.
+2. Developer runs `publish-and-deploy.cmd`.
+3. The local publish helper validates Prisma schema, typecheck, lint, and build, then commits and pushes `main` to GitHub.
+4. The helper SSHes into Tencent Cloud Lighthouse `124.222.136.121` and runs `scripts/server/deploy.sh`.
+5. `scripts/server/deploy.sh` creates a PostgreSQL backup, pulls GitHub, installs dependencies, generates Prisma Client, validates schema, syncs PostgreSQL, seeds baseline configuration, previews missing identity-card login accounts, builds, restarts `xiaowuxitong.service`, reloads Nginx, and runs authenticated page smoke.
+6. The helper verifies local HEAD, `origin/main`, and the server checkout HEAD match after deployment.
+7. The cloud PostgreSQL database remains server-local and does not include old local demo/test data.
 
 Current implementation note:
 
@@ -354,6 +357,7 @@ Current implementation note:
 - Windows workstation, LAN, and public-tunnel flows were removed from active handoff docs and remain historical context only in archived progress or git history.
 - If several authenticated dashboard pages show "This page couldn't load" at once, first check Prisma schema drift against the cloud PostgreSQL database and rerun authenticated smoke after schema sync.
 - `npm run smoke:pages` checks the protected data-heavy route set with the browser-session cookie behavior required by the app.
+- `npm run db:repair:identity-accounts:dry-run` previews teacher and active-student profile records that can receive missing identity-card-number login accounts; `npm run db:repair:identity-accounts` applies the repair after a backup is confirmed.
 
 ### Current Auth Flow
 
@@ -451,11 +455,12 @@ Current implementation note:
 - `scripts/server/bootstrap-ubuntu.sh` defines the first-time Ubuntu bootstrap path for Tencent Cloud Lighthouse: install Node.js, PostgreSQL, Git, and Nginx; create `/opt/xiaowuxitong`; clone GitHub; generate production `.env.local`; create the local PostgreSQL app database; run Prisma schema sync and baseline seeds; install `xiaowuxitong.service`; and proxy public `:80` to `127.0.0.1:3000`.
 - On Tencent Cloud Lighthouse, the bootstrap defaults to Ubuntu repository PostgreSQL packages for reliability; setting `POSTGRES_VERSION=17` opts into the external PostgreSQL apt repository when that network path is healthy.
 - The live Tencent Cloud Lighthouse deployment is now running at `124.222.136.121` with Nginx on `:80`, PostgreSQL local to the instance, and `xiaowuxitong.service` under systemd; the published login page responds with HTTP `200`.
-- `scripts/server/deploy.sh` is the server-side one-command update path: back up PostgreSQL, pull GitHub, install dependencies, generate and validate Prisma, sync the live database schema, rebuild, restart systemd, and smoke-test data-heavy pages.
+- `scripts/server/deploy.sh` is the server-side one-command update path: back up PostgreSQL, pull GitHub, install dependencies, generate and validate Prisma, sync the live database schema, preview missing identity-card login accounts, rebuild, restart systemd, and smoke-test data-heavy pages.
 - `scripts/server/backup-postgres.sh` creates custom-format PostgreSQL backups with bounded retention under `/opt/xiaowuxitong/backups`, and `scripts/deploy-tencent-lighthouse.ps1` is the local SSH entrypoint for triggering the server update.
 - The current cloud PostgreSQL database is treated as a clean production/pilot database, not a continuation of old local demo data; `db:seed:demo`, `db:clear:demo`, and PGlite simulation remain local-only helpers.
 - Active handoff docs now promote the cloud path and demote Windows workstation, LAN, and public-tunnel paths to historical or backup references.
 
 ## 2026-05-12 Local Commit Push Helper
 
-- `commit-and-push.cmd` and `scripts/commit-and-push.ps1` provide the local one-click GitHub save path before deployment: verify, prompt for a commit message, stage, commit, rebase, push, then remind the operator to run the Tencent Cloud deployment script.
+- `publish-and-deploy.cmd` and `scripts/publish-and-deploy.ps1` are the preferred local cloud publishing path: verify, prompt for a commit message when needed, stage, commit, rebase, push, run the Tencent Cloud deployment script, and confirm local/GitHub/server commit alignment.
+- `commit-and-push.cmd` and `scripts/commit-and-push.ps1` remain available when the operator only wants to save code to GitHub without deploying.

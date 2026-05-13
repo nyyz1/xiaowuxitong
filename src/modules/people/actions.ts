@@ -896,42 +896,50 @@ export async function createTeacher(formData: FormData) {
       "duties",
     );
 
-    const teacher = await prisma.teacher.create({
-      data: {
-        idCardNumber: parsed.data.idCardNumber,
-        employeeNumber,
-        name: parsed.data.name,
-        gender:
-          getTouchedSystemProfileValue(teacherProfileFields, profileValues, "gender") ||
-          null,
-        subjectId: optionalRelationId(parsed.data.subjectId),
-        duties: duties ? splitMultiValueText(duties) : [],
-        profileData: profileDataToJsonInput(
-          mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
-        ),
-        phone:
-          getTouchedSystemProfileValue(teacherProfileFields, profileValues, "phone") ||
-          null,
-        employmentStatus: parsed.data.employmentStatus,
-        remarks:
-          getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ||
-          null,
-        ...(await buildTeacherDepartmentCreateData(
-          parsed.data.departmentIds,
-          parsed.data.departmentIdentities,
-        )),
-      },
-      select: {
-        id: true,
-      },
-    });
+    const teacherDepartmentData = await buildTeacherDepartmentCreateData(
+      parsed.data.departmentIds,
+      parsed.data.departmentIdentities,
+    );
 
-    await syncTeacherUserRole(prisma, teacher.id);
+    await prisma.$transaction(async (tx) => {
+      const teacher = await tx.teacher.create({
+        data: {
+          idCardNumber: parsed.data.idCardNumber,
+          employeeNumber,
+          name: parsed.data.name,
+          gender:
+            getTouchedSystemProfileValue(teacherProfileFields, profileValues, "gender") ||
+            null,
+          subjectId: optionalRelationId(parsed.data.subjectId),
+          duties: duties ? splitMultiValueText(duties) : [],
+          profileData: profileDataToJsonInput(
+            mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
+          ),
+          phone:
+            getTouchedSystemProfileValue(teacherProfileFields, profileValues, "phone") ||
+            null,
+          employmentStatus: parsed.data.employmentStatus,
+          remarks:
+            getTouchedSystemProfileValue(teacherProfileFields, profileValues, "remarks") ||
+            null,
+          ...teacherDepartmentData,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await ensureTeacherLoginAccount(tx, {
+        idCardNumber: parsed.data.idCardNumber,
+        teacherId: teacher.id,
+        displayName: parsed.data.name,
+      });
+    });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error", redirectPath);
   }
 
-  redirectWithNotice("教师档案已新增。", "success", redirectPath);
+  redirectWithNotice("教师档案已新增，并已同步创建登录账号。", "success", redirectPath);
 }
 
 export async function updateTeacher(formData: FormData) {
@@ -1178,41 +1186,60 @@ export async function createStudent(formData: FormData) {
     await assertGradeAvailableForStudentView(parsed.data.gradeId, studentViewMode);
     await assertClassMatchesGrade(classId, parsed.data.gradeId);
 
-    await prisma.student.create({
-      data: {
-        idCardNumber: parsed.data.idCardNumber,
-        studentNumber,
-        name: parsed.data.name,
-        gender:
-          getTouchedSystemProfileValue(studentProfileFields, profileValues, "gender") ||
-          null,
-        gradeId: parsed.data.gradeId,
-        classId,
-        enrollmentStatus: parsed.data.enrollmentStatus,
-        isArchived: studentViewMode === "archived",
-        archivedAt: studentViewMode === "archived" ? new Date() : null,
-        profileData: profileDataToJsonInput(
-          mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
-        ),
-        phone:
-          getTouchedSystemProfileValue(studentProfileFields, profileValues, "phone") ||
-          null,
-        guardianContact:
-          getTouchedSystemProfileValue(
-            studentProfileFields,
-            profileValues,
-            "guardianContact",
-          ) || null,
-        remarks:
-          getTouchedSystemProfileValue(studentProfileFields, profileValues, "remarks") ||
-          null,
-      },
+    await prisma.$transaction(async (tx) => {
+      const student = await tx.student.create({
+        data: {
+          idCardNumber: parsed.data.idCardNumber,
+          studentNumber,
+          name: parsed.data.name,
+          gender:
+            getTouchedSystemProfileValue(studentProfileFields, profileValues, "gender") ||
+            null,
+          gradeId: parsed.data.gradeId,
+          classId,
+          enrollmentStatus: parsed.data.enrollmentStatus,
+          isArchived: studentViewMode === "archived",
+          archivedAt: studentViewMode === "archived" ? new Date() : null,
+          profileData: profileDataToJsonInput(
+            mergeProfileData({}, profileValues.values, profileValues.touchedFieldIds),
+          ),
+          phone:
+            getTouchedSystemProfileValue(studentProfileFields, profileValues, "phone") ||
+            null,
+          guardianContact:
+            getTouchedSystemProfileValue(
+              studentProfileFields,
+              profileValues,
+              "guardianContact",
+            ) || null,
+          remarks:
+            getTouchedSystemProfileValue(studentProfileFields, profileValues, "remarks") ||
+            null,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (studentViewMode === "active") {
+        await ensureStudentLoginAccount(tx, {
+          idCardNumber: parsed.data.idCardNumber,
+          studentId: student.id,
+          displayName: parsed.data.name,
+        });
+      }
     });
   } catch (error) {
     redirectWithNotice(getMutationErrorMessage(error), "error", redirectPath);
   }
 
-  redirectWithNotice("学生档案已新增。", "success", redirectPath);
+  redirectWithNotice(
+    studentViewMode === "active"
+      ? "学生档案已新增，并已同步创建登录账号。"
+      : "归档学生档案已新增，不创建登录账号。",
+    "success",
+    redirectPath,
+  );
 }
 
 export async function updateStudent(formData: FormData) {

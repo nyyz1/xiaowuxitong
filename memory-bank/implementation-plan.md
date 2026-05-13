@@ -10,7 +10,7 @@
 ## Current Status
 
 - Current authoritative deployment path as of 2026-05-12: Tencent Cloud Lighthouse `124.222.136.121` runs the app and PostgreSQL on the same Ubuntu server, with Nginx proxying public `:80` to `127.0.0.1:3000`.
-- Current authoritative update path: local development, push to GitHub, then run `scripts/deploy-tencent-lighthouse.ps1`; the server deploy script backs up PostgreSQL, pulls code, syncs Prisma schema, builds, restarts `xiaowuxitong.service`, and runs authenticated page smoke.
+- Current authoritative update path: run `publish-and-deploy.cmd` after local changes; it validates locally, commits and pushes GitHub, triggers the Tencent Cloud deploy script, and confirms local, `origin/main`, and server commits match. The server deploy script backs up PostgreSQL, pulls code, syncs Prisma schema, seeds baseline config, previews missing identity-card login accounts, builds, restarts `xiaowuxitong.service`, and runs authenticated page smoke.
 - Current authoritative data state: the cloud PostgreSQL database does not carry old demo/test data; demo seeding and PGlite simulation are local development helpers only.
 - Earlier Windows workstation, LAN URL, and public tunnel items below are historical pilot milestones, not the current deployment plan.
 - Completed: Step 0, Step 1
